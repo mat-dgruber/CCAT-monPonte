@@ -1,0 +1,48 @@
+Protótipo do Aplicativo: Ponte (Versão MVP)
+1. Visão Geral
+O "Ponte" é um web app projetado para resolver dois problemas comuns: a transferência de texto entre diferentes dispositivos e a organização de anotações de forma centralizada e categorizada. O aplicativo funcionará como um clipboard universal e um bloco de notas inteligente, acessível de qualquer lugar.
+2. Pilha de Tecnologia (Tech Stack)
+Frontend: Angular com Tailwind CSS para uma interface de usuário moderna, reativa e totalmente responsiva.
+Backend: Python com FastAPI (para futuras implementações de lógica complexa). Para o MVP, o frontend se comunicará majoritariamente com o Firebase.
+Banco de Dados: Firestore para armazenamento de dados NoSQL, aproveitando seus recursos de sincronização em tempo real.
+Autenticação: Firebase Authentication para gerenciar o login e a segurança dos dados do usuário.
+3. Recursos Principais (MVP)
+O aplicativo será dividido em duas seções principais:
+a) O "Clip" - Clipboard Universal de Texto
+Esta é a área de transferência de texto instantânea. O objetivo é a simplicidade e a velocidade.
+Área de Texto:
+Um campo de texto grande e visível.
+Qualquer texto colado aqui de um dispositivo (ex: desktop) aparecerá instantaneamente em todos os outros dispositivos logados na mesma conta (ex: celular).
+Um botão "Copiar tudo" e "Limpar" para facilitar o uso.
+Como funciona (Tecnicamente):
+Usaremos o onSnapshot do Firestore. O frontend se inscreverá para ouvir mudanças em um documento específico do usuário. Quando o texto for alterado no banco, o Firestore notificará todos os clientes conectados, que atualizarão a interface em tempo real.
+b) Os "Cadernos" - Central de Anotações
+Esta é a área para conteúdo permanente e organizado.
+Estrutura de Caderno:
+O usuário pode criar múltiplos "Cadernos", que funcionam como categorias ou projetos (ex: "Trabalho", "Estudos", "Ideias Aleatórias").
+O usuário pode criar, renomear e excluir cadernos.
+Notas:
+Dentro de cada caderno, o usuário pode criar várias notas.
+Cada nota terá um título e um corpo de texto.
+O corpo da nota usará um editor de texto simples.
+As notas podem ser criadas, editadas e excluídas.
+Como funciona (Tecnicamente):
+A estrutura no Firestore será hierárquica. Teremos uma coleção de users, onde cada usuário terá uma subcoleção de notebooks. Dentro de cada notebook, haverá uma subcoleção de notes. Isso mantém os dados organizados e eficientes para consulta.
+4. Arquitetura e Fluxo de Dados
+Usuário se Autentica: O usuário faz login via Firebase Auth no cliente Angular.
+Cliente Angular: Após o login, o Angular obtém um token de autenticação.
+Comunicação com Firebase:
+Para as funcionalidades em tempo real ("Clip") e para os "Cadernos", o Angular se conecta diretamente ao Firestore, usando as regras de segurança do Firebase para garantir que um usuário só possa acessar seus próprios dados.
+Comunicação com Backend (FastAPI):
+Não será utilizada no MVP, mas a arquitetura permite a integração futura para funcionalidades mais complexas.
+5. Próximos Passos (Roadmap de Desenvolvimento do MVP)
+Configuração do Ambiente:
+Criar o projeto no Firebase (habilitar Auth e Firestore).
+Configurar o ambiente de desenvolvimento local para Angular.
+Módulo 1: Autenticação de Usuário.
+Criar as telas de Login, Cadastro e a lógica de autenticação no Angular.
+Módulo 2: Desenvolvimento do "Clip" Universal.
+Criar a interface no Angular e a integração em tempo real com o Firestore para a área de texto.
+Módulo 3: Desenvolvimento dos "Cadernos".
+Criar a interface para gerenciar cadernos e notas.
+Implementar as operações de CRUD (Criar, Ler, Atualizar, Excluir) para as anotações.

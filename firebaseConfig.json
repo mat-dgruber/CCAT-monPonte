@@ -1,0 +1,9 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyDJZQsfbJk2DZzeRI-DowEvOHwUfYrUWho",
+  authDomain: "ccat-monponte.firebaseapp.com",
+  projectId: "ccat-monponte",
+  storageBucket: "ccat-monponte.firebasestorage.app",
+  messagingSenderId: "936681554685",
+  appId: "1:936681554685:web:3f27e74712a18e522f7494",
+  measurementId: ""
+};
