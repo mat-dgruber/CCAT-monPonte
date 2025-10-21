@@ -16,7 +16,7 @@ import { User } from 'firebase/auth';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App { // Renomeado de App para AppComponent por convenção
+export class AppComponent { // Renomeado de App para AppComponent por convenção
   // 1. Injeta o AuthService e expõe o authState$
   private authService = inject(AuthService);
   authState$: Observable<User | null> = this.authService.authState$;

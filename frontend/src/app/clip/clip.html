@@ -6,3 +6,69 @@
      placeholder="Cole seu texto aqui...">
      </textarea>
 </div>
+
+ <div class="actions" style="margin-top: 10px;">
+    <button (click)="clearText()" style="margin-right: 5px;">Limpar</button>
+    <button (click)="onCopy()" style="margin-right: 10px;">Copiar tudo</button>
+    @if (copyFeedbackMessage) {
+      <span style="color: green; font-weight: bold;">{{ copyFeedbackMessage }}</span>
+    }
+    <button (click)="openConvertToNoteModal()">Converter em Nota</button>
+ </div>
+
+ <!-- O HTML do Modal virá aqui -->
+ <!-- Modal para converter texto em nota -->
+ @if (isModalVisible) {
+  <div class="modal-backdrop">
+    <div class="modal">
+      @if (noteCreationFeedbackMessage) {
+        <p style="color: green; font-weight: bold; text-align: center; margin-bottom: 15px;">{{ noteCreationFeedbackMessage }}</p>
+      }
+
+      <h2>Converter em Nota</h2>
+      
+      <div style="margin-bottom: 15px;">
+        <label for="noteTitle">Título da Nota:</label><br>
+        <input type="text" id="noteTitle" [(ngModel)]="newNoteTitle" style="width: 100%; padding: 8px;">
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        @if (!isCreatingNewNotebook) {
+          <label for="notebookSelect">Salvar no Caderno:</label><br>
+          <select id="notebookSelect" [(ngModel)]="selectedNotebookIdForNote" style="width: 100%; padding: 8px;">
+            <option [ngValue]="null" disabled>Selecione um caderno</option>
+            @for (notebook of notebooks; track notebook.id) {
+              <option [value]="notebook.id">{{ notebook.name }}</option>
+            }
+          </select>
+          <button (click)="isCreatingNewNotebook = true" style="margin-top: 5px; background: none; border: none; color: blue; cursor: pointer; padding: 0;">
+            + Criar novo caderno
+          </button>
+        } @else {
+          <label for="newNotebookName">Nome do Novo Caderno:</label><br>
+          <input type="text" id="newNotebookName" [(ngModel)]="newNotebookName" style="width: 100%; padding: 8px;">
+          <div style="margin-top: 5px;">
+            <button (click)="createNewNotebookFromModal()" [disabled]="!newNotebookName.trim()">Salvar Caderno</button>
+            <button (click)="isCreatingNewNotebook = false; newNotebookName = ''" style="margin-left: 5px;">Cancelar</button>
+          </div>
+        }
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <input type="checkbox" id="deleteClip" [(ngModel)]="deleteClipAfterConversion">
+        <label for="deleteClip"> Limpar Clip após conversão</label>
+      </div>
+
+      @if (modalErrorMessage) {
+        <p style="color: red; margin-top: 10px;">{{ modalErrorMessage }}</p>
+      }
+
+      @if (isCreatingNote) {
+        <p style="margin-top: 10px;">Salvando...</p> <!-- Você pode substituir isso por um componente de spinner -->
+      }
+
+      <button (click)="confirmConvertToNote()" [disabled]="isCreatingNote" style="margin-right: 10px; margin-top: 10px;">Confirmar</button>
+      <button (click)="cancelConvertToNote()" [disabled]="isCreatingNote">Cancelar</button>
+    </div>
+  </div>
+ }

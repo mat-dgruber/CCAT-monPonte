@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
 import { collection, doc, Firestore, onSnapshot, Unsubscribe, addDoc, serverTimestamp, updateDoc, deleteDoc } from '@angular/fire/firestore';
 import { AuthService } from '../services/auth';
+import { DataService } from '../services/data.service';
 import { Subscription } from 'rxjs';
 
 interface Note {
@@ -21,10 +22,9 @@ export class NotesList implements OnChanges, OnDestroy {
   @Input({ required: true }) notebookId!: string;
   @Input() selectedNoteId: string | null = null;
 
-  private firestore = inject(Firestore);
   private authService = inject(AuthService);
+  private dataService = inject(DataService);
   private userSubscription: Subscription | null = null;
-  private notesSubscription: Unsubscribe | null = null;
 
   userId: string | null = null;
   notes: Note[] = [];
@@ -35,15 +35,9 @@ export class NotesList implements OnChanges, OnDestroy {
       this.userSubscription = this.authService.authState$.subscribe(user => {
         if (user) {
           this.userId = user.uid;
-          const notesCollectionPath = `users/${this.userId}/notebooks/${this.notebookId}/notes`;
-          const notesCollection = collection(this.firestore, notesCollectionPath);
-
-          // 2. Cancela a inscrição anterior para não ouvir notas do caderno antigo
-          this.notesSubscription?.();
-
-          // 3. Cria uma nova inscrição para as notas do caderno selecionado
-          this.notesSubscription = onSnapshot(notesCollection, (snapshot) => {
-            this.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Note));
+          // Usa o serviço para obter as notas
+                    this.dataService.getNotes(this.notebookId).subscribe((notes: Note[]) => {
+            this.notes = notes;
             console.log(`Notas do caderno ${this.notebookId}:`, this.notes);
           });
         }
@@ -58,7 +52,6 @@ export class NotesList implements OnChanges, OnDestroy {
   ngOnDestroy(): void {
     // 4. Garante que todas as inscrições sejam canceladas ao destruir o componente
     this.userSubscription?.unsubscribe();
-    this.notesSubscription?.();
   }
 
   async createNote(title: string, content: string) {
@@ -68,14 +61,9 @@ export class NotesList implements OnChanges, OnDestroy {
       return;
     }
 
-    // 2. Monta a referência para a subcoleção de notas.
-    const notesCollectionPath = `users/${this.userId}/notebooks/${this.notebookId}/notes`;
-    const notesCollection = collection(this.firestore, notesCollectionPath);
-
     try {
-      // 3. Usa addDoc para criar um novo documento com um ID gerado automaticamente.
-      const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp() });
-      console.log('Nota criada com sucesso! ID:', docRef.id);
+      const newId = await this.dataService.createNote(this.notebookId, title, content);
+      console.log('Nota criada com sucesso! ID:', newId);
     } catch (error) {
       console.error('Erro ao criar a nota:', error);
     }
@@ -88,12 +76,8 @@ export class NotesList implements OnChanges, OnDestroy {
       return;
     }
 
-    // 2. Monta a referência para o documento específico da nota.
-    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${this.notebookId}/notes/${noteId}`);
-
     try {
-      // 3. Usa updateDoc para atualizar apenas os campos especificados.
-      await updateDoc(docRef, data);
+      await this.dataService.updateNote(this.notebookId, noteId, data);
       console.log('Nota atualizada com sucesso! ID:', noteId);
     } catch (error) {
       console.error('Erro ao atualizar a nota:', error);
@@ -107,12 +91,8 @@ export class NotesList implements OnChanges, OnDestroy {
       return;
     }
 
-    // 2. Monta a referência para o documento específico da nota.
-    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${this.notebookId}/notes/${noteId}`);
-
     try {
-      // 3. Usa deleteDoc para remover o documento.
-      await deleteDoc(docRef);
+      await this.dataService.deleteNote(this.notebookId, noteId);
       console.log('Nota deletada com sucesso! ID:', noteId);
     } catch (error) {
       console.error('Erro ao deletar a nota:', error);
