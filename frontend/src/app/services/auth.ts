@@ -20,5 +20,9 @@ export class AuthService {
   logout() {
     return signOut(this.auth);
   }
+
+  getCurrentUserId(): string | null {
+    return this.auth.currentUser ? this.auth.currentUser.uid : null;
+  }
   
 }
