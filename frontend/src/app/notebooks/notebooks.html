@@ -1,6 +1,6 @@
 <div class="notebooks-container">
   @if (notification(); as notification) {
-    <div class="notification" [ngClass]="{ 'success': notification.type === 'success', 'error': notification.type === 'error' }">
+    <div class="notification" [class.success]="notification.type === 'success'" [class.error]="notification.type === 'error'">
       {{ notification.message }}
     </div>
   }
@@ -59,7 +59,7 @@
                 <button class="rename-notebook-btn" (click)="renameNotebook(notebook.id, notebook.name)" title="Renomear caderno">✏️</button>
                 <button class="delete-notebook-btn" (click)="confirmDeleteNotebook(notebook.id, notebook.name)" title="Deletar caderno">🗑️</button>
               }
-            }
+           
             </div>
           </li>
           }

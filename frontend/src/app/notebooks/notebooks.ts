@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, computed, Signal } from '@angular/core';
-import { trigger, transition, style, animate, keyframes } from '@angular/animations';
+import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, animate, keyframes } from '@angular/animations'; // Importa o NotesList
 import { AuthService } from '../services/auth';
 import { Subscription } from 'rxjs';
 import { NotesList } from '../notes-list/notes-list'; // Importa o NotesList
@@ -11,7 +12,7 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NotesList, HighlightPipe],
+  imports: [NotesList, HighlightPipe, FormsModule],
   templateUrl: './notebooks.html',
   styleUrl: './notebooks.css',
   animations: [

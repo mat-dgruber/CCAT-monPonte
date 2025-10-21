@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-notes-list',
   standalone: true,
-  imports: [HighlightPipe],
+  imports: [],
   templateUrl: './notes-list.html',
   styleUrl: './notes-list.css',
 })
