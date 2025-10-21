@@ -1,5 +1,83 @@
-<p>notebooks works!</p>
-
-@if (selectedNotebookId) {
-  <app-notes-list [notebookId]="selectedNotebookId" />
-}
+<div class="notebooks-container">
+  @if (notification(); as notification) {
+    <div class="notification" [ngClass]="{ 'success': notification.type === 'success', 'error': notification.type === 'error' }">
+      {{ notification.message }}
+    </div>
+  }
+  <aside class="notebooks-sidebar">
+    <div class="sidebar-header">
+      <h2>Cadernos</h2>
+      <button class="add-notebook-btn" (click)="createNewNotebook()" title="Criar novo caderno">+</button>
+    </div>
+    <div class="sort-options">
+      <label for="sort-select">Ordenar por:</label>
+      <div class="select-wrapper">
+        <select id="sort-select" (change)="changeSortOrder($event)" [value]="sortOption().by + '-' + sortOption().direction">
+          <option value="createdAt-desc">Mais recentes</option>
+          <option value="createdAt-asc">Mais antigos</option>
+          <option value="name-asc">Nome (A-Z)</option>
+          <option value="name-desc">Nome (Z-A)</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-box">
+      <input #searchInput
+             type="text"
+             placeholder="Buscar caderno..."
+             [value]="searchTerm()"
+             (input)="onSearch($event)"
+             (keydown.escape)="clearSearch(searchInput)">
+      @if (searchTerm()) {
+        <button class="clear-search-btn" (click)="clearSearch(searchInput)" title="Limpar busca">&times;</button>
+      }
+    </div>
+    @if (isLoading()) {
+      <div class="skeleton-container">
+        @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          <div class="skeleton-item">
+            <div class="skeleton-text"></div>
+            <div class="skeleton-actions"></div>
+          </div>
+        }
+      </div>
+    } @else if (loadingError()) {
+      <div class="error-indicator">
+        <p>Falha ao carregar.</p>
+        <button (click)="retryFetchNotebooks()">Tentar Novamente</button>
+      </div>
+    } @else {
+      @if (filteredNotebooks().length > 0) { 
+        <ul class="notebook-list">
+          @for (notebook of filteredNotebooks(); track notebook.id) {
+          <li class="notebook-item" @itemAnimation
+              [class.selected]="notebook.id === selectedNotebookId()">
+            <span class="notebook-name-display" (click)="selectNotebook(notebook.id)" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
+            <div class="notebook-actions">
+              @if (deletingNotebookIds().has(notebook.id)) {
+                <div class="spinner"></div>
+              } @else {
+                <button class="rename-notebook-btn" (click)="renameNotebook(notebook.id, notebook.name)" title="Renomear caderno">✏️</button>
+                <button class="delete-notebook-btn" (click)="confirmDeleteNotebook(notebook.id, notebook.name)" title="Deletar caderno">🗑️</button>
+              }
+            }
+            </div>
+          </li>
+          }
+        </ul>
+      } @else {
+        @if (searchTerm()) {
+          <div class="empty-list-message">Nenhum caderno corresponde à sua busca.</div>
+        } @else {
+          <div class="empty-list-message">Nenhum caderno encontrado.</div>
+        }
+      }
+    }
+  </aside>
+  <main class="notes-content">
+    @if (selectedNotebookId()) {
+    <app-notes-list [notebookId]="selectedNotebookId()!" [userId]="userId" [searchTerm]="searchTerm()" />
+    } @else {
+    <div class="no-notebook-selected">Selecione um caderno para visualizar as notas.</div>
+    }
+  </main>
+</div>

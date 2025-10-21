@@ -1,0 +1,203 @@
+/* notebooks.css */
+
+.notebooks-container {
+  display: flex;
+  height: calc(100vh - 50px); /* Ajuste a altura conforme o seu header */
+  position: relative;
+}
+
+.notebooks-sidebar {
+  width: 300px;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  background-color: #fcfcfc;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.add-notebook-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 20px;
+  line-height: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-notebook-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos para o dropdown de ordenação */
+.sort-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #555;
+}
+
+.sort-options label {
+  font-weight: 500;
+}
+
+.select-wrapper {
+  position: relative;
+  flex-grow: 1;
+}
+
+.sort-options select {
+  /* Remove a aparência padrão */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Estilos customizados */
+  width: 100%;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 28px 6px 10px; /* Espaço para a seta customizada */
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sort-options select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Seta customizada */
+.select-wrapper::after {
+  content: '▼';
+  font-size: 10px;
+  color: #888;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* Permite que o clique passe para o select */
+}
+
+/* Estilos para a caixa de busca */
+.search-box {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 28px 8px 10px; /* Adiciona espaço à direita para o botão */
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #999;
+  padding: 0 4px;
+}
+
+.clear-search-btn:hover {
+  color: #333;
+}
+
+.notebook-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.notebook-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.notebook-item:hover {
+  background-color: #f5f5f5;
+}
+
+.notebook-item.selected {
+  background-color: #e0eaff;
+  font-weight: 500;
+}
+
+.notebook-name-display {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notebook-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+}
+
+.rename-notebook-btn,
+.delete-notebook-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.rename-notebook-btn:hover,
+.delete-notebook-btn:hover {
+  opacity: 1;
+}
+
+/* ... (outros estilos como spinner, skeleton, etc.) ... */
+
+/* Estilo customizado para o destaque da busca */
+::ng-deep mark {
+  background-color: #dbeafe; /* Azul claro, por exemplo */
+  color: #1e40af; /* Azul escuro para o texto */
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 600;
+}

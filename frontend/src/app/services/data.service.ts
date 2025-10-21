@@ -6,11 +6,19 @@ import {
   Firestore,
   onSnapshot,
   serverTimestamp,
-  updateDoc,
-  addDoc
+  updateDoc, 
+  addDoc,
+  writeBatch, 
+  getDocs,
+  query,
+  orderBy,
+  where
 } from '@angular/fire/firestore';
-import { Observable, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { AuthService } from './auth';
+
+export type SortBy = 'createdAt' | 'name';
+export type SortDirection = 'asc' | 'desc';
 
 export interface Notebook {
   id: string;
@@ -45,12 +53,14 @@ export class DataService {
 
   // --- Métodos para Cadernos (Notebooks) ---
 
-  getNotebooks(): Observable<Notebook[]> {
+  getNotebooks(sortBy: SortBy = 'createdAt', sortDirection: SortDirection = 'desc'): Observable<Notebook[]> {
     if (!this.userId) return of([]); // Retorna um array vazio se não houver usuário
 
-    const notebooksCollection = collection(this.firestore, `users/${this.userId}/notebooks`);
+    const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
+    const q = query(notebooksCollectionRef, orderBy(sortBy, sortDirection));
+
     return new Observable<Notebook[]>(subscriber => {
-      const unsubscribe = onSnapshot(notebooksCollection, (snapshot) => {
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         const notebooks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notebook));
         subscriber.next(notebooks);
       });
@@ -72,10 +82,23 @@ export class DataService {
     return updateDoc(docRef, { name: newName });
   }
 
-  deleteNotebook(notebookId: string): Promise<void> {
+  async deleteNotebook(notebookId: string): Promise<void> {
     if (!this.userId) throw new Error('Usuário não autenticado para deletar caderno.');
-    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}`);
-    return deleteDoc(docRef);
+    
+    const notebookDocRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}`);
+    const notesCollectionRef = collection(notebookDocRef, 'notes');
+
+    // 1. Inicia um "batch" de escritas para deletar tudo atomicamente.
+    const batch = writeBatch(this.firestore);
+
+    // 2. Pega todas as notas da subcoleção.
+    const notesSnapshot = await getDocs(notesCollectionRef);
+    notesSnapshot.forEach(noteDoc => {
+      batch.delete(noteDoc.ref); // 3. Adiciona a deleção de cada nota ao batch.
+    });
+
+    batch.delete(notebookDocRef); // 4. Adiciona a deleção do caderno ao batch.
+    return batch.commit(); // 5. Executa todas as operações de deleção.
   }
 
   // --- Métodos para Notas (Notes) ---

@@ -1,57 +1,69 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal } from '@angular/core';
 import { collection, doc, Firestore, onSnapshot, Unsubscribe, addDoc, serverTimestamp, updateDoc, deleteDoc } from '@angular/fire/firestore';
+import { HighlightPipe } from '../pipes/highlight.pipe';
 import { AuthService } from '../services/auth';
-import { DataService } from '../services/data.service';
+import { DataService, Note } from '../services/data.service';
 import { Subscription } from 'rxjs';
 
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  // Adicione outros campos que sua nota possa ter
-}
 
 @Component({
   selector: 'app-notes-list',
   standalone: true,
-  imports: [],
+  imports: [HighlightPipe],
   templateUrl: './notes-list.html',
   styleUrl: './notes-list.css',
 })
 export class NotesList implements OnChanges, OnDestroy {
   @Input({ required: true }) notebookId!: string;
-  @Input() selectedNoteId: string | null = null;
+  @Input({ required: true }) userId!: string | null;
+  @Input() searchTerm: string = '';
 
   private authService = inject(AuthService);
   private dataService = inject(DataService);
-  private userSubscription: Subscription | null = null;
+  private notesSubscription: Subscription | null = null;
 
-  userId: string | null = null;
-  notes: Note[] = [];
+  notes: WritableSignal<Note[]> = signal([]);
+  selectedNoteId: WritableSignal<string | null> = signal(null);
+  isLoading = signal(false);
+
+  // Signal computado para filtrar as notas localmente
+  filteredNotes: Signal<Note[]> = computed(() => {
+    const term = this.searchTerm.toLowerCase();
+    if (!term) {
+      return this.notes();
+    }
+    return this.notes().filter(note =>
+      note.title.toLowerCase().includes(term) ||
+      note.content.toLowerCase().includes(term)
+    );
+  });
 
   ngOnChanges(changes: SimpleChanges): void {
-    // 1. Reage quando o notebookId muda
-    if (changes['notebookId']) {
-      this.userSubscription = this.authService.authState$.subscribe(user => {
-        if (user) {
-          this.userId = user.uid;
-          // Usa o serviço para obter as notas
-                    this.dataService.getNotes(this.notebookId).subscribe((notes: Note[]) => {
-            this.notes = notes;
-            console.log(`Notas do caderno ${this.notebookId}:`, this.notes);
-          });
-        }
-      });
+    const notebookIdChange = changes['notebookId'];
+
+    if (notebookIdChange && notebookIdChange.currentValue && !notebookIdChange.firstChange) {
+      this.userId = this.authService.getCurrentUserId();
+      this.fetchAllNotes();
     }
   }
 
+  private fetchAllNotes() {
+    if (!this.userId) return;
+    this.isLoading.set(true);
+    this.notesSubscription?.unsubscribe();
+    this.notesSubscription = this.dataService.getNotes(this.notebookId).subscribe((notes: Note[]) => {
+      this.notes.set(notes);
+      this.isLoading.set(false);
+    });
+  }
+
   selectNote(noteId: string) {
-    this.selectedNoteId = noteId;
+    this.selectedNoteId.set(noteId);
   }
 
   ngOnDestroy(): void {
     // 4. Garante que todas as inscrições sejam canceladas ao destruir o componente
-    this.userSubscription?.unsubscribe();
+    this.notesSubscription?.unsubscribe();
   }
 
   async createNote(title: string, content: string) {
