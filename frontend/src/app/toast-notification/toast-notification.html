@@ -1,0 +1,28 @@
+<div class="toast-container">
+  @for (toast of notificationService.toasts(); track toast.id) {
+    <div 
+      @toastAnimation 
+      class="max-w-sm w-full shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
+      [ngClass]="{
+        'toast-success': toast.type === 'success',
+        'toast-error': toast.type === 'error'
+      }"
+    >
+      <div class="p-4">
+        <div class="flex items-start">
+          <div class="toast-icon">
+            @if (toast.type === 'success') {
+              <lucide-icon name="check-circle-2" class="h-6 w-6 text-green-500"></lucide-icon>
+            }
+            @if (toast.type === 'error') {
+              <lucide-icon name="x-circle" class="h-6 w-6 text-red-500"></lucide-icon>
+            }
+          </div>
+          <div class="ml-3 w-0 flex-1 pt-0.5">
+            <p class="text-sm font-medium text-gray-900">{{ toast.message }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

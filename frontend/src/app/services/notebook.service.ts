@@ -15,6 +15,7 @@ export class NotebookService {
   notebooks: WritableSignal<Notebook[]> = signal([]);
   isLoading: WritableSignal<boolean> = signal(false);
   loadingError: WritableSignal<boolean> = signal(false);
+  isSidebarCollapsed: WritableSignal<boolean> = signal(false);
 
   constructor() {
     this.authService.authState$.subscribe(user => {
@@ -51,5 +52,9 @@ export class NotebookService {
 
   ngOnDestroy() {
     this.notebooksSubscription?.unsubscribe();
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed.update(value => !value);
   }
 }

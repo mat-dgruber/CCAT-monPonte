@@ -116,6 +116,19 @@ export class DataService {
     });
   }
 
+  getNote(notebookId: string, noteId: string): Observable<Note | null> {
+    if (!this.userId) return of(null);
+
+    const noteDocRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
+    
+    return new Observable<Note | null>(subscriber => {
+      const unsubscribe = onSnapshot(noteDocRef, (docSnap) => {
+        subscriber.next(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Note : null);
+      });
+      return () => unsubscribe();
+    });
+  }
+
   async createNote(notebookId: string, title: string, content: string): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar nota.');
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
@@ -133,21 +146,5 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para deletar nota.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return deleteDoc(docRef);
-  }
-
-  getNote(notebookId: string, noteId: string): Observable<Note | null> {
-    if (!this.userId) return of(null);
-
-    const noteDocRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
-    return new Observable<Note | null>(subscriber => {
-      const unsubscribe = onSnapshot(noteDocRef, (doc) => {
-        if (doc.exists()) {
-          subscriber.next({ id: doc.id, ...doc.data() } as Note);
-        } else {
-          subscriber.next(null);
-        }
-      });
-      return () => unsubscribe();
-    });
   }
 }

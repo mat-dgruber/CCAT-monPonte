@@ -18,7 +18,7 @@ type ViewMode = 'grid' | 'list';
   styleUrl: './notes-list.css',
   animations: [
     trigger('listAnimation', [
-      transition(':enter, * => *', [
+      transition(':enter', [
         query(':enter', [
           style({ opacity: 0, transform: 'translateY(20px)' }),
           stagger(50, [ // 50ms de atraso entre cada item

@@ -2,13 +2,14 @@ import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './header/header';
 import { FooterComponent } from './footer/footer';
+import { ToastNotificationComponent } from '../toast-notification/toast-notification';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, ToastNotificationComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })

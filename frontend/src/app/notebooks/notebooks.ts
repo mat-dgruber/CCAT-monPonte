@@ -1,10 +1,12 @@
 import { Component, inject, OnInit, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes } from '@angular/animations';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { AuthService } from '../services/auth';
 import { NotesList } from '../notes-list/notes-list';
 import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
 import { NotebookService } from '../services/notebook.service';
+import { NotificationService } from '../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
@@ -15,7 +17,7 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NotesList, HighlightPipe, FormsModule, Modal, LucideAngularModule],
+  imports: [NotesList, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
   templateUrl: './notebooks.html',
   styleUrl: './notebooks.css',
   animations: [
@@ -44,11 +46,13 @@ export class Notebooks implements OnInit {
   private authService = inject(AuthService);
   private dataService = inject(DataService);
   notebookService = inject(NotebookService); // Injeta o serviço
+  router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private notificationService = inject(NotificationService);
   
   // Signals para o estado local do componente (UI)
   selectedNotebookId: WritableSignal<string | null> = signal(null);
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
-  notification: WritableSignal<{ message: string; type: 'success' | 'error' } | null> = signal(null);
   showDeleteModal: WritableSignal<boolean> = signal(false);
   notebookToDelete: WritableSignal<{ id: string; name: string } | null> = signal(null);
   showCreateRenameModal: WritableSignal<boolean> = signal(false);
@@ -57,6 +61,8 @@ export class Notebooks implements OnInit {
   newNotebookName: WritableSignal<string> = signal('');
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
+  isNoteOpen: WritableSignal<boolean> = signal(false);
+  isNavigating: WritableSignal<boolean> = signal(false); // Novo signal para o estado de navegação
 
   // Signal computado para filtrar os cadernos
   filteredNotebooks: Signal<Notebook[]> = computed(() => {
@@ -76,6 +82,24 @@ export class Notebooks implements OnInit {
       const notebooks = this.notebookService.notebooks();
       if (notebooks.length > 0 && !this.selectedNotebookId()) {
         this.selectNotebook(notebooks[0].id);
+      }
+    });
+
+    // Monitora as mudanças de rota para saber se uma nota está aberta
+    this.router.events.subscribe(event => {      if (event instanceof NavigationStart) {
+        this.isNavigating.set(true); // Navegação iniciada
+      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.isNavigating.set(false); // Navegação finalizada (sucesso, cancelamento ou erro)
+        const isNoteRouteActive = this.route.firstChild?.snapshot.paramMap.has('noteId') || false;
+        this.isNoteOpen.set(isNoteRouteActive);
+
+        // Se uma nota estiver aberta, atualiza o selectedNotebookId a partir dos parâmetros da rota
+        if (isNoteRouteActive) {
+          const notebookIdFromRoute = this.route.firstChild?.snapshot.paramMap.get('notebookId');
+          if (notebookIdFromRoute && this.selectedNotebookId() !== notebookIdFromRoute) {
+            this.selectedNotebookId.set(notebookIdFromRoute);
+          }
+        }
       }
     });
   }
@@ -154,41 +178,41 @@ export class Notebooks implements OnInit {
 
   private async createNotebook(name: string) {
     if (!this.authService.getCurrentUserId()) {
-      this.showNotification('Você precisa estar logado para criar um caderno.', 'error');
+      this.notificationService.showError('Você precisa estar logado para criar um caderno.');
       return;
     }
 
     try {
       const newId = await this.dataService.createNotebook(name);
-      this.showNotification(`Caderno "${name}" criado com sucesso.`, 'success');
+      this.notificationService.showSuccess(`Caderno "${name}" criado com sucesso.`);
       // Re-busca os cadernos para atualizar a lista
       this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao criar o caderno:', error);
-      this.showNotification(`Erro ao criar o caderno "${name}".`, 'error');
+      this.notificationService.showError(`Erro ao criar o caderno "${name}".`);
     }
   }
 
   async updateNotebook(id: string, newName: string) {
     if (!this.authService.getCurrentUserId()) {
-      this.showNotification('Você precisa estar logado para atualizar um caderno.', 'error');
+      this.notificationService.showError('Você precisa estar logado para atualizar um caderno.');
       return;
     }
 
     try {
       await this.dataService.updateNotebook(id, newName);
-      this.showNotification(`Caderno renomeado para "${newName}".`, 'success');
+      this.notificationService.showSuccess(`Caderno renomeado para "${newName}".`);
       // Re-busca os cadernos para atualizar a lista
       this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao atualizar o caderno:', error);
-      this.showNotification(`Erro ao renomear o caderno.`, 'error');
+      this.notificationService.showError(`Erro ao renomear o caderno.`);
     }
   }
 
   async deleteNotebook(id: string) {
     if (!this.authService.getCurrentUserId()) {
-      this.showNotification('Você precisa estar logado para deletar um caderno.', 'error');
+      this.notificationService.showError('Você precisa estar logado para deletar um caderno.');
       return;
     }
 
@@ -211,7 +235,7 @@ export class Notebooks implements OnInit {
 
     const trimmedNewName = newName.trim();
     if (trimmedNewName === '') {
-      this.showNotification('O nome do caderno não pode ser vazio.', 'error');
+      this.notificationService.showError('O nome do caderno não pode ser vazio.');
       return;
     }
     if (trimmedNewName === currentName) {
@@ -243,10 +267,10 @@ export class Notebooks implements OnInit {
         this.selectedNotebookId.set(null);
       }
       await this.deleteNotebook(notebook.id);
-      this.showNotification(`Caderno "${notebook.name}" deletado com sucesso.`, 'success');
+      this.notificationService.showSuccess(`Caderno "${notebook.name}" deletado com sucesso.`);
     } catch (error) {
       console.error(`Erro ao deletar o caderno ${notebook.name}:`, error);
-      this.showNotification(`Ocorreu um erro ao deletar o caderno "${notebook.name}".`, 'error');
+      this.notificationService.showError(`Ocorreu um erro ao deletar o caderno "${notebook.name}".`);
     } finally {
       this.deletingNotebookIds.update(ids => {
         ids.delete(notebook.id);
@@ -258,12 +282,5 @@ export class Notebooks implements OnInit {
   selectNotebook(id: string) {
     this.selectedNotebookId.set(id);
     console.log('Caderno selecionado:', this.selectedNotebookId());
-  }
-
-  private showNotification(message: string, type: 'success' | 'error') {
-    this.notification.set({ message, type });
-    setTimeout(() => {
-      this.notification.set(null);
-    }, 3000); // A notificação desaparecerá após 3 segundos
   }
 }
