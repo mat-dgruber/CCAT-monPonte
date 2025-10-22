@@ -1,11 +1,49 @@
 <div class="container mx-auto p-4">
-  <h2 class="text-2xl font-bold mb-4">Minhas Notas</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    @for (note of notes(); track note.id) {
-      <div class="bg-white p-4 rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Minhas Notas</h2>
+    <div class="flex items-center gap-4">
+      <div class="view-switcher">
+        <button (click)="setViewMode('grid')" [class.active]="viewMode() === 'grid'"><i class="fas fa-th"></i></button>
+        <button (click)="setViewMode('list')" [class.active]="viewMode() === 'list'"><i class="fas fa-bars"></i></button>
+      </div>
+      <select (change)="changeSortOrder($event)" class="p-2 border rounded-lg">
+        <option value="createdAt-desc">Mais recentes</option>
+        <option value="createdAt-asc">Mais antigos</option>
+        <option value="title-asc">Título (A-Z)</option>
+        <option value="title-desc">Título (Z-A)</option>
+      </select>
+      <button (click)="openCreateNoteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Criar Nova Nota</button>
+    </div>
+  </div>
+  <div [ngClass]="{'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4': viewMode() === 'grid', 'flex flex-col gap-4': viewMode() === 'list'}">
+    @for (note of sortedNotes(); track note.id) {
+      <div class="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg" (click)="openNoteEditor(note)">
         <h3 class="text-lg font-bold mb-2">{{ note.title }}</h3>
         <p class="text-gray-700">{{ note.content }}</p>
       </div>
     }
   </div>
 </div>
+
+@if (showNoteEditor()) {
+  <app-note-editor
+    [note]="noteToEdit()"
+    (onSave)="handleSaveNote($event)"
+    (onCancel)="closeNoteEditor()"
+  ></app-note-editor>
+}
+
+<!-- Modal de Criar Nota -->
+@if (showCreateNoteModal()) {
+<app-modal
+  title="Criar Nova Nota"
+  confirmText="Salvar"
+  (onConfirm)="handleCreateNote()"
+  (onCancel)="closeCreateNoteModal()"
+>
+  <div class="flex flex-col gap-4">
+    <input type="text" [(ngModel)]="newNoteTitle" class="w-full p-2 border rounded-lg" placeholder="Título da nota">
+    <textarea [(ngModel)]="newNoteContent" class="w-full p-2 border rounded-lg" rows="5" placeholder="Conteúdo da nota"></textarea>
+  </div>
+</app-modal>
+}

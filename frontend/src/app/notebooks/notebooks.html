@@ -7,7 +7,7 @@
   <aside class="notebooks-sidebar">
     <div class="sidebar-header">
       <h2>Cadernos</h2>
-      <button class="add-notebook-btn" (click)="createNewNotebook()" title="Criar novo caderno">+</button>
+      <button class="add-notebook-btn" (click)="openCreateModal()" title="Criar novo caderno">+</button>
     </div>
     <div class="sort-options">
       <label for="sort-select">Ordenar por:</label>
@@ -56,8 +56,8 @@
               @if (deletingNotebookIds().has(notebook.id)) {
                 <div class="spinner"></div>
               } @else {
-                <button class="rename-notebook-btn" (click)="renameNotebook(notebook.id, notebook.name)" title="Renomear caderno">✏️</button>
-                <button class="delete-notebook-btn" (click)="confirmDeleteNotebook(notebook.id, notebook.name)" title="Deletar caderno">🗑️</button>
+                <button class="rename-notebook-btn" (click)="openRenameModal(notebook.id, notebook.name)" title="Renomear caderno">✏️</button>
+                <button class="delete-notebook-btn" (click)="openDeleteModal(notebook.id, notebook.name)" title="Deletar caderno">🗑️</button>
               }
            
             </div>
@@ -75,9 +75,31 @@
   </aside>
   <main class="notes-content">
     @if (selectedNotebookId()) {
-    <app-notes-list [notebookId]="selectedNotebookId()!" [userId]="userId" [searchTerm]="searchTerm()" />
+    <app-notes-list [notebookId]="selectedNotebookId()!" [userId]="userId()" [searchTerm]="searchTerm()" />
     } @else {
     <div class="no-notebook-selected">Selecione um caderno para visualizar as notas.</div>
     }
   </main>
 </div>
+<!-- Modal de Confirmação de Deleção -->
+@if (showDeleteModal()) {
+<app-modal
+  title="Confirmar Deleção"
+  [message]="'Tem certeza que deseja deletar o caderno &quot;' + notebookToDelete()?.name + '&quot;? Esta ação não pode ser desfeita.'"
+  confirmText="Deletar"
+  (onConfirm)="confirmDeleteNotebook()"
+  (onCancel)="closeDeleteModal()"
+></app-modal>
+}
+
+<!-- Modal de Criar/Renomear Caderno -->
+@if (showCreateRenameModal()) {
+<app-modal
+  [title]="modalMode() === 'create' ? 'Criar Novo Caderno' : 'Renomear Caderno'"
+  confirmText="Salvar"
+  (onConfirm)="handleSaveNotebook()"
+  (onCancel)="closeCreateRenameModal()"
+>
+  <input type="text" [(ngModel)]="newNotebookName" class="w-full p-2 border rounded-lg" placeholder="Nome do caderno" (keydown.enter)="handleSaveNotebook()">
+</app-modal>
+}
