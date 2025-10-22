@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, HostListener, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Firestore, doc, DocumentReference, onSnapshot, Unsubscribe, setDoc, serverTimestamp, Timestamp } from '@angular/fire/firestore';
@@ -43,7 +43,41 @@ export class Clip implements OnInit, OnDestroy {
   deleteClipAfterConversion = false;
   isLoadingNotebooks = false;
 
+  // Contadores de caracteres e palavras
+  characterCount: WritableSignal<number> = signal(0);
+  wordCount: WritableSignal<number> = signal(0);
+
+  // Variáveis para a seleção de fonte
+  selectedFont: WritableSignal<string> = signal("'Courier Prime', monospace");
+  availableFonts = [
+    { name: 'Padrão', family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif" },
+    { name: 'Monoespaçado', family: "'Roboto Mono', monospace" },
+    { name: 'Manuscrito', family: "'Caveat', cursive" },
+    { name: 'Serifado', family: "'Georgia', serif" }
+  ];
+
+  // Variáveis para o tamanho da fonte
+  selectedFontSize: WritableSignal<string> = signal('16px');
+  availableFontSizes = [
+    { name: 'Pequeno', size: '14px' },
+    { name: 'Médio', size: '16px' },
+    { name: 'Grande', size: '20px' },
+    { name: 'Extra Grande', size: '24px' }
+  ];
+
   ngOnInit() {
+    // Carrega a preferência de fonte do usuário
+    const savedFont = localStorage.getItem('clipFontPreference');
+    if (savedFont) {
+      this.selectedFont.set(savedFont);
+    }
+
+    // Carrega a preferência de tamanho de fonte do usuário
+    const savedFontSize = localStorage.getItem('clipFontSizePreference');
+    if (savedFontSize) {
+      this.selectedFontSize.set(savedFontSize);
+    }
+
     this.userSubscription = this.authService.authState$.subscribe(user => {
       if (user) {
         this.userId = user.uid;
@@ -174,12 +208,28 @@ export class Clip implements OnInit, OnDestroy {
   }
 
   onTextChange(text: string) {
+    this.updateCounts(text);
     this.textChangeSubject.next(text);
   }
 
   clearText() {
     this.copyText = '';
+    this.updateCounts('');
     this.onTextChange(''); // Notifica o subject para salvar o estado vazio
+  }
+
+  // Altera a fonte e salva a preferência
+  onFontChange(event: Event) {
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    this.selectedFont.set(selectedValue);
+    localStorage.setItem('clipFontPreference', selectedValue);
+  }
+
+  // Altera o tamanho da fonte e salva a preferência
+  onFontSizeChange(event: Event) {
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    this.selectedFontSize.set(selectedValue);
+    localStorage.setItem('clipFontSizePreference', selectedValue);
   }
 
   // Abre o modal para converter o Clip em Nota
@@ -288,5 +338,17 @@ export class Clip implements OnInit, OnDestroy {
         clearInterval(this.typewriterInterval);
       }
     }, speed);
+  }
+
+  private updateCounts(text: string): void {
+    this.characterCount.set(text.length);
+
+    const trimmedText = text.trim();
+    if (trimmedText === '') {
+      this.wordCount.set(0);
+    } else {
+      const words = trimmedText.split(/\s+/);
+      this.wordCount.set(words.length);
+    }
   }
 }

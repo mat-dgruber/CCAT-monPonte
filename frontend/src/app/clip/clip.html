@@ -1,22 +1,31 @@
-<div class="min-h-screen bg-gray-200 p-4 md:p-8">
+<div class="flex-grow  bg-gray p-4 rounded-lg  md:p-8 ">
 
-  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+  <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
 
     <div class="p-4 sm:p-6"> <textarea
         [(ngModel)]="copyText"
         (ngModelChange)="onTextChange($event)"
         aria-label="Conteúdo do Clip" class="
-          w-full 
+          w-full
           border 
           rounded-lg 
           notebook-textarea    leading-6            pl-14                pt-2                 bg-yellow-50         border-gray-300      focus:border-sky-600 focus:ring-2         focus:ring-sky-600
         "
         placeholder="Cole seu texto aqui..."
         rows="15" ></textarea>
+        <!-- [style.fontFamily]="selectedFont()" -->
+        <!-- [style.fontSize]="selectedFontSize()" -->
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 border-t border-gray-200">
       
+      <!-- Contadores -->
+      <!-- <div class="text-sm text-gray-500 font-mono">
+        <span>Caracteres: {{ characterCount() }}</span>
+        <span class="mx-2">|</span>
+        <span>Palavras: {{ wordCount() }}</span>
+      </div> -->
+
       <div class="flex items-center gap-4">
         <button 
           (click)="clearText()" aria-label="Limpar conteúdo do Clip"
@@ -44,6 +53,32 @@
           Copiar tudo
         </button>
       </div>
+
+      <!-- Seletor de Fonte -->
+      <!-- <div class="flex items-center gap-2">
+        <label for="font-select" class="text-sm font-medium text-gray-600">Fonte:</label>
+        <select id="font-select" 
+                class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [value]="selectedFont()"
+                (change)="onFontChange($event)">
+          @for (font of availableFonts; track font.family) {
+            <option [value]="font.family">{{ font.name }}</option>
+          }
+        </select>
+      </div> -->
+
+      <!-- Seletor de Tamanho da Fonte -->
+      <!-- <div class="flex items-center gap-2">
+        <label for="font-size-select" class="text-sm font-medium text-gray-600">Tamanho:</label>
+        <select id="font-size-select"
+                class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [value]="selectedFontSize()"
+                (change)="onFontSizeChange($event)">
+          @for (size of availableFontSizes; track size.size) {
+            <option [value]="size.size">{{ size.name }}</option>
+          }
+        </select>
+      </div> -->
 
       <button 
         (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
