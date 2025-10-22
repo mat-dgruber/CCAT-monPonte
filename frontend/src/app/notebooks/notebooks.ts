@@ -5,7 +5,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 import { AuthService } from '../services/auth';
 import { RouterOutlet } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
-import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
+import { DataService, Notebook, Note, SortBy, SortDirection } from '../services/data.service';
 import { NotebookService } from '../services/notebook.service';
 import { NotificationService } from '../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
