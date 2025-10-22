@@ -9,7 +9,9 @@ export class AuthService {
   private auth: FirebaseAuth = inject(FirebaseAuth);
   public readonly authState$ = authState(this.auth);
 
-  login(email: string, password: string) {
+  async login(email: string, password: string, rememberMe: boolean) {
+    const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+    await setPersistence(this.auth, persistence);
     return signInWithEmailAndPassword(this.auth, email, password);
   }
 

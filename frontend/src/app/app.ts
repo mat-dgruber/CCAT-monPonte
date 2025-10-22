@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common'; // Necessário para @if e async pipe
 import { AuthService } from './services/auth';
 import { Observable } from 'rxjs';
@@ -10,13 +10,12 @@ import { User } from 'firebase/auth';
   standalone: true, // standalone já estava, mantemos
   imports: [
     RouterOutlet,
-    RouterLink, // Adicionado para a diretiva routerLink
     CommonModule  // Adicionado para a diretiva @if e o pipe async
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App { // Renomeado de App para AppComponent por convenção
+export class AppComponent { // Renomeado de App para AppComponent por convenção
   // 1. Injeta o AuthService e expõe o authState$
   private authService = inject(AuthService);
   authState$: Observable<User | null> = this.authService.authState$;
