@@ -6,13 +6,14 @@ import { Subscription } from 'rxjs';
 import { NotesList } from '../notes-list/notes-list'; // Importa o NotesList
 import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
+import { Modal } from '../modal/modal';
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NotesList, HighlightPipe, FormsModule],
+  imports: [NotesList, HighlightPipe, FormsModule, Modal],
   templateUrl: './notebooks.html',
   styleUrl: './notebooks.css',
   animations: [
@@ -43,12 +44,18 @@ export class Notebooks implements OnInit, OnDestroy {
   private authSubscription: Subscription | null = null;
   private notebooksSubscription: Subscription | null = null;
   
-  userId: string | null = null;
+  userId: WritableSignal<string | null> = signal(null);
   notebooks: WritableSignal<Notebook[]> = signal([]);
   selectedNotebookId: WritableSignal<string | null> = signal(null);
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
   notification: WritableSignal<{ message: string; type: 'success' | 'error' } | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(false);
+  showDeleteModal: WritableSignal<boolean> = signal(false);
+  notebookToDelete: WritableSignal<{ id: string; name: string } | null> = signal(null);
+  showCreateRenameModal: WritableSignal<boolean> = signal(false);
+  notebookToRename: WritableSignal<{ id: string; name: string } | null> = signal(null);
+  modalMode: WritableSignal<'create' | 'rename'> = signal('create');
+  newNotebookName: WritableSignal<string> = signal('');
   loadingError: WritableSignal<boolean> = signal(false);
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
@@ -64,9 +71,10 @@ export class Notebooks implements OnInit, OnDestroy {
   });
 
   constructor() {
-    // Reage a mudanças na ordenação para buscar os cadernos novamente.
+    // Reage a mudanças no userId ou na ordenação para buscar os cadernos.
     effect(() => {
-      this.sortOption();
+      this.userId(); // Depende do userId
+      this.sortOption(); // Depende da ordenação
       this.fetchNotebooks();
     });
   }
@@ -77,32 +85,26 @@ export class Notebooks implements OnInit, OnDestroy {
     if (savedSort) {
       try {
         const parsedSort = JSON.parse(savedSort);
-        // Validação básica para garantir que os dados são válidos
         if (parsedSort.by && parsedSort.direction) {
           this.sortOption.set(parsedSort);
         }
       } catch (e) {
         console.error('Erro ao carregar preferência de ordenação do localStorage', e);
-        localStorage.removeItem(SORT_PREFERENCE_KEY); // Limpa dados corrompidos
+        localStorage.removeItem(SORT_PREFERENCE_KEY);
       }
     }
 
-    // 1. Inscreve-se no authState$ para ouvir mudanças de autenticação.
+    // Inscreve-se no authState$ para ouvir mudanças de autenticação.
     this.authSubscription = this.authService.authState$.subscribe(user => {
-      // 2. Verifica se o objeto 'user' existe (se o usuário está logado).
       if (user) {
-        this.userId = user.uid; // O userId é definido aqui
+        this.userId.set(user.uid);
       } else {
-        // 4. Se não houver usuário (logout), limpa o userId.
-        this.userId = null;
-        this.notebooks.set([]); // Limpa a lista de cadernos
-        this.selectedNotebookId.set(null); // Limpa a seleção
+        this.userId.set(null);
+        this.notebooks.set([]);
+        this.selectedNotebookId.set(null);
         this.isLoading.set(false);
         this.loadingError.set(false);
-        console.log('Usuário deslogado.');
       }
-      // A busca é acionada aqui, após a mudança de estado de autenticação
-      this.fetchNotebooks();
     });
   }
 
@@ -114,7 +116,7 @@ export class Notebooks implements OnInit, OnDestroy {
   }
 
   private fetchNotebooks() {
-    if (!this.userId) {
+    if (!this.userId()) {
       return; // Não busca se não houver usuário
     }
 
@@ -165,16 +167,39 @@ export class Notebooks implements OnInit, OnDestroy {
     inputElement.focus(); // Devolve o foco para o campo de busca
   }
 
-  async createNewNotebook() {
-    const name = prompt('Digite o nome do novo caderno:');
-    if (name && name.trim() !== '') {
-      await this.createNotebook(name.trim());
+  openCreateModal() {
+    this.modalMode.set('create');
+    this.newNotebookName.set('');
+    this.showCreateRenameModal.set(true);
+  }
+
+  openRenameModal(id: string, name: string) {
+    this.modalMode.set('rename');
+    this.notebookToRename.set({ id, name });
+    this.newNotebookName.set(name);
+    this.showCreateRenameModal.set(true);
+  }
+
+  closeCreateRenameModal() {
+    this.notebookToRename.set(null);
+    this.showCreateRenameModal.set(false);
+  }
+
+  async handleSaveNotebook() {
+    const name = this.newNotebookName().trim();
+    if (name === '') return;
+
+    if (this.modalMode() === 'create') {
+      await this.createNotebook(name);
+    } else if (this.notebookToRename()) {
+      await this.updateNotebook(this.notebookToRename()!.id, name);
     }
+    this.closeCreateRenameModal();
   }
 
   private async createNotebook(name: string) {
     // 1. Garante que temos um usuário logado.
-    if (!this.userId) {
+    if (!this.userId()) {
       this.showNotification('Você precisa estar logado para criar um caderno.', 'error');
       return;
     }
@@ -192,7 +217,7 @@ export class Notebooks implements OnInit, OnDestroy {
 
   async updateNotebook(id: string, newName: string) {
     // 1. Garante que temos um usuário logado.
-    if (!this.userId) {
+    if (!this.userId()) {
       this.showNotification('Você precisa estar logado para atualizar um caderno.', 'error');
       return;
     }
@@ -210,7 +235,7 @@ export class Notebooks implements OnInit, OnDestroy {
 
   async deleteNotebook(id: string) {
     // 1. Garante que temos um usuário logado.
-    if (!this.userId) {
+    if (!this.userId()) {
       this.showNotification('Você precisa estar logado para deletar um caderno.', 'error');
       return;
     }
@@ -244,31 +269,37 @@ export class Notebooks implements OnInit, OnDestroy {
     await this.updateNotebook(id, trimmedNewName);
   }
 
-  async confirmDeleteNotebook(id: string, name: string) {
-    const confirmation = confirm(`Tem certeza que deseja deletar o caderno "${name}"?\n\nATENÇÃO: Todas as notas dentro dele serão perdidas permanentemente.`);
-    
-    if (confirmation) {
-      // Adiciona o ID ao conjunto de cadernos que estão sendo deletados
-      this.deletingNotebookIds.update(ids => ids.add(id));
-      try {
-        // Se o caderno deletado for o que está selecionado, limpa a seleção.
-        if (this.selectedNotebookId() === id) {
-          this.selectedNotebookId.set(null);
-        }
-        await this.deleteNotebook(id);
-        this.showNotification(`Caderno "${name}" deletado com sucesso.`, 'success');
-      } catch (error) {
-        console.error(`Erro ao deletar o caderno ${name}:`, error);
-        this.showNotification(`Ocorreu um erro ao deletar o caderno "${name}".`, 'error');
-      } finally {
-        // Remove o ID do conjunto, independentemente do resultado
-        this.deletingNotebookIds.update(ids => {
-          ids.delete(id);
-          return ids;
-        });
+  openDeleteModal(id: string, name: string) {
+    this.notebookToDelete.set({ id, name });
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal() {
+    this.notebookToDelete.set(null);
+    this.showDeleteModal.set(false);
+  }
+
+  async confirmDeleteNotebook() {
+    const notebook = this.notebookToDelete();
+    if (!notebook) return;
+
+    this.deletingNotebookIds.update(ids => ids.add(notebook.id));
+    this.closeDeleteModal();
+
+    try {
+      if (this.selectedNotebookId() === notebook.id) {
+        this.selectedNotebookId.set(null);
       }
-    } else {
-      console.log('Deleção do caderno cancelada.');
+      await this.deleteNotebook(notebook.id);
+      this.showNotification(`Caderno "${notebook.name}" deletado com sucesso.`, 'success');
+    } catch (error) {
+      console.error(`Erro ao deletar o caderno ${notebook.name}:`, error);
+      this.showNotification(`Ocorreu um erro ao deletar o caderno "${notebook.name}".`, 'error');
+    } finally {
+      this.deletingNotebookIds.update(ids => {
+        ids.delete(notebook.id);
+        return ids;
+      });
     }
   }
 
