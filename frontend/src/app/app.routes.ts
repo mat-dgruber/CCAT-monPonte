@@ -1,15 +1,19 @@
 import { Routes } from '@angular/router';
-import { Login } from './login/login';
-import { Signup } from './signup/signup';
-import { Clip } from './clip/clip';
-import { Notebooks } from './notebooks/notebooks'; 
 import { authGuard } from './services/guards/auth.guard';
 import { loggedInGuard } from './services/guards/logged-in.guard';
+import { LayoutComponent } from './layout/layout';
 
 export const routes: Routes = [
-     {path: 'login', component: Login, canActivate: [loggedInGuard]},
-     {path: 'signup', component: Signup, canActivate: [loggedInGuard]},
-     {path: 'clip', component: Clip, canActivate: [authGuard]},
-     {path: 'notebooks', component: Notebooks, canActivate: [authGuard]},
+     {path: 'login', loadComponent: () => import('./login/login').then(m => m.Login), canActivate: [loggedInGuard]},
+     {path: 'signup', loadComponent: () => import('./signup/signup').then(m => m.Signup), canActivate: [loggedInGuard]},
+     {
+          path: '',
+          component: LayoutComponent,
+          canActivate: [authGuard],
+          children: [
+               {path: 'clip', loadComponent: () => import('./clip/clip').then(m => m.Clip)},
+               {path: 'notebooks', loadComponent: () => import('./notebooks/notebooks').then(m => m.Notebooks)},
+          ]
+     },
      {path: '', redirectTo: 'login', pathMatch: 'full'}
 ];

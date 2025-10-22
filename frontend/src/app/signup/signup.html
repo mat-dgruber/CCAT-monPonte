@@ -1,7 +1,56 @@
-<div>
-     <input type="email" placeholder="Email" [(ngModel)]="email" />
-     
-     <input type="password" placeholder="Password" [(ngModel)]="password" />
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+  <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-lg relative overflow-hidden">
+    <!-- Animated background circles -->
+    <div class="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+    <div class="absolute -bottom-8 -right-8 w-52 h-52 bg-gradient-to-r from-yellow-400 to-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
-     <button (click)="onSignup()">Sign Up</button>
+    <div class="relative z-10">
+      <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-6">Crie sua conta</h2>
+      <p class="text-center text-gray-600 mb-8">Junte-se a nós e comece a organizar suas notas.</p>
+
+      <form class="space-y-6" (ngSubmit)="onSignup()">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            required
+            [(ngModel)]="name"
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Endereço de E-mail</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            [(ngModel)]="email"
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            required
+            [(ngModel)]="password"
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div>
+          <button
+            type="submit"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Registrar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

@@ -67,3 +67,14 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Angular
+dist/
+tmp/
+.angular/
+/frontend/dist
+/frontend/.angular
+
+# Editor folders
+.vscode/
+.idea/
