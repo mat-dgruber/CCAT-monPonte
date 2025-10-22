@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { Observable } from 'rxjs';
@@ -14,11 +14,9 @@ import { User } from 'firebase/auth';
 })
 export class HeaderComponent {
   private authService = inject(AuthService);
-  private router = inject(Router);
   authState$: Observable<User | null> = this.authService.authState$;
 
   async logout() {
     await this.authService.logout();
-    this.router.navigate(['/login']);
   }
 }
