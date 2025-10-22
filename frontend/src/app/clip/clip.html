@@ -13,8 +13,8 @@
         "
         placeholder="Cole seu texto aqui..."
         rows="15" ></textarea>
-        <!-- [style.fontFamily]="selectedFont()" -->
-        <!-- [style.fontSize]="selectedFontSize()" -->
+        @if (showAdvancedClipOptions()) { [style.fontFamily]="selectedFont()" }
+        @if (showAdvancedClipOptions()) { [style.fontSize]="selectedFontSize()" }
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 border-t border-gray-200">
@@ -24,7 +24,13 @@
         <span>Caracteres: {{ characterCount() }}</span>
         <span class="mx-2">|</span>
         <span>Palavras: {{ wordCount() }}</span>
-      </div> -->
+      </div> --> @if (showAdvancedClipOptions()) {
+        <div class="text-sm text-gray-500 font-mono">
+          <span>Caracteres: {{ characterCount() }}</span>
+          <span class="mx-2">|</span>
+          <span>Palavras: {{ wordCount() }}</span>
+        </div>
+      }
 
       <div class="flex items-center gap-4">
         <button 
@@ -55,7 +61,8 @@
       </div>
 
       <!-- Seletor de Fonte -->
-      <!-- <div class="flex items-center gap-2">
+      @if (showAdvancedClipOptions()) {
+        <div class="flex items-center gap-2">
         <label for="font-select" class="text-sm font-medium text-gray-600">Fonte:</label>
         <select id="font-select" 
                 class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -65,10 +72,12 @@
             <option [value]="font.family">{{ font.name }}</option>
           }
         </select>
-      </div> -->
+      </div>}
 
       <!-- Seletor de Tamanho da Fonte -->
-      <!-- <div class="flex items-center gap-2">
+      @if (showAdvancedClipOptions()) {
+        
+        <div class="flex items-center gap-2">
         <label for="font-size-select" class="text-sm font-medium text-gray-600">Tamanho:</label>
         <select id="font-size-select"
                 class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -78,7 +87,15 @@
             <option [value]="size.size">{{ size.name }}</option>
           }
         </select>
-      </div> -->
+      </div>
+      }
+
+      <!-- Botão de Toggle para Opções Avançadas -->
+      <button (click)="toggleAdvancedClipOptions()"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition-colors duration-200">
+        {{ showAdvancedClipOptions() ? 'Ocultar Opções' : 'Mostrar Opções' }}
+      </button>
+
 
       <button 
         (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
@@ -94,8 +111,9 @@
         Converter em Nota
       </button>
     </div>
-
-  </div> </div> @if (isModalVisible) { <!-- Modal para Converter em Nota -->
+  </div>
+</div>
+  @if (isModalVisible) { <!-- Modal para Converter em Nota -->
   <div role="dialog" aria-modal="true" aria-labelledby="convert-note-modal-title" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" role="document">
 

@@ -1,25 +1,20 @@
-<div class="note-editor-container" role="main">
+<div class="note-editor-container">
   @if (isLoading()) {
     <div class="p-8 text-center">Carregando nota...</div>
   } @else if (note(); as currentNote) {
     <div class="note-editor-header">
-      <button (click)="goBack()" aria-label="Voltar para a lista de notas" class="back-button">
-        <lucide-icon name="chevron-left" [size]="24"></lucide-icon>
-      </button>
       <input 
         type="text" 
         placeholder="Título da Nota" 
-        aria-label="Título da nota" class="title-input"
+        class="title-input"
         [(ngModel)]="currentNote.title"
         (ngModelChange)="onContentChange()"
       />
       <div class="actions">
-        <button (click)="saveNote()" aria-label="Salvar nota" class="save-button" [disabled]="isSaving()">
-          <lucide-icon name="save" [size]="20"></lucide-icon>
-          <span *ngIf="!isSaving()">Salvar</span>
-          <span *ngIf="isSaving()">Salvando...</span>
+        <button (click)="deleteNote()" class="delete-button" title="Deletar Nota">
+          <lucide-icon name="trash-2" size="20"></lucide-icon>
         </button>
-        <div class="save-status" aria-live="polite">
+        <div class="save-status">
           @if (isSaving()) {
             <span class="text-gray-500">Salvando...</span>
           } @else {
@@ -30,12 +25,25 @@
     </div>
     <div class="note-content-wrapper">
       <textarea
-        aria-label="Conteúdo da nota" class="note-content-textarea"
+        class="note-content-textarea"
         placeholder="Comece a escrever sua nota aqui..."
         [(ngModel)]="currentNote.content"
         (ngModelChange)="onContentChange()"
         rows="15"
       ></textarea>
     </div>
+  } @else {
+    <div class="p-8 text-center text-gray-500">Selecione uma nota para editar.</div>
   }
 </div>
+
+<!-- Modal de Confirmação de Deleção -->
+@if (showDeleteConfirmationModal()) {
+  <app-modal
+    title="Confirmar Deleção"
+    [message]="'Tem certeza que deseja deletar a nota &quot;' + note()?.title + '&quot;? Esta ação não pode ser desfeita.'"
+    confirmText="Deletar"
+    (onConfirm)="confirmDeleteNote()"
+    (onCancel)="cancelDeleteNote()"
+  ></app-modal>
+}

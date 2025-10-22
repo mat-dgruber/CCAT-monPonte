@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap, of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
+import { Modal } from '../modal/modal';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
@@ -11,7 +12,7 @@ import { NotificationService } from '../services/notification.service';
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
@@ -24,6 +25,7 @@ export class NoteEditor implements OnInit, OnDestroy {
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);
   isSaving: WritableSignal<boolean> = signal(false);
+  showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
 
   private notebookId: string | null = null;
   private noteId: string | null = null;
@@ -54,13 +56,13 @@ export class NoteEditor implements OnInit, OnDestroy {
         return of(null);
       })
     ).subscribe(note => {
+      this.isLoading.set(false);
       if (note) {
         this.note.set(note);
       } else {
-        this.notificationService.showError("Nota não encontrada.");
+        // Se a nota for nula (ex: deletada), navega de volta para a lista de cadernos.
         this.router.navigate(['/notebooks']);
       }
-      this.isLoading.set(false);
     });
 
     const autoSaveSub = this.contentChanges.pipe(
@@ -86,6 +88,30 @@ export class NoteEditor implements OnInit, OnDestroy {
 
   onContentChange(): void {
     this.contentChanges.next();
+  }
+
+  // --- Lógica de Deleção ---
+
+  deleteNote(): void {
+    this.showDeleteConfirmationModal.set(true);
+  }
+
+  cancelDeleteNote(): void {
+    this.showDeleteConfirmationModal.set(false);
+  }
+
+  async confirmDeleteNote(): Promise<void> {
+    if (!this.notebookId || !this.noteId) return;
+
+    try {
+      await this.dataService.deleteNote(this.notebookId, this.noteId);
+      this.notificationService.showSuccess(`Nota "${this.note()?.title}" deletada com sucesso.`);
+      this.showDeleteConfirmationModal.set(false);
+      // A navegação de volta será acionada pelo `onSnapshot` que detectará a nota como nula.
+    } catch (error) {
+      this.notificationService.showError('Erro ao deletar a nota.');
+      console.error('Erro ao deletar a nota:', error);
+    }
   }
 
   goBack(): void {

@@ -1,0 +1,47 @@
+<div class="p-4">
+  <div class="mb-4 flex items-center gap-4">
+    <input
+      type="text"
+      placeholder="Buscar notas..."
+      [value]="searchTerm()"
+      (input)="onSearch($event)"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button (click)="openCreateNoteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">Criar Nota</button>
+  </div>
+
+  @if (isLoading()) {
+    <p>Carregando notas...</p>
+  } @else if (error()) {
+    <p class="text-red-500">{{ error() }}</p>
+  } @else if (filteredNotes().length === 0) {
+    <div class="text-center py-10 px-4 bg-gray-50 rounded-lg">
+      <h3 class="text-lg font-medium text-gray-900">Nenhuma nota encontrada</h3>
+    </div>
+  } @else {
+    <div class="space-y-2" @listAnimation>
+      @for (note of filteredNotes(); track note.id) {
+        <div class="bg-white rounded-lg shadow-md p-3 cursor-pointer" (click)="selectNote(note.id)">
+          <h3 class="font-bold text-md truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+          <p class="text-gray-500 text-sm line-clamp-1" [innerHTML]="note.content | highlight: searchTerm()"></p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal de Criar/Editar Nota -->
+@if (isNoteModalVisible()) {
+  <app-modal
+    [title]="isEditing() ? 'Editar Nota' : 'Criar Nova Nota'"
+    confirmText="Salvar"
+    (onConfirm)="saveNote(currentNote())"
+    (onCancel)="closeNoteModal()"
+  >
+    <div class="space-y-4">
+      <input type="text" [(ngModel)]="currentNote().title" class="w-full p-2 border rounded-lg" placeholder="Título da nota">
+      <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg" placeholder="Conteúdo da nota" rows="5"></textarea>
+    </div>
+  </app-modal>
+}
+

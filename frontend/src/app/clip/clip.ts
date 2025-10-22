@@ -43,6 +43,9 @@ export class Clip implements OnInit, OnDestroy {
   deleteClipAfterConversion = false;
   isLoadingNotebooks = false;
 
+  // Toggle para opções avançadas do Clip
+  showAdvancedClipOptions: WritableSignal<boolean> = signal(false);
+
   // Contadores de caracteres e palavras
   characterCount: WritableSignal<number> = signal(0);
   wordCount: WritableSignal<number> = signal(0);
@@ -76,6 +79,12 @@ export class Clip implements OnInit, OnDestroy {
     const savedFontSize = localStorage.getItem('clipFontSizePreference');
     if (savedFontSize) {
       this.selectedFontSize.set(savedFontSize);
+    }
+
+    // Carrega a preferência de visibilidade das opções avançadas
+    const savedAdvancedOptionsPref = localStorage.getItem('clipShowAdvancedOptions');
+    if (savedAdvancedOptionsPref !== null) {
+      this.showAdvancedClipOptions.set(JSON.parse(savedAdvancedOptionsPref));
     }
 
     this.userSubscription = this.authService.authState$.subscribe(user => {
@@ -230,6 +239,12 @@ export class Clip implements OnInit, OnDestroy {
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.selectedFontSize.set(selectedValue);
     localStorage.setItem('clipFontSizePreference', selectedValue);
+  }
+
+  // Alterna a visibilidade das opções avançadas e salva a preferência
+  toggleAdvancedClipOptions() {
+    this.showAdvancedClipOptions.update(value => !value);
+    localStorage.setItem('clipShowAdvancedOptions', JSON.stringify(this.showAdvancedClipOptions()));
   }
 
   // Abre o modal para converter o Clip em Nota

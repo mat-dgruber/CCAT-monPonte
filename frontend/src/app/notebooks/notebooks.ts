@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes } from '@angular/animations';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { AuthService } from '../services/auth';
-import { NotesList } from '../notes-list/notes-list';
+import { RouterOutlet } from '@angular/router';
+import { NoteColumn } from '../note-column/note-column';
 import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
 import { NotebookService } from '../services/notebook.service';
 import { NotificationService } from '../services/notification.service';
@@ -17,7 +17,7 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NotesList, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
+  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
   templateUrl: './notebooks.html',
   styleUrl: './notebooks.css',
   animations: [
@@ -45,13 +45,12 @@ export class Notebooks implements OnInit {
 
   private authService = inject(AuthService);
   private dataService = inject(DataService);
-  notebookService = inject(NotebookService); // Injeta o serviço
-  router = inject(Router);
-  private route = inject(ActivatedRoute);
+  notebookService = inject(NotebookService);
   private notificationService = inject(NotificationService);
   
   // Signals para o estado local do componente (UI)
   selectedNotebookId: WritableSignal<string | null> = signal(null);
+  selectedNoteId: WritableSignal<string | null> = signal(null);
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
   showDeleteModal: WritableSignal<boolean> = signal(false);
   notebookToDelete: WritableSignal<{ id: string; name: string } | null> = signal(null);
@@ -82,24 +81,6 @@ export class Notebooks implements OnInit {
       const notebooks = this.notebookService.notebooks();
       if (notebooks.length > 0 && !this.selectedNotebookId()) {
         this.selectNotebook(notebooks[0].id);
-      }
-    });
-
-    // Monitora as mudanças de rota para saber se uma nota está aberta
-    this.router.events.subscribe(event => {      if (event instanceof NavigationStart) {
-        this.isNavigating.set(true); // Navegação iniciada
-      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        this.isNavigating.set(false); // Navegação finalizada (sucesso, cancelamento ou erro)
-        const isNoteRouteActive = this.route.firstChild?.snapshot.paramMap.has('noteId') || false;
-        this.isNoteOpen.set(isNoteRouteActive);
-
-        // Se uma nota estiver aberta, atualiza o selectedNotebookId a partir dos parâmetros da rota
-        if (isNoteRouteActive) {
-          const notebookIdFromRoute = this.route.firstChild?.snapshot.paramMap.get('notebookId');
-          if (notebookIdFromRoute && this.selectedNotebookId() !== notebookIdFromRoute) {
-            this.selectedNotebookId.set(notebookIdFromRoute);
-          }
-        }
       }
     });
   }
@@ -265,6 +246,7 @@ export class Notebooks implements OnInit {
     try {
       if (this.selectedNotebookId() === notebook.id) {
         this.selectedNotebookId.set(null);
+        this.selectedNoteId.set(null);
       }
       await this.deleteNotebook(notebook.id);
       this.notificationService.showSuccess(`Caderno "${notebook.name}" deletado com sucesso.`);
@@ -280,10 +262,11 @@ export class Notebooks implements OnInit {
   }
 
   selectNotebook(id: string) {
-    if (this.isNavigating()) return; // Previne cliques duplos enquanto a navegação está em andamento
     this.selectedNotebookId.set(id);
-    // Navega para a lista de notas do caderno selecionado
-    this.router.navigate(['/notebooks', id, 'notes']);
-    console.log('Navegando para o caderno:', id);
+    this.selectedNoteId.set(null); // Reseta a nota selecionada ao trocar de caderno
+  }
+
+  onNoteSelected(noteId: string) {
+    this.selectedNoteId.set(noteId);
   }
 }

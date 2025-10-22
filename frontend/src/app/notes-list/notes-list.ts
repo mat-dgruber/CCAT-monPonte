@@ -7,6 +7,7 @@ import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { ConfirmationModalComponent } from './modals/confirmation-modal.component';
+import { NotificationService } from '../services/notification.service';
 
 type ViewMode = 'grid' | 'list';
 
@@ -34,6 +35,7 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
 
   private dataService = inject(DataService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
   private notesSubscription: Subscription | null = null;
 
   private searchSubject = new Subject<string>();
@@ -133,7 +135,7 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
     this.showDeleteConfirmationModal.set(false); // Fecha o modal
     try {
       await this.dataService.deleteNote(this.notebookId, note.id);
-      console.log('Nota deletada com sucesso:', note.id);
+      this.notificationService.showSuccess(`Nota "${note.title}" deletada com sucesso.`);
       // A lista será atualizada automaticamente pelo listener do Firestore
     } catch (error) {
       console.error('Erro ao deletar a nota:', error);
