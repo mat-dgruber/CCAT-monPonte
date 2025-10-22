@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common'; // Necessário para @if e async pipe
 import { AuthService } from './services/auth';
 import { Observable } from 'rxjs';
@@ -10,7 +10,6 @@ import { User } from 'firebase/auth';
   standalone: true, // standalone já estava, mantemos
   imports: [
     RouterOutlet,
-    RouterLink, // Adicionado para a diretiva routerLink
     CommonModule  // Adicionado para a diretiva @if e o pipe async
   ],
   templateUrl: './app.html',
