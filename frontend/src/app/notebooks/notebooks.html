@@ -70,7 +70,7 @@
   </aside>
   <main class="notes-content">
     @if (selectedNotebookId()) {
-    <app-notes-list [notebookId]="selectedNotebookId()!" [userId]="userId()" [searchTerm]="searchTerm()" />
+    <app-notes-list [notebookId]="selectedNotebookId()!" />
     } @else {
     <div class="no-notebook-selected">Selecione um caderno para visualizar as notas.</div>
     }

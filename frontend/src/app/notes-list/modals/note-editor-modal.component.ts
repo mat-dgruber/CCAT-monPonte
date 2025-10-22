@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Note } from '../../services/data.service'; // Assuming Note interface is in data.service
+import { Note } from '../../services/data.service';
 
 @Component({
   selector: 'app-note-editor-modal',

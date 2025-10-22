@@ -126,7 +126,7 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   async confirmDeleteNote() {
     const note = this.noteToDelete();
     if (!note || !this.notebookId) {
-      this.cancelDeleteNote(); // Fecha o modal se não houver nota para deletar (corrected call)
+      this.cancelDeleteNote();
       return;
     }
 
@@ -142,6 +142,12 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
       // Limpa o estado da nota a ser deletada
       this.noteToDelete.set(null);
     }
+  }
+
+  // Cancela a exclusão da nota
+  cancelDeleteNote() {
+    this.showDeleteConfirmationModal.set(false);
+    this.noteToDelete.set(null);
   }
 
   // Abre o modal para criar uma nova nota
