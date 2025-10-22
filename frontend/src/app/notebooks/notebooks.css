@@ -64,3 +64,11 @@
   height: 100%;
   color: #9ca3af;
 }
+
+/* Estilo para o caderno que é um alvo de drop durante o arraste de uma nota */
+.notebook-item.cdk-drop-list-dragging {
+  background-color: #e0e7ff; /* Cor: indigo-100 do Tailwind */
+  border: 2px dashed #6366f1; /* Cor: indigo-500 do Tailwind */
+  transform: scale(1.02);
+  transition: background-color 150ms ease-in-out, transform 150ms ease-in-out;
+}

@@ -6,12 +6,14 @@ import { Router } from '@angular/router';
 import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
 
 @Component({
   selector: 'app-note-column',
   standalone: true,
-  imports: [CommonModule, FormsModule, Modal, HighlightPipe],
+  imports: [CommonModule, FormsModule, Modal, HighlightPipe, DragDropModule],
   templateUrl: './note-column.html',
   styleUrl: './note-column.css',
   animations: [
@@ -33,6 +35,7 @@ export class NoteColumn implements OnChanges, OnInit {
 
   private dataService = inject(DataService);
   private router = inject(Router);
+  notebookService = inject(NotebookService); // Injetado para o template
   private notesSubscription: Subscription | null = null;
   private searchSubject = new Subject<string>();
 

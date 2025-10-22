@@ -14,7 +14,7 @@ import {
   orderBy,
   where
 } from '@angular/fire/firestore';
-import { from, Observable, of } from 'rxjs';
+import { from, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth';
 
 export type SortBy = 'createdAt' | 'name';
@@ -23,6 +23,7 @@ export type SortDirection = 'asc' | 'desc';
 export interface Notebook {
   id: string;
   name: string;
+  order: number;
   createdAt?: any;
 }
 
@@ -56,7 +57,7 @@ export class DataService {
   getNotebooks(sortBy: SortBy = 'createdAt', sortDirection: SortDirection = 'desc'): Observable<Notebook[]> {
     if (!this.userId) return of([]); // Retorna um array vazio se não houver usuário
 
-    const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
+    const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);    
     const q = query(notebooksCollectionRef, orderBy(sortBy, sortDirection));
 
     return new Observable<Notebook[]>(subscriber => {
@@ -71,8 +72,10 @@ export class DataService {
 
   async createNotebook(name: string): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar caderno.');
-    const notebooksCollection = collection(this.firestore, `users/${this.userId}/notebooks`);
-    const docRef = await addDoc(notebooksCollection, { name, createdAt: serverTimestamp() });
+    const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
+    const snapshot = await getDocs(notebooksCollectionRef);
+    const newOrder = snapshot.size; // O novo caderno será o último
+    const docRef = await addDoc(notebooksCollectionRef, { name, createdAt: serverTimestamp(), order: newOrder });
     return docRef.id;
   }
 
@@ -80,6 +83,16 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para atualizar caderno.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}`);
     return updateDoc(docRef, { name: newName });
+  }
+
+  updateNotebooksOrder(notebooks: Notebook[]): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para reordenar cadernos.');
+    const batch = writeBatch(this.firestore);
+    notebooks.forEach((notebook, index) => {
+      const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebook.id}`);
+      batch.update(docRef, { order: index });
+    });
+    return batch.commit();
   }
 
   async deleteNotebook(notebookId: string): Promise<void> {
@@ -146,5 +159,32 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para deletar nota.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return deleteDoc(docRef);
+  }
+
+  async moveNote(noteId: string, fromNotebookId: string, toNotebookId: string): Promise<void> {
+    if (!this.userId) return throwError(() => new Error('Usuário não autenticado.'));
+    if (fromNotebookId === toNotebookId) return; // Não faz nada se for o mesmo caderno
+
+    const fromNoteRef = doc(this.firestore, `users/${this.userId}/notebooks/${fromNotebookId}/notes/${noteId}`);
+    const toNotesCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks/${toNotebookId}/notes`);
+
+    const batch = writeBatch(this.firestore);
+
+    // 1. Lê a nota original
+    const noteDoc = await getDoc(fromNoteRef);
+    if (!noteDoc.exists()) {
+      throw new Error("A nota que você está tentando mover não existe.");
+    }
+    const noteData = noteDoc.data();
+
+    // 2. Cria uma nova nota no caderno de destino com os mesmos dados
+    const newNoteRef = doc(toNotesCollectionRef); // Gera um novo ID
+    batch.set(newNoteRef, noteData);
+
+    // 3. Deleta a nota original
+    batch.delete(fromNoteRef);
+
+    // 4. Executa a operação
+    return batch.commit();
   }
 }

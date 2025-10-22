@@ -29,9 +29,14 @@
         <button (click)="retryFetchNotebooks()">Tentar Novamente</button>
       </div>
     } @else {
-      <ul class="notebook-list">
+      <ul class="notebook-list" 
+          cdkDropList 
+          id="notebook-reorder-list" 
+          [cdkDropListConnectedTo]="[]"
+          [cdkDropListDisabled]="!!searchTerm()" 
+          (cdkDropListDropped)="onNotebookDrop($event)">
         @for (notebook of filteredNotebooks(); track notebook.id) {
-        <li class="notebook-item" [class.selected]="notebook.id === selectedNotebookId()" (click)="selectNotebook(notebook.id)">
+        <li class="notebook-item" cdkDrag [cdkDragData]="notebook" cdkDropList [cdkDropListData]="notebook.id" [id]="notebook.id" (cdkDropListDropped)="onNoteDropped($event)" [class.selected]="notebook.id === selectedNotebookId()" (click)="selectNotebook(notebook.id)">
           <span [innerHTML]="notebook.name | highlight: searchTerm()"></span>
           <div class="notebook-actions">
             <button class="rename-notebook-btn" (click)="openRenameModal(notebook.id, notebook.name); $event.stopPropagation()" title="Renomear caderno">
