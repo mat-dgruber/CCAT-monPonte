@@ -82,3 +82,65 @@
 .modal button:first-of-type:hover:not(:disabled) {
   background-color: #0056b3;
 }
+
+.notebook-textarea {
+  /* Define um fundo creme, parecido com papel de caderno.
+    Usei a cor 'yellow-50' do Tailwind.
+  */
+  background-color: #fefce8;
+
+  /* Esta é a parte principal! 
+    Usamos dois 'linear-gradient' para criar as linhas.
+    'background-attachment: local' é crucial para que as linhas
+    rolem junto com o texto que você digita.
+  */
+  background-image: 
+    /* 1. A linha da margem vertical (vermelha) */
+    /* Começa transparente, desenha a linha vermelha e continua transparente */
+    linear-gradient(to right, 
+      transparent 2.9rem, 
+      #f87171 2.9rem, /* Cor: red-400 do Tailwind */
+      #f87171 3.0rem, 
+      transparent 3.0rem),
+    
+    /* 2. As linhas horizontais (azul claro) */
+    /* A linha fica no final de um bloco de 1.5rem (tamanho da linha de texto) */
+    linear-gradient(to bottom,
+      transparent calc(2rem - 1px), /* Fica transparente até quase o final da linha */
+      #93c5fd calc(2rem - 1px)      /* Desenha a linha azul */
+    );
+
+  /* Define os tamanhos dos fundos:
+    - A margem vertical ocupa 100% da altura.
+    - As linhas horizontais se repetem a cada 1.5rem na altura.
+  */
+  background-size: 100% 100%, 100% 2rem;
+
+  /* Faz as linhas rolarem com o texto */
+  background-attachment: local, local;
+
+  /* A margem não se repete, as linhas horizontais sim (para baixo) */
+  background-repeat: no-repeat, repeat-y;
+  
+  /* Esta é a altura da linha do texto. 
+    DEVE ser igual ao tamanho do 'background-size' horizontal.
+    1.75rem = 28px (leading-7 no Tailwind)
+    2rem = 32px (leading-8 no Tailwind)
+  */
+  line-height: 2rem; 
+
+  /* Remove o anel de foco azul padrão para um visual mais limpo */
+  outline: none;
+  box-shadow: none;
+
+  /* Adiciona uma sombra sutil ao texto para dar profundidade */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Quando o textarea está focado, apenas mostramos a borda 
+  (que definimos no HTML com Tailwind) 
+*/
+.notebook-textarea:focus {
+  outline: none;
+  box-shadow: none;
+}

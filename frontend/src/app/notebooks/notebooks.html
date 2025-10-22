@@ -66,10 +66,10 @@
       </div>
     } @else {
       @if (filteredNotebooks().length > 0) { 
-        <ul class="notebook-list">
+        <ul class="notebook-list" role="list">
           @for (notebook of filteredNotebooks(); track notebook.id) {
-          <li class="notebook-item" @itemAnimation
-              [class.selected]="notebook.id === selectedNotebookId()">
+          <li role="listitem" class="notebook-item" @itemAnimation
+              [class.selected]="notebook.id === selectedNotebookId()" [attr.aria-current]="notebook.id === selectedNotebookId() ? 'true' : 'false'">
             <span class="notebook-name-display" (click)="selectNotebook(notebook.id)" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
             <div class="notebook-actions">
               @if (deletingNotebookIds().has(notebook.id)) {
@@ -89,9 +89,9 @@
         </ul>
       } @else {
         @if (searchTerm()) {
-          <div class="empty-list-message">Nenhum caderno corresponde à sua busca.</div>
+          <div class="empty-list-message" role="status">Nenhum caderno corresponde à sua busca.</div>
         } @else {
-          <div class="empty-list-message">Nenhum caderno encontrado.</div>
+          <div class="empty-list-message" role="status">Nenhum caderno encontrado.</div>
         }
       }
     }
@@ -100,7 +100,7 @@
     @if (isNoteOpen()) {
       <!-- Botão de voltar visível quando uma nota está aberta -->
       <div class="p-4 border-b border-gray-200 bg-white flex items-center gap-2">
-        <button (click)="router.navigate(['/notebooks'])" class="p-2 rounded-full hover:bg-gray-200 text-gray-600" title="Voltar para a lista de cadernos" [disabled]="isNavigating()">
+        <button (click)="router.navigate(['/notebooks'])" aria-label="Voltar para a lista de cadernos" class="p-2 rounded-full hover:bg-gray-200 text-gray-600" title="Voltar para a lista de cadernos" [disabled]="isNavigating()">
           @if (isNavigating()) {
             <svg class="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -110,14 +110,14 @@
             <lucide-icon name="arrow-left" size="20"></lucide-icon>
           }
         </button>
-        <h3 class="text-lg font-semibold">Visualizando Nota</h3>
+        <h3 id="note-view-title" class="text-lg font-semibold">Visualizando Nota</h3>
       </div>
     }
     <!-- Este router-outlet renderizará NotesList ou NoteEditor -->
     <router-outlet></router-outlet>
     <!-- Se nenhuma rota filha estiver ativa e nenhum caderno selecionado, exibe mensagem padrão -->
     @if (!isNoteOpen() && !selectedNotebookId()) {
-      <div class="no-notebook-selected p-4 text-center text-gray-500">Selecione um caderno para visualizar as notas.</div>
+      <div class="no-notebook-selected p-4 text-center text-gray-500" role="status">Selecione um caderno para visualizar as notas.</div>
     } @else if (!isNoteOpen() && selectedNotebookId()) {
       <!-- Renderiza NotesList quando um caderno é selecionado e nenhuma nota específica está aberta -->
       <app-notes-list [notebookId]="selectedNotebookId()!" />
@@ -126,7 +126,7 @@
 </div>
 <!-- Modal de Confirmação de Deleção -->
 @if (showDeleteModal()) {
-<app-modal
+<app-modal role="dialog" aria-modal="true" aria-labelledby="delete-modal-title"
   title="Confirmar Deleção"
   [message]="'Tem certeza que deseja deletar o caderno &quot;' + notebookToDelete()?.name + '&quot;? Esta ação não pode ser desfeita.'"
   confirmText="Deletar"
@@ -137,12 +137,12 @@
 
 <!-- Modal de Criar/Renomear Caderno -->
 @if (showCreateRenameModal()) {
-<app-modal
+<app-modal role="dialog" aria-modal="true" [attr.aria-labelledby]="modalMode() === 'create' ? 'create-notebook-modal-title' : 'rename-notebook-modal-title'"
   [title]="modalMode() === 'create' ? 'Criar Novo Caderno' : 'Renomear Caderno'"
   confirmText="Salvar"
   (onConfirm)="handleSaveNotebook()"
   (onCancel)="closeCreateRenameModal()"
 >
-  <input type="text" [(ngModel)]="newNotebookName" class="w-full p-2 border rounded-lg" placeholder="Nome do caderno" (keydown.enter)="handleSaveNotebook()">
+  <input type="text" [(ngModel)]="newNotebookName" aria-label="Nome do caderno" class="w-full p-2 border rounded-lg" placeholder="Nome do caderno" (keydown.enter)="handleSaveNotebook()">
 </app-modal>
 }

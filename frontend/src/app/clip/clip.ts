@@ -26,6 +26,7 @@ export class Clip implements OnInit, OnDestroy {
   private textChangeSubject = new Subject<string>();
   private textChangeSubscription: Subscription | null = null;
   private notebooksSubscription: Subscription | null = null;
+  private typewriterInterval: any = null; // Para controlar o efeito de digitação
   private docRef: DocumentReference | null = null;
 
   copyText: string = '';
@@ -48,24 +49,29 @@ export class Clip implements OnInit, OnDestroy {
         this.userId = user.uid;
         this.docRef = doc(this.firestore, `clip/${this.userId}`);
         this.snapshotSubscription = onSnapshot(this.docRef, (docSnap) => {
+          // Ignora atualizações locais para não interferir com a digitação do usuário
+          if (docSnap.metadata.hasPendingWrites) {
+            return;
+          }
+
           if (docSnap.exists()) {
             const data = docSnap.data();
             const text = data['text'] ?? '';
             const expiresAt = data['expiresAt'] as Timestamp | undefined;
 
-            // 1. Verifica se o campo 'expiresAt' existe e se a data já passou.
+            // Verifica se o clip expirou
             if (expiresAt && new Date() > expiresAt.toDate()) {
               console.log('Clip expirado. Limpando o texto.');
-              this.copyText = '';
+              this.typewriterEffect(''); // Limpa com efeito
             } else {
-              // 2. Se não expirou, exibe o texto normalmente.
-              this.copyText = text;
+              // Se não expirou, exibe o texto com efeito de máquina de escrever
+              this.typewriterEffect(text);
               console.log('Document data updated:', this.copyText);
             }
           } else {
             // O documento ainda não existe para este usuário.
             console.log('No document found for this user.');
-            this.copyText = '';
+            this.typewriterEffect('');
           }
         });
 
@@ -261,5 +267,26 @@ export class Clip implements OnInit, OnDestroy {
     this.isCreatingNote = false;
     this.deleteClipAfterConversion = false;
     this.isLoadingNotebooks = false;
+  }
+
+  private typewriterEffect(text: string, speed: number = 20) {
+    // Se o texto a ser digitado for o mesmo que já está na tela, não faz nada.
+    if (this.copyText === text) return;
+
+    // Se já houver um efeito de digitação em andamento, limpa o intervalo.
+    if (this.typewriterInterval) {
+      clearInterval(this.typewriterInterval);
+    }
+
+    this.copyText = ''; // Começa com o texto vazio
+    let i = 0;
+    this.typewriterInterval = setInterval(() => {
+      if (i < text.length) {
+        this.copyText += text.charAt(i);
+        i++;
+      } else {
+        clearInterval(this.typewriterInterval);
+      }
+    }, speed);
   }
 }

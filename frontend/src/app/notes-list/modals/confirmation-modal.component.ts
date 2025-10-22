@@ -6,11 +6,11 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    @if (isVisible) {
-      <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="relative p-5 border w-96 shadow-lg rounded-md bg-white">
+    @if (isVisible) { <!-- Modal de Confirmação -->
+      <div role="dialog" aria-modal="true" aria-labelledby="confirmation-modal-title" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="relative p-5 border w-96 shadow-lg rounded-md bg-white" role="document">
           <div class="mt-3 text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Confirmação</h3>
+            <h3 id="confirmation-modal-title" class="text-lg leading-6 font-medium text-gray-900">Confirmação</h3>
             <div class="mt-2 px-7 py-3">
               <p class="text-sm text-gray-500">{{ message }}</p>
             </div>
@@ -18,11 +18,13 @@ import { CommonModule } from '@angular/common';
               <button
                 (click)="onConfirm()"
                 class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
+                aria-label="Confirmar"
               >
                 Confirmar
               </button>
               <button
                 (click)="onCancel()"
+                aria-label="Cancelar"
                 class="px-4 py-2 bg-white text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 sm:text-sm"
               >
                 Cancelar

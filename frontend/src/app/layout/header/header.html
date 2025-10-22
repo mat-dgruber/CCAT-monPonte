@@ -1,13 +1,13 @@
-<header class="bg-gray-900 text-white shadow-md rounded-b-3xl"> <div class="container mx-auto flex items-center justify-between p-4">
+<header class="bg-gray-900 text-white shadow-md rounded-b-3xl"> <div class="container mx-auto flex items-center justify-between p-4" role="banner">
     <h1 class="text-2xl font-bold">
-      <a routerLink="/" class="hover:text-gray-400">monPonte</a>
+      <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-gray-400">monPonte</a>
     </h1>
     @if (authState$ | async; as user) {
-      <nav class="flex items-center">
-        <a routerLink="/clip" class="px-4 py-2 hover:bg-gray-700 rounded-md">Clip</a>
-        <a routerLink="/notebooks" class="px-4 py-2 hover:bg-gray-700 rounded-md">Cadernos</a>
+      <nav aria-label="Navegação principal" class="flex items-center">
+        <a routerLink="/clip" aria-label="Ir para a página do Clip" class="px-4 py-2 hover:bg-gray-700 rounded-md">Clip</a>
+        <a routerLink="/notebooks" aria-label="Ir para a página de Cadernos" class="px-4 py-2 hover:bg-gray-700 rounded-md">Cadernos</a>
         <span class="px-4">Olá, {{ user.displayName || user.email }}</span>
-        <button (click)="logout()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md">Logout</button>
+        <button (click)="logout()" aria-label="Sair da conta" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md">Logout</button>
       </nav>
     }
   </div>

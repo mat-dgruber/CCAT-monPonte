@@ -1,55 +1,99 @@
-<div class="p-4 bg-gray-100 rounded-lg shadow-md">
-  <textarea
-    [(ngModel)]="copyText"
-    (ngModelChange)="onTextChange($event)"
-    class="w-full p-2 border rounded-lg"
-    placeholder="Cole seu texto aqui..."
-    rows="10"
-  ></textarea>
+<div class="min-h-screen bg-gray-200 p-4 md:p-8">
 
-  <div class="flex items-center justify-between mt-4">
-    <div class="flex items-center gap-4">
-      <button (click)="clearText()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Limpar</button>
-      <button (click)="onCopy()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Copiar tudo</button>
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+
+    <div class="p-4 sm:p-6"> <textarea
+        [(ngModel)]="copyText"
+        (ngModelChange)="onTextChange($event)"
+        aria-label="Conteúdo do Clip" class="
+          w-full 
+          border 
+          rounded-lg 
+          notebook-textarea    leading-6            pl-14                pt-2                 bg-yellow-50         border-gray-300      focus:border-sky-600 focus:ring-2         focus:ring-sky-600
+        "
+        placeholder="Cole seu texto aqui..."
+        rows="15" ></textarea>
     </div>
-    <button (click)="openConvertToNoteModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Converter em Nota</button>
-  </div>
-</div>
 
-@if (isModalVisible) {
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+    <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 border-t border-gray-200">
+      
+      <div class="flex items-center gap-4">
+        <button 
+          (click)="clearText()" aria-label="Limpar conteúdo do Clip"
+          class="
+            px-4 py-2 
+            bg-gray-200 text-gray-800 
+            rounded-lg 
+            hover:bg-gray-300 
+            font-medium 
+            transition-colors duration-200
+          ">
+          Limpar
+        </button>
+        <button 
+          (click)="onCopy()" aria-label="Copiar todo o conteúdo do Clip"
+          class="
+            px-4 py-2 
+            bg-blue-600 text-white 
+            rounded-lg 
+            hover:bg-blue-700 
+            font-medium 
+            transition-colors duration-200 
+            shadow-sm hover:shadow-md
+          ">
+          Copiar tudo
+        </button>
+      </div>
 
-      <h2 class="text-2xl font-bold mb-4">Converter em Nota</h2>
+      <button 
+        (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
+        class="
+          px-4 py-2 
+          bg-green-600 text-white 
+          rounded-lg 
+          hover:bg-green-700 
+          font-medium 
+          transition-colors duration-200 
+          shadow-sm hover:shadow-md
+        ">
+        Converter em Nota
+      </button>
+    </div>
+
+  </div> </div> @if (isModalVisible) { <!-- Modal para Converter em Nota -->
+  <div role="dialog" aria-modal="true" aria-labelledby="convert-note-modal-title" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" role="document">
+
+      <h2 id="convert-note-modal-title" class="text-2xl font-bold mb-4">Converter em Nota</h2>
 
       <div class="mb-4">
-        <label for="noteTitle" class="block text-gray-700 font-bold mb-2">Título da Nota:</label>
-        <input type="text" id="noteTitle" [(ngModel)]="newNoteTitle" class="w-full p-2 border rounded-lg">
+        <label id="noteTitleLabel" for="noteTitle" class="block text-gray-700 font-bold mb-2">Título da Nota:</label>
+        <input type="text" id="noteTitle" [(ngModel)]="newNoteTitle" aria-labelledby="noteTitleLabel" class="w-full p-2 border rounded-lg">
       </div>
 
       <div class="mb-6">
-        @if (!isCreatingNewNotebook) {
-          <label for="notebookSelect" class="block text-gray-700 font-bold mb-2">Salvar no Caderno:</label>
-          <select id="notebookSelect" [(ngModel)]="selectedNotebookIdForNote" class="w-full p-2 border rounded-lg">
+        @if (!isCreatingNewNotebook) { <!-- Selecionar Caderno Existente -->
+          <label id="notebookSelectLabel" for="notebookSelect" class="block text-gray-700 font-bold mb-2">Salvar no Caderno:</label>
+          <select id="notebookSelect" [(ngModel)]="selectedNotebookIdForNote" aria-labelledby="notebookSelectLabel" class="w-full p-2 border rounded-lg">
             <option [ngValue]="null" disabled>Selecione um caderno</option>
             @for (notebook of notebooks; track notebook.id) {
               <option [value]="notebook.id">{{ notebook.name }}</option>
             }
           </select>
-          <button (click)="isCreatingNewNotebook = true" class="mt-2 text-blue-600 hover:underline">+ Criar novo caderno</button>
-        } @else {
-          <label for="newNotebookName" class="block text-gray-700 font-bold mb-2">Nome do Novo Caderno:</label>
-          <input type="text" id="newNotebookName" [(ngModel)]="newNotebookName" class="w-full p-2 border rounded-lg">
+          <button (click)="isCreatingNewNotebook = true" aria-label="Criar novo caderno" class="mt-2 text-blue-600 hover:underline">+ Criar novo caderno</button>
+        } @else { <!-- Criar Novo Caderno -->
+          <label id="newNotebookNameLabel" for="newNotebookName" class="block text-gray-700 font-bold mb-2">Nome do Novo Caderno:</label>
+          <input type="text" id="newNotebookName" [(ngModel)]="newNotebookName" aria-labelledby="newNotebookNameLabel" class="w-full p-2 border rounded-lg">
           <div class="mt-2 flex gap-2">
-            <button (click)="createNewNotebookFromModal()" [disabled]="!newNotebookName.trim()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Caderno</button>
-            <button (click)="isCreatingNewNotebook = false; newNotebookName = ''" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
+            <button (click)="createNewNotebookFromModal()" [disabled]="!newNotebookName.trim()" aria-label="Salvar novo caderno" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Caderno</button>
+            <button (click)="isCreatingNewNotebook = false; newNotebookName = ''" aria-label="Cancelar criação de novo caderno" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
           </div>
         }
       </div>
 
       <div class="mb-4">
-        <input type="checkbox" id="deleteClip" [(ngModel)]="deleteClipAfterConversion">
-        <label for="deleteClip" class="ml-2 text-gray-700">Limpar Clip após conversão</label>
+        <input type="checkbox" id="deleteClip" [(ngModel)]="deleteClipAfterConversion" aria-describedby="deleteClipDescription">
+        <label id="deleteClipDescription" for="deleteClip" class="ml-2 text-gray-700">Limpar Clip após conversão</label>
       </div>
 
       @if (isCreatingNote) {
@@ -57,8 +101,8 @@
       }
 
       <div class="flex justify-end gap-4 mt-4">
-        <button (click)="confirmConvertToNote()" [disabled]="isCreatingNote" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Confirmar</button>
-        <button (click)="cancelConvertToNote()" [disabled]="isCreatingNote" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
+        <button (click)="confirmConvertToNote()" [disabled]="isCreatingNote" aria-label="Confirmar conversão para nota" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Confirmar</button>
+        <button (click)="cancelConvertToNote()" [disabled]="isCreatingNote" aria-label="Cancelar conversão para nota" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
       </div>
     </div>
   </div>

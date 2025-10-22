@@ -16,14 +16,14 @@
         </div>
       }
 
-      <form #loginForm="ngForm" class="space-y-6" (ngSubmit)="onLogin()">
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Endereço de E-mail</label>
+      <form #loginForm="ngForm" class="space-y-6" (ngSubmit)="onLogin()" aria-labelledby="login-form-title">
+        <h2 id="login-form-title" class="text-3xl font-extrabold text-gray-900 text-center mb-6">Bem-vindo de volta!</h2>
+        <div role="form" aria-labelledby="login-form-title">
+          <label id="emailLabel" for="email" class="block text-sm font-medium text-gray-700">Endereço de E-mail</label>
           <input
             id="email"
             name="email"
-            type="email"
-            autocomplete="email"
+            type="email" autocomplete="email" aria-labelledby="emailLabel"
             required
             [(ngModel)]="email"
             #emailInput="ngModel"
@@ -35,13 +35,13 @@
             </p>
           }
         </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+        <div role="form" aria-labelledby="login-form-title">
+          <label id="passwordLabel" for="password" class="block text-sm font-medium text-gray-700">Senha</label>
           <input
             id="password"
             name="password"
             type="password"
-            autocomplete="current-password"
+            autocomplete="current-password" aria-labelledby="passwordLabel"
             required
             [(ngModel)]="password"
             #passwordInput="ngModel"
@@ -55,13 +55,13 @@
         </div>
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <input id="remember-me" name="remember-me" type="checkbox" [(ngModel)]="rememberMe" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-            <label for="remember-me" class="ml-2 block text-sm text-gray-900">Lembrar-me</label>
+            <input id="remember-me" name="remember-me" type="checkbox" [(ngModel)]="rememberMe" aria-describedby="rememberMeDescription" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+            <label id="rememberMeDescription" for="remember-me" class="ml-2 block text-sm text-gray-900">Lembrar-me</label>
           </div>
         </div>
         <div>
           <button
-            type="submit"
+            type="submit" aria-label="Fazer login"
             [disabled]="!loginForm.form.valid || isLoading"
             class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed">
             @if (isLoading) {

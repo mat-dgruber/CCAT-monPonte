@@ -8,11 +8,11 @@ import { Note } from '../../services/data.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    @if (isVisible()) {
-      <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+    @if (isVisible()) { <!-- Modal de Edição/Criação de Nota -->
+      <div role="dialog" aria-modal="true" [attr.aria-labelledby]="isEditing() ? 'edit-note-modal-title' : 'create-note-modal-title'" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white" role="document">
           <div class="mt-3 text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">{{ isEditing() ? 'Editar Nota' : 'Criar Nova Nota' }}</h3>
+            <h3 [id]="isEditing() ? 'edit-note-modal-title' : 'create-note-modal-title'" class="text-lg leading-6 font-medium text-gray-900">{{ isEditing() ? 'Editar Nota' : 'Criar Nova Nota' }}</h3>
             <div class="mt-2 px-7 py-3">
               <form #noteForm="ngForm" (ngSubmit)="onSave()">
                 <div class="mb-4 text-left">
@@ -22,6 +22,7 @@ import { Note } from '../../services/data.service';
                     id="noteTitle"
                     name="noteTitle"
                     [(ngModel)]="editedTitle"
+                    aria-labelledby="noteTitleLabel"
                     required
                     #titleInput="ngModel"
                     [class.border-red-500]="titleInput.invalid && (titleInput.dirty || titleInput.touched)"
@@ -34,13 +35,14 @@ import { Note } from '../../services/data.service';
                   }
                 </div>
                 <div class="mb-4 text-left">
-                  <label for="noteContent" class="block text-sm font-medium text-gray-700">Conteúdo</label>
+                  <label id="noteContentLabel" for="noteContent" class="block text-sm font-medium text-gray-700">Conteúdo</label>
                   <textarea
                     id="noteContent"
                     name="noteContent"
                     rows="5"
                     [(ngModel)]="editedContent"
                     required
+                    aria-labelledby="noteContentLabel"
                     #contentInput="ngModel"
                     [class.border-red-500]="contentInput.invalid && (contentInput.dirty || contentInput.touched)"
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -55,6 +57,7 @@ import { Note } from '../../services/data.service';
                   <button
                     type="submit"
                     [disabled]="!noteForm.form.valid || isSaving()"
+                    aria-label="Salvar nota"
                     class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm disabled:bg-indigo-400 disabled:cursor-not-allowed"
                   >
                     @if (isSaving()) {
@@ -67,6 +70,7 @@ import { Note } from '../../services/data.service';
                   </button>
                   <button
                     type="button"
+                    aria-label="Cancelar edição/criação de nota"
                     (click)="onCancel()"
                     class="px-4 py-2 bg-white text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 sm:text-sm"
                   >
