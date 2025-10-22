@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Firestore, doc, DocumentReference, onSnapshot, Unsubscribe, setDoc, serverTimestamp, Timestamp } from '@angular/fire/firestore';
 import { AuthService } from '../services/auth';
 import { DataService, Notebook } from '../services/data.service';
+import { NotificationService } from '../services/notification.service';
 import { Subscription, Subject, debounceTime } from 'rxjs';
 
 
@@ -19,6 +20,7 @@ export class Clip implements OnInit, OnDestroy {
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
   private dataService = inject(DataService);
+  private notificationService = inject(NotificationService);
   private userSubscription: Subscription | null = null;
   private snapshotSubscription: Unsubscribe | null = null;
   private textChangeSubject = new Subject<string>();
@@ -36,9 +38,6 @@ export class Clip implements OnInit, OnDestroy {
   selectedNotebookIdForNote: string | null = null;
   isCreatingNewNotebook = false;
   newNotebookName = '';
-  copyFeedbackMessage: string | null = null;
-  modalErrorMessage: string | null = null;
-  noteCreationFeedbackMessage: string | null = null;
   isCreatingNote = false; // Para controlar o spinner
   deleteClipAfterConversion = false;
   isLoadingNotebooks = false;
@@ -109,11 +108,7 @@ export class Clip implements OnInit, OnDestroy {
     event.preventDefault(); // Impede a ação padrão do navegador (Salvar Página)
     this.saveClip(this.copyText);
     console.log('Clip saved via Ctrl+S');
-    // Fornece um feedback visual rápido
-    this.copyFeedbackMessage = 'Salvo!';
-    setTimeout(() => {
-      this.copyFeedbackMessage = null;
-    }, 1500);
+    this.notificationService.showSuccess('Clip salvo!');
   }
 
   @HostListener('window:keydown.control.d', ['$event'])
@@ -121,11 +116,7 @@ export class Clip implements OnInit, OnDestroy {
     event.preventDefault(); // Impede a ação padrão do navegador (ex: Adicionar aos Favoritos)
     this.clearText();
     console.log('Clip cleared via Ctrl+D');
-    // Fornece um feedback visual rápido
-    this.copyFeedbackMessage = 'Limpo!';
-    setTimeout(() => {
-      this.copyFeedbackMessage = null;
-    }, 1500);
+    this.notificationService.showSuccess('Clip limpo!');
   }
 
   @HostListener('window:keydown.control.shift.c', ['$event'])
@@ -168,16 +159,11 @@ export class Clip implements OnInit, OnDestroy {
   async onCopy() {
     try {
       await navigator.clipboard.writeText(this.copyText);
-      this.copyFeedbackMessage = 'Copiado!';
+      this.notificationService.showSuccess('Copiado para a área de transferência!');
       console.log('Text copied to clipboard');
     } catch (error) {
-      this.copyFeedbackMessage = 'Falha ao copiar!';
+      this.notificationService.showError('Falha ao copiar!');
       console.error('Failed to copy text: ', error);
-    } finally {
-      // Limpa a mensagem após 2 segundos
-      setTimeout(() => {
-        this.copyFeedbackMessage = null;
-      }, 2000);
     }
   }
 
@@ -207,7 +193,7 @@ export class Clip implements OnInit, OnDestroy {
     // 1. Garante que o usuário está logado e um caderno foi selecionado.
     if (!this.userId || !this.selectedNotebookIdForNote) {
       console.error('Usuário ou caderno não selecionado. Não é possível criar a nota.');
-      this.modalErrorMessage = 'Por favor, selecione um caderno para salvar a nota.';
+      this.notificationService.showError('Por favor, selecione um caderno para salvar a nota.');
       return;
     }
 
@@ -215,7 +201,6 @@ export class Clip implements OnInit, OnDestroy {
     const title = this.newNoteTitle.trim() || this.copyText.substring(0, 20) + '...';
 
     this.isCreatingNote = true;
-    this.modalErrorMessage = null;
 
     try {
       // 3. Chama o serviço para criar a nota com os dados coletados.
@@ -225,7 +210,7 @@ export class Clip implements OnInit, OnDestroy {
         this.copyText // O conteúdo da nota é o texto do Clip.
       );
       console.log('Nota criada com sucesso a partir do Clip!');
-      this.noteCreationFeedbackMessage = 'Nota criada com sucesso!'; // Define a mensagem de sucesso
+      this.notificationService.showSuccess('Nota criada com sucesso!');
 
       if (this.deleteClipAfterConversion) {
         this.clearText();
@@ -240,7 +225,7 @@ export class Clip implements OnInit, OnDestroy {
 
     } catch (error) {
       console.error('Falha ao converter Clip em Nota:', error);
-      this.modalErrorMessage = 'Ocorreu um erro ao salvar a nota. Tente novamente.';
+      this.notificationService.showError('Ocorreu um erro ao salvar a nota. Tente novamente.');
     } finally {
       this.isCreatingNote = false;
     }
@@ -273,8 +258,6 @@ export class Clip implements OnInit, OnDestroy {
     this.selectedNotebookIdForNote = null;
     this.isCreatingNewNotebook = false;
     this.newNotebookName = '';
-    this.modalErrorMessage = null; // Limpa a mensagem de erro ao resetar
-    this.noteCreationFeedbackMessage = null; // Limpa a mensagem de sucesso ao resetar
     this.isCreatingNote = false;
     this.deleteClipAfterConversion = false;
     this.isLoadingNotebooks = false;

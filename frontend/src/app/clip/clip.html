@@ -11,9 +11,6 @@
     <div class="flex items-center gap-4">
       <button (click)="clearText()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Limpar</button>
       <button (click)="onCopy()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Copiar tudo</button>
-      @if (copyFeedbackMessage) {
-        <span class="text-green-600 font-bold">{{ copyFeedbackMessage }}</span>
-      }
     </div>
     <button (click)="openConvertToNoteModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Converter em Nota</button>
   </div>
@@ -22,9 +19,6 @@
 @if (isModalVisible) {
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
-      @if (noteCreationFeedbackMessage) {
-        <p class="text-green-600 font-bold text-center mb-4">{{ noteCreationFeedbackMessage }}</p>
-      }
 
       <h2 class="text-2xl font-bold mb-4">Converter em Nota</h2>
 
@@ -57,10 +51,6 @@
         <input type="checkbox" id="deleteClip" [(ngModel)]="deleteClipAfterConversion">
         <label for="deleteClip" class="ml-2 text-gray-700">Limpar Clip após conversão</label>
       </div>
-
-      @if (modalErrorMessage) {
-        <p class="text-red-600 mt-2">{{ modalErrorMessage }}</p>
-      }
 
       @if (isCreatingNote) {
         <p class="mt-2">Salvando...</p>

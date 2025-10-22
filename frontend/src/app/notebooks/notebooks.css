@@ -2,7 +2,7 @@
 
 .notebooks-container {
   display: flex;
-  height: calc(100vh - 50px); /* Ajuste a altura conforme o seu header */
+  height: 100%; /* Ocupa a altura total do container pai flexível */
   position: relative;
 }
 
