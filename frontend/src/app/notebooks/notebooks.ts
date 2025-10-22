@@ -280,7 +280,10 @@ export class Notebooks implements OnInit {
   }
 
   selectNotebook(id: string) {
+    if (this.isNavigating()) return; // Previne cliques duplos enquanto a navegação está em andamento
     this.selectedNotebookId.set(id);
-    console.log('Caderno selecionado:', this.selectedNotebookId());
+    // Navega para a lista de notas do caderno selecionado
+    this.router.navigate(['/notebooks', id, 'notes']);
+    console.log('Navegando para o caderno:', id);
   }
 }

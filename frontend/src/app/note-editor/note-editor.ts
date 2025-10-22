@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap, of } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
@@ -10,7 +11,7 @@ import { NotificationService } from '../services/notification.service';
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
@@ -85,5 +86,9 @@ export class NoteEditor implements OnInit, OnDestroy {
 
   onContentChange(): void {
     this.contentChanges.next();
+  }
+
+  goBack(): void {
+    this.router.navigate(['/notebooks']);
   }
 }

@@ -1,11 +1,8 @@
 <div class="notebooks-container" [class.hidden]="notebookService.isSidebarCollapsed()">
   <aside 
     class="notebooks-sidebar transition-all duration-300 overflow-hidden" 
-    [class.w-64]="!isNoteOpen() && !notebookService.isSidebarCollapsed()"
-    [class.w-20]="!isNoteOpen() && notebookService.isSidebarCollapsed()"
-    [class.w-0]="isNoteOpen()"
-    [class.p-0]="isNoteOpen()"
-    [class.border-0]="isNoteOpen()"
+    [class.w-64]="!notebookService.isSidebarCollapsed()"
+    [class.w-20]="notebookService.isSidebarCollapsed()"
   >
     <div class="sidebar-header justify-between">
       <!-- O botão de voltar não deve estar aqui se a sidebar for escondida -->
