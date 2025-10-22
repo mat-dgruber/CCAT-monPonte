@@ -1,19 +1,21 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, computed, Signal } from '@angular/core';
+import { Component, inject, OnInit, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate, keyframes } from '@angular/animations'; // Importa o NotesList
+import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 import { AuthService } from '../services/auth';
-import { Subscription } from 'rxjs';
-import { NotesList } from '../notes-list/notes-list'; // Importa o NotesList
+import { NotesList } from '../notes-list/notes-list';
 import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
+import { NotebookService } from '../services/notebook.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
+import { LucideAngularModule, PlusCircle, Pencil, Trash2 } from 'lucide-angular';
+
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NotesList, HighlightPipe, FormsModule, Modal],
+  imports: [NotesList, HighlightPipe, FormsModule, Modal, LucideAngularModule],
   templateUrl: './notebooks.html',
   styleUrl: './notebooks.css',
   animations: [
@@ -37,33 +39,30 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
     ])
   ]
 })
-export class Notebooks implements OnInit, OnDestroy {
+export class Notebooks implements OnInit {
 
   private authService = inject(AuthService);
   private dataService = inject(DataService);
-  private authSubscription: Subscription | null = null;
-  private notebooksSubscription: Subscription | null = null;
+  notebookService = inject(NotebookService); // Injeta o serviço
   
-  userId: WritableSignal<string | null> = signal(null);
-  notebooks: WritableSignal<Notebook[]> = signal([]);
+  // Signals para o estado local do componente (UI)
   selectedNotebookId: WritableSignal<string | null> = signal(null);
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
   notification: WritableSignal<{ message: string; type: 'success' | 'error' } | null> = signal(null);
-  isLoading: WritableSignal<boolean> = signal(false);
   showDeleteModal: WritableSignal<boolean> = signal(false);
   notebookToDelete: WritableSignal<{ id: string; name: string } | null> = signal(null);
   showCreateRenameModal: WritableSignal<boolean> = signal(false);
   notebookToRename: WritableSignal<{ id: string; name: string } | null> = signal(null);
   modalMode: WritableSignal<'create' | 'rename'> = signal('create');
   newNotebookName: WritableSignal<string> = signal('');
-  loadingError: WritableSignal<boolean> = signal(false);
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
 
   // Signal computado para filtrar os cadernos
   filteredNotebooks: Signal<Notebook[]> = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    const allNotebooks = this.notebooks();
+    // Usa o signal de cadernos do serviço
+    const allNotebooks = this.notebookService.notebooks();
 
     if (!term) return allNotebooks;
 
@@ -71,11 +70,13 @@ export class Notebooks implements OnInit, OnDestroy {
   });
 
   constructor() {
-    // Reage a mudanças no userId ou na ordenação para buscar os cadernos.
+    // Efeito para re-selecionar o primeiro caderno quando a lista é atualizada
+    // e nenhum caderno está selecionado.
     effect(() => {
-      this.userId(); // Depende do userId
-      this.sortOption(); // Depende da ordenação
-      this.fetchNotebooks();
+      const notebooks = this.notebookService.notebooks();
+      if (notebooks.length > 0 && !this.selectedNotebookId()) {
+        this.selectNotebook(notebooks[0].id);
+      }
     });
   }
 
@@ -93,58 +94,12 @@ export class Notebooks implements OnInit, OnDestroy {
         localStorage.removeItem(SORT_PREFERENCE_KEY);
       }
     }
-
-    // Inscreve-se no authState$ para ouvir mudanças de autenticação.
-    this.authSubscription = this.authService.authState$.subscribe(user => {
-      if (user) {
-        this.userId.set(user.uid);
-      } else {
-        this.userId.set(null);
-        this.notebooks.set([]);
-        this.selectedNotebookId.set(null);
-        this.isLoading.set(false);
-        this.loadingError.set(false);
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    // 5. É fundamental cancelar a inscrição para evitar vazamentos de memória
-    // quando o componente for destruído.
-    this.authSubscription?.unsubscribe();
-    this.notebooksSubscription?.unsubscribe();
-  }
-
-  private fetchNotebooks() {
-    if (!this.userId()) {
-      return; // Não busca se não houver usuário
-    }
-
-    this.isLoading.set(true);
-    this.loadingError.set(false);
-
-    const { by, direction } = this.sortOption();
-    this.notebooksSubscription = this.dataService.getNotebooks(by, direction).subscribe({
-      next: (notebooks) => {
-        this.notebooks.set(notebooks);
-        if (notebooks.length > 0 && !this.selectedNotebookId()) {
-          this.selectNotebook(notebooks[0].id);
-        }
-        console.log('Cadernos atualizados:', this.notebooks());
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Erro ao buscar cadernos:', error);
-        this.showNotification('Não foi possível carregar os cadernos.', 'error');
-        this.isLoading.set(false);
-        this.loadingError.set(true);
-      }
-    });
   }
 
   retryFetchNotebooks() {
     console.log('Tentando buscar cadernos novamente...');
-    this.fetchNotebooks();
+    const { by, direction } = this.sortOption();
+    this.notebookService.fetchNotebooks(by, direction);
   }
 
   changeSortOrder(event: Event) {
@@ -198,17 +153,16 @@ export class Notebooks implements OnInit, OnDestroy {
   }
 
   private async createNotebook(name: string) {
-    // 1. Garante que temos um usuário logado.
-    if (!this.userId()) {
+    if (!this.authService.getCurrentUserId()) {
       this.showNotification('Você precisa estar logado para criar um caderno.', 'error');
       return;
     }
 
     try {
-      // Delega a criação para o DataService
       const newId = await this.dataService.createNotebook(name);
-      console.log('Caderno criado com sucesso! ID:', newId);
       this.showNotification(`Caderno "${name}" criado com sucesso.`, 'success');
+      // Re-busca os cadernos para atualizar a lista
+      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao criar o caderno:', error);
       this.showNotification(`Erro ao criar o caderno "${name}".`, 'error');
@@ -216,17 +170,16 @@ export class Notebooks implements OnInit, OnDestroy {
   }
 
   async updateNotebook(id: string, newName: string) {
-    // 1. Garante que temos um usuário logado.
-    if (!this.userId()) {
+    if (!this.authService.getCurrentUserId()) {
       this.showNotification('Você precisa estar logado para atualizar um caderno.', 'error');
       return;
     }
 
     try {
-      // Delega a atualização para o DataService
       await this.dataService.updateNotebook(id, newName);
-      console.log('Caderno atualizado com sucesso! ID:', id);
       this.showNotification(`Caderno renomeado para "${newName}".`, 'success');
+      // Re-busca os cadernos para atualizar a lista
+      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao atualizar o caderno:', error);
       this.showNotification(`Erro ao renomear o caderno.`, 'error');
@@ -234,16 +187,15 @@ export class Notebooks implements OnInit, OnDestroy {
   }
 
   async deleteNotebook(id: string) {
-    // 1. Garante que temos um usuário logado.
-    if (!this.userId()) {
+    if (!this.authService.getCurrentUserId()) {
       this.showNotification('Você precisa estar logado para deletar um caderno.', 'error');
       return;
     }
 
     try {
-      // Delega a exclusão para o DataService
       await this.dataService.deleteNotebook(id);
-      console.log('Caderno deletado com sucesso! ID:', id);
+       // Re-busca os cadernos para atualizar a lista
+      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao deletar o caderno:', error);
     }

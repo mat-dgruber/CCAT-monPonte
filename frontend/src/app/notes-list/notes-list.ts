@@ -1,11 +1,11 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
-import { NoteEditorModalComponent } from './modals/note-editor-modal.component';
 import { ConfirmationModalComponent } from './modals/confirmation-modal.component';
 
 type ViewMode = 'grid' | 'list';
@@ -13,7 +13,7 @@ type ViewMode = 'grid' | 'list';
 @Component({
   selector: 'app-notes-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmationModalComponent, HighlightPipe, NoteEditorModalComponent],
+  imports: [CommonModule, FormsModule, ConfirmationModalComponent, HighlightPipe],
   templateUrl: './notes-list.html',
   styleUrl: './notes-list.css',
   animations: [
@@ -33,6 +33,7 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   @Input() notebookId: string | null = null;
 
   private dataService = inject(DataService);
+  private router = inject(Router);
   private notesSubscription: Subscription | null = null;
 
   private searchSubject = new Subject<string>();
@@ -108,10 +109,9 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   }
 
   openNoteEditor(note: Note) {
-    this.isEditing.set(true);
-    this.currentNote.set({ ...note });
-    this.isSavingNote.set(false); // Reset saving state
-    this.isNoteModalVisible.set(true);
+    if (this.notebookId) {
+      this.router.navigate(['/notebooks', this.notebookId, 'notes', note.id]);
+    }
   }
 
   // Abre o modal de confirmação de exclusão

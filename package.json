@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "@angular/animations": "^20.3.6"
+    "@angular/animations": "^20.3.6",
+    "lucide-angular": "^0.546.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4"
   }
 }
