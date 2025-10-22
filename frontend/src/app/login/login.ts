@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from '../services/auth';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -15,14 +16,14 @@ export class Login {
 
   email: string = ''
   password: string = ''
+  rememberMe: boolean = false
 
   async onLogin() {
     try {
-      await this.authService.login(this.email, this.password);
+      await this.authService.login(this.email, this.password, this.rememberMe);
       console.log('Login successful');
-    } catch (error) {
-      console.error('Login failed', error);
+    } catch (e) {
+      console.error('Login failed', e);
     }
   }
-
 }

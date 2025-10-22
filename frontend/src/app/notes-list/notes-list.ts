@@ -41,7 +41,7 @@ export class NotesList implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     const notebookIdChange = changes['notebookId'];
 
-    if (notebookIdChange && notebookIdChange.currentValue && !notebookIdChange.firstChange) {
+    if (notebookIdChange && notebookIdChange.currentValue) {
       this.userId = this.authService.getCurrentUserId();
       this.fetchAllNotes();
     }
