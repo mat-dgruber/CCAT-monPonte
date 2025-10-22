@@ -32,7 +32,7 @@ export class LoginComponent {
     this.isLoading = true;
     try {
       await this.authService.login(this.email, this.password, this.rememberMe);
-      this.router.navigate(['/']);
+      this.router.navigate(['/notebooks']);
     } catch (e) {
       const error = e as AuthError;
       this.errorMessage = this.getFriendlyErrorMessage(error);

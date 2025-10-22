@@ -16,11 +16,7 @@ export const routes: Routes = [
                {path: 'clip', loadComponent: () => import('./clip/clip').then(m => m.Clip)},
                {
                  path: 'notebooks',
-                 loadComponent: () => import('./notebooks/notebooks').then(m => m.Notebooks),
-                 children: [
-                    { path: ':notebookId/notes', redirectTo: ':notebookId/notes/', pathMatch: 'full' },
-                    { path: ':notebookId/notes/:noteId', loadComponent: () => import('./note-editor/note-editor').then(m => m.NoteEditor) }
-                 ]
+                 loadComponent: () => import('./notebooks/notebooks').then(m => m.Notebooks)
                },
           ]
      },

@@ -1,45 +1,12 @@
-<div class="notebooks-container" [class.hidden]="notebookService.isSidebarCollapsed()">
-  <aside 
-    class="notebooks-sidebar transition-all duration-300 overflow-hidden" 
-    [class.w-64]="!notebookService.isSidebarCollapsed()"
-    [class.w-20]="notebookService.isSidebarCollapsed()"
-  >
-    <div class="sidebar-header justify-between">
-      <!-- O botão de voltar não deve estar aqui se a sidebar for escondida -->
-      <!-- @if (isNoteOpen()) {
-        <button (click)="router.navigate(['/notebooks'])" class="p-2 rounded-full hover:bg-gray-200 text-gray-600" title="Voltar para a lista de cadernos">
-          <lucide-icon name="arrow-left" size="20"></lucide-icon>
-        </button>
-      } -->
-
-      <h2 [class.hidden]="notebookService.isSidebarCollapsed()">Cadernos</h2>
-
-      <button (click)="notebookService.toggleSidebar()" class="p-2 rounded-full hover:bg-gray-200">
-        <lucide-icon name="menu" size="20"></lucide-icon>
-      </button>
-      
-      <button 
-        class="add-notebook-btn flex items-center justify-center gap-2" 
-        (click)="openCreateModal()" 
-        title="Criar novo caderno"
-        [class.w-full]="notebookService.isSidebarCollapsed()"
-      >
+<div class="three-column-layout">
+  <aside class="notebooks-sidebar">
+    <div class="sidebar-header">
+      <h2>Cadernos</h2>
+      <button (click)="openCreateModal()" class="add-notebook-btn" title="Criar novo caderno">
         <lucide-icon name="plus-circle" size="16"></lucide-icon>
-        <span [class.hidden]="notebookService.isSidebarCollapsed()">Criar</span>
       </button>
     </div>
-    <div class="sort-options" [class.hidden]="notebookService.isSidebarCollapsed()">
-      <label for="sort-select">Ordenar por:</label>
-      <div class="select-wrapper">
-        <select id="sort-select" (change)="changeSortOrder($event)" [value]="sortOption().by + '-' + sortOption().direction">
-          <option value="createdAt-desc">Mais recentes</option>
-          <option value="createdAt-asc">Mais antigos</option>
-          <option value="name-asc">Nome (A-Z)</option>
-          <option value="name-desc">Nome (Z-A)</option>
-        </select>
-      </div>
-    </div>
-    <div class="search-box" [class.hidden]="notebookService.isSidebarCollapsed()">
+    <div class="search-box">
       <input #searchInput
              type="text"
              placeholder="Buscar caderno..."
@@ -53,10 +20,7 @@
     @if (notebookService.isLoading()) {
       <div class="skeleton-container">
         @for (_ of [1, 2, 3, 4, 5]; track $index) {
-          <div class="skeleton-item">
-            <div class="skeleton-text"></div>
-            <div class="skeleton-actions"></div>
-          </div>
+          <div class="skeleton-item"></div>
         }
       </div>
     } @else if (notebookService.loadingError()) {
@@ -65,64 +29,39 @@
         <button (click)="retryFetchNotebooks()">Tentar Novamente</button>
       </div>
     } @else {
-      @if (filteredNotebooks().length > 0) { 
-        <ul class="notebook-list">
-          @for (notebook of filteredNotebooks(); track notebook.id) {
-          <li class="notebook-item" @itemAnimation
-              [class.selected]="notebook.id === selectedNotebookId()">
-            <span class="notebook-name-display" (click)="selectNotebook(notebook.id)" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
-            <div class="notebook-actions">
-              @if (deletingNotebookIds().has(notebook.id)) {
-                <div class="spinner"></div>
-              } @else {
-                <button class="rename-notebook-btn" (click)="openRenameModal(notebook.id, notebook.name)" title="Renomear caderno">
-                  <lucide-icon name="pencil" size="16"></lucide-icon>
-                </button>
-                <button class="delete-notebook-btn" (click)="openDeleteModal(notebook.id, notebook.name)" title="Deletar caderno">
-                  <lucide-icon name="trash-2" size="16"></lucide-icon>
-                </button>
-              }
-           
-            </div>
-          </li>
-          }
-        </ul>
-      } @else {
-        @if (searchTerm()) {
-          <div class="empty-list-message">Nenhum caderno corresponde à sua busca.</div>
-        } @else {
-          <div class="empty-list-message">Nenhum caderno encontrado.</div>
+      <ul class="notebook-list">
+        @for (notebook of filteredNotebooks(); track notebook.id) {
+        <li class="notebook-item" [class.selected]="notebook.id === selectedNotebookId()" (click)="selectNotebook(notebook.id)">
+          <span [innerHTML]="notebook.name | highlight: searchTerm()"></span>
+          <div class="notebook-actions">
+            <button class="rename-notebook-btn" (click)="openRenameModal(notebook.id, notebook.name); $event.stopPropagation()" title="Renomear caderno">
+              <lucide-icon name="pencil" size="16"></lucide-icon>
+            </button>
+            <button class="delete-notebook-btn" (click)="openDeleteModal(notebook.id, notebook.name); $event.stopPropagation()" title="Deletar caderno">
+              <lucide-icon name="trash-2" size="16"></lucide-icon>
+            </button>
+          </div>
+        </li>
         }
-      }
+      </ul>
     }
   </aside>
-  <main class="notes-content flex-grow">
-    @if (isNoteOpen()) {
-      <!-- Botão de voltar visível quando uma nota está aberta -->
-      <div class="p-4 border-b border-gray-200 bg-white flex items-center gap-2">
-        <button (click)="router.navigate(['/notebooks'])" class="p-2 rounded-full hover:bg-gray-200 text-gray-600" title="Voltar para a lista de cadernos" [disabled]="isNavigating()">
-          @if (isNavigating()) {
-            <svg class="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          } @else {
-            <lucide-icon name="arrow-left" size="20"></lucide-icon>
-          }
-        </button>
-        <h3 class="text-lg font-semibold">Visualizando Nota</h3>
-      </div>
-    }
-    <!-- Este router-outlet renderizará NotesList ou NoteEditor -->
-    <router-outlet></router-outlet>
-    <!-- Se nenhuma rota filha estiver ativa e nenhum caderno selecionado, exibe mensagem padrão -->
-    @if (!isNoteOpen() && !selectedNotebookId()) {
-      <div class="no-notebook-selected p-4 text-center text-gray-500">Selecione um caderno para visualizar as notas.</div>
-    } @else if (!isNoteOpen() && selectedNotebookId()) {
-      <!-- Renderiza NotesList quando um caderno é selecionado e nenhuma nota específica está aberta -->
-      <app-notes-list [notebookId]="selectedNotebookId()!" />
+
+  <main class="notes-column">
+    @if (selectedNotebookId()) {
+      <app-note-column [notebookId]="selectedNotebookId()" (noteSelected)="onNoteSelected($event)"></app-note-column>
+    } @else {
+      <div class="placeholder">Selecione um caderno para ver as notas.</div>
     }
   </main>
+
+  <section class="note-editor-column">
+    @if (selectedNoteId() && selectedNotebookId()) {
+      <app-note-editor [notebookId]="selectedNotebookId()" [noteId]="selectedNoteId()"></app-note-editor>
+    } @else {
+      <div class="placeholder">Selecione uma nota para editar.</div>
+    }
+  </section>
 </div>
 <!-- Modal de Confirmação de Deleção -->
 @if (showDeleteModal()) {

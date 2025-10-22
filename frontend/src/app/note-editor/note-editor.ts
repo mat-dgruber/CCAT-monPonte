@@ -1,94 +1,102 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, debounceTime, switchMap, of } from 'rxjs';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
+import { Modal } from '../modal/modal';
 
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
-export class NoteEditor implements OnInit, OnDestroy {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+export class NoteEditor implements OnChanges {
+  @Input() notebookId: string | null = null;
+  @Input() noteId: string | null = null;
+
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
 
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);
   isSaving: WritableSignal<boolean> = signal(false);
-
-  private notebookId: string | null = null;
-  private noteId: string | null = null;
+  showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
 
   private contentChanges = new Subject<void>();
-  private subscriptions = new Subscription();
+  private autoSaveSubscription: Subscription;
 
   constructor() {
-    // Efeito para salvar automaticamente
-    effect(() => {
-      const currentNote = this.note();
-      if (currentNote) {
-        this.onContentChange();
-      }
-    }, { allowSignalWrites: true });
+    this.autoSaveSubscription = this.contentChanges.pipe(
+      debounceTime(1000)
+    ).subscribe(() => this.saveNote());
   }
 
-  ngOnInit(): void {
-    const routeSub = this.route.paramMap.pipe(
-      switchMap(params => {
-        this.notebookId = params.get('notebookId');
-        this.noteId = params.get('noteId');
-
-        if (this.notebookId && this.noteId) {
-          this.isLoading.set(true);
-          return this.dataService.getNote(this.notebookId, this.noteId);
-        }
-        return of(null);
-      })
-    ).subscribe(note => {
-      if (note) {
-        this.note.set(note);
-      } else {
-        this.notificationService.showError("Nota não encontrada.");
-        this.router.navigate(['/notebooks']);
-      }
-      this.isLoading.set(false);
-    });
-
-    const autoSaveSub = this.contentChanges.pipe(
-      debounceTime(1500) // Salva 1.5s após a última alteração
-    ).subscribe(() => {
-      this.saveNote();
-    });
-
-    this.subscriptions.add(routeSub);
-    this.subscriptions.add(autoSaveSub);
+  ngOnChanges(changes: SimpleChanges): void {
+    if ((changes['noteId'] || changes['notebookId'])) {
+      this.fetchNote();
+    }
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+    this.autoSaveSubscription.unsubscribe();
+  }
+
+  fetchNote(): void {
+    if (this.notebookId && this.noteId) {
+      this.isLoading.set(true);
+      this.dataService.getNote(this.notebookId, this.noteId).subscribe(note => {
+        if (note) {
+          this.note.set(note);
+        } else {
+          this.note.set(null);
+          this.notificationService.showError("Nota não encontrada.");
+        }
+        this.isLoading.set(false);
+      });
+    } else {
+      this.note.set(null);
+    }
   }
 
   async saveNote() {
     if (!this.notebookId || !this.noteId || !this.note()) return;
     this.isSaving.set(true);
-    await this.dataService.updateNote(this.notebookId, this.noteId, { ...this.note()! });
-    this.isSaving.set(false);
+    try {
+      await this.dataService.updateNote(this.notebookId, this.noteId, this.note()!);
+    } catch (error) {
+      this.notificationService.showError("Erro ao salvar a nota.");
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   onContentChange(): void {
     this.contentChanges.next();
   }
 
-  goBack(): void {
-    this.router.navigate(['/notebooks']);
+  deleteNote(): void {
+    this.showDeleteConfirmationModal.set(true);
+  }
+
+  async confirmDeleteNote(): Promise<void> {
+    if (!this.notebookId || !this.noteId) return;
+
+    try {
+      await this.dataService.deleteNote(this.notebookId, this.noteId);
+      this.notificationService.showSuccess("Nota deletada com sucesso.");
+      this.showDeleteConfirmationModal.set(false);
+      this.note.set(null); // Clear the note editor
+    } catch (error) {
+      this.notificationService.showError("Erro ao deletar a nota.");
+    }
+  }
+
+  cancelDeleteNote(): void {
+    this.showDeleteConfirmationModal.set(false);
   }
 }
