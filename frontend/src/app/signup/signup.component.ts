@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthError } from '@angular/fire/auth';
@@ -9,8 +8,8 @@ import { AuthService } from '../services/auth';
 
 @Component({
   selector: 'app-signup',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  standalone: true, // RouterLink removed as it's not used in this component's template
+  imports: [CommonModule, FormsModule],
   templateUrl: './signup.html',
 })
 export class SignupComponent {
@@ -18,12 +17,19 @@ export class SignupComponent {
   email = '';
   password = '';
   errorMessage: string | null = null;
+  isLoading = false;
 
   private authService = inject(AuthService);
   private router = inject(Router);
 
   async onSignup() {
+    // Safeguard against submission with empty fields
+    if (!this.name || !this.email || !this.password) {
+      return;
+    }
+
     this.errorMessage = null;
+    this.isLoading = true;
     try {
       await this.authService.signup(this.name, this.email, this.password);
       this.router.navigate(['/']); // Navigate to the main app upon successful signup
@@ -31,8 +37,12 @@ export class SignupComponent {
       const error = e as AuthError;
       this.errorMessage = this.getFriendlyErrorMessage(error);
       console.error(error);
+    } finally {
+      this.isLoading = false;
     }
   }
+
+  
 
   private getFriendlyErrorMessage(error: AuthError): string {
     switch (error.code) {

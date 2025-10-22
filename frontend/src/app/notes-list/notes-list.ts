@@ -1,186 +1,190 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { collection, doc, Firestore, onSnapshot, Unsubscribe, addDoc, serverTimestamp, updateDoc, deleteDoc } from '@angular/fire/firestore';
-import { HighlightPipe } from '../pipes/highlight.pipe';
-import { AuthService } from '../services/auth';
-import { DataService, Note, SortBy, SortDirection } from '../services/data.service';
-import { Subscription } from 'rxjs';
-import { NoteEditor } from '../note-editor/note-editor';
-import { Modal } from '../modal/modal';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
+import { DataService, Note } from '../services/data.service';
+import { Subscription, debounceTime, Subject } from 'rxjs';
+import { HighlightPipe } from '../pipes/highlight.pipe';
+import { NoteEditorModalComponent } from './modals/note-editor-modal.component';
+import { ConfirmationModalComponent } from './modals/confirmation-modal.component';
 
+type ViewMode = 'grid' | 'list';
 
 @Component({
   selector: 'app-notes-list',
   standalone: true,
-  imports: [NoteEditor, NgClass, Modal, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmationModalComponent, HighlightPipe, NoteEditorModalComponent],
   templateUrl: './notes-list.html',
   styleUrl: './notes-list.css',
+  animations: [
+    trigger('listAnimation', [
+      transition(':enter, * => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(20px)' }),
+          stagger(50, [ // 50ms de atraso entre cada item
+            animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+          ])
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
-export class NotesList implements OnChanges, OnDestroy {
-  @Input({ required: true }) notebookId!: string;
-  @Input({ required: true }) userId!: string | null;
-  @Input() searchTerm: string = '';
+export class NotesList implements OnChanges, OnDestroy, OnInit {
+  @Input() notebookId: string | null = null;
 
-  private authService = inject(AuthService);
   private dataService = inject(DataService);
   private notesSubscription: Subscription | null = null;
 
+  private searchSubject = new Subject<string>();
   notes: WritableSignal<Note[]> = signal([]);
-  selectedNoteId: WritableSignal<string | null> = signal(null);
-  isLoading = signal(false);
-  showNoteEditor: WritableSignal<boolean> = signal(false);
-  noteToEdit: WritableSignal<Note | null> = signal(null);
-  viewMode: WritableSignal<'grid' | 'list'> = signal('grid');
-  sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
-  showCreateNoteModal: WritableSignal<boolean> = signal(false);
-  newNoteTitle: WritableSignal<string> = signal('');
-  newNoteContent: WritableSignal<string> = signal('');
+  isLoading: WritableSignal<boolean> = signal(false);
+  error: WritableSignal<string | null> = signal(null);
 
-  // Signal computado para filtrar as notas localmente
+  // Estado para o modal de edição/criação
+  isNoteModalVisible: WritableSignal<boolean> = signal(false);
+  currentNote: WritableSignal<Partial<Note>> = signal({});
+  isEditing: WritableSignal<boolean> = signal(false);
+  isSavingNote: WritableSignal<boolean> = signal(false); // Novo estado para o spinner do modal de edição/criação
+
+  // Estado para o modal de confirmação de exclusão
+  showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
+  noteToDelete: WritableSignal<{ id: string; title: string } | null> = signal(null);
+
+  // Estado para a busca
+  searchTerm: WritableSignal<string> = signal('');
+
+  // Estado para o modo de visualização
+  viewMode: WritableSignal<ViewMode> = signal('grid');
+
+  // Signal computado para filtrar as notas
   filteredNotes: Signal<Note[]> = computed(() => {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm().toLowerCase();
     if (!term) {
       return this.notes();
     }
-    return this.notes().filter(note =>
-      note.title.toLowerCase().includes(term) ||
-      note.content.toLowerCase().includes(term)
-    );
+    return this.notes().filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
   });
 
-  sortedNotes: Signal<Note[]> = computed(() => {
-    const notes = this.filteredNotes();
-    const { by, direction } = this.sortOption();
+  ngOnInit() {
+    const savedViewMode = localStorage.getItem('notesViewMode') as ViewMode;
+    if (savedViewMode && (savedViewMode === 'grid' || savedViewMode === 'list')) {
+      this.viewMode.set(savedViewMode);
+    }
 
-    return [...notes].sort((a, b) => {
-      const aValue = (a as any)[by];
-      const bValue = (b as any)[by];
-
-      if (aValue < bValue) {
-        return direction === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return direction === 'asc' ? 1 : -1;
-      }
-      return 0;
+    this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
+      this.searchTerm.set(searchTerm);
     });
-  });
+  }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    const notebookIdChange = changes['notebookId'];
-
-    if (notebookIdChange && notebookIdChange.currentValue) {
-      this.userId = this.authService.getCurrentUserId();
-      this.fetchAllNotes();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['notebookId'] && this.notebookId) {
+      this.fetchNotes();
     }
   }
 
-  private fetchAllNotes() {
-    if (!this.userId) return;
+  ngOnDestroy() {
+    this.notesSubscription?.unsubscribe();
+    this.searchSubject.unsubscribe();
+  }
+
+  fetchNotes() {
+    if (!this.notebookId) return;
+
     this.isLoading.set(true);
+    this.error.set(null);
     this.notesSubscription?.unsubscribe();
-    this.notesSubscription = this.dataService.getNotes(this.notebookId).subscribe((notes: Note[]) => {
-      this.notes.set(notes);
-      this.isLoading.set(false);
+
+    this.notesSubscription = this.dataService.getNotes(this.notebookId).subscribe({
+      next: (notes) => {
+        this.notes.set(notes);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao buscar notas:', err);
+        this.error.set('Não foi possível carregar as notas.');
+        this.isLoading.set(false);
+      }
     });
-  }
-
-  selectNote(noteId: string) {
-    this.selectedNoteId.set(noteId);
-  }
-
-  ngOnDestroy(): void {
-    // 4. Garante que todas as inscrições sejam canceladas ao destruir o componente
-    this.notesSubscription?.unsubscribe();
-  }
-
-  setViewMode(mode: 'grid' | 'list') {
-    this.viewMode.set(mode);
-  }
-
-  changeSortOrder(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    const [by, direction] = selectElement.value.split('-') as [SortBy, SortDirection];
-    this.sortOption.set({ by, direction });
-  }
-
-  openCreateNoteModal() {
-    this.newNoteTitle.set('');
-    this.newNoteContent.set('');
-    this.showCreateNoteModal.set(true);
-  }
-
-  closeCreateNoteModal() {
-    this.showCreateNoteModal.set(false);
-  }
-
-  async handleCreateNote() {
-    const title = this.newNoteTitle().trim();
-    const content = this.newNoteContent().trim();
-    if (title !== '' && content !== '') {
-      await this.createNote(title, content);
-      this.closeCreateNoteModal();
-    }
-  }
-
-  async createNote(title: string, content: string) {
-    // 1. Garante que temos um usuário e um caderno selecionado.
-    if (!this.userId || !this.notebookId) {
-      console.error('Usuário ou caderno não selecionado. Não é possível criar a nota.');
-      return;
-    }
-
-    try {
-      const newId = await this.dataService.createNote(this.notebookId, title, content);
-      console.log('Nota criada com sucesso! ID:', newId);
-    } catch (error) {
-      console.error('Erro ao criar a nota:', error);
-    }
   }
 
   openNoteEditor(note: Note) {
-    this.noteToEdit.set(note);
-    this.showNoteEditor.set(true);
+    this.isEditing.set(true);
+    this.currentNote.set({ ...note });
+    this.isSavingNote.set(false); // Reset saving state
+    this.isNoteModalVisible.set(true);
   }
 
-  closeNoteEditor() {
-    this.noteToEdit.set(null);
-    this.showNoteEditor.set(false);
+  // Abre o modal de confirmação de exclusão
+  deleteNote(noteId: string, noteTitle: string) {
+    if (!this.notebookId) return;
+
+    this.noteToDelete.set({ id: noteId, title: noteTitle });
+    this.showDeleteConfirmationModal.set(true);
   }
 
-  async handleSaveNote(note: Note) {
-    await this.updateNote(note.id, { title: note.title, content: note.content });
-    this.closeNoteEditor();
-  }
-
-  async updateNote(noteId: string, data: { title?: string, content?: string }) {
-    // 1. Garante que temos um usuário e um caderno selecionado.
-    if (!this.userId || !this.notebookId) {
-      console.error('Usuário ou caderno não selecionado. Não é possível atualizar a nota.');
+  // Confirma a exclusão da nota
+  async confirmDeleteNote() {
+    const note = this.noteToDelete();
+    if (!note || !this.notebookId) {
+      this.cancelDeleteNote(); // Fecha o modal se não houver nota para deletar (corrected call)
       return;
     }
 
+    this.showDeleteConfirmationModal.set(false); // Fecha o modal
     try {
-      await this.dataService.updateNote(this.notebookId, noteId, data);
-      console.log('Nota atualizada com sucesso! ID:', noteId);
-    } catch (error) {
-      console.error('Erro ao atualizar a nota:', error);
-    }
-  }
-
-  async deleteNote(noteId: string) {
-    // 1. Garante que temos um usuário e um caderno selecionado.
-    if (!this.userId || !this.notebookId) {
-      console.error('Usuário ou caderno não selecionado. Não é possível deletar a nota.');
-      return;
-    }
-
-    try {
-      await this.dataService.deleteNote(this.notebookId, noteId);
-      console.log('Nota deletada com sucesso! ID:', noteId);
+      await this.dataService.deleteNote(this.notebookId, note.id);
+      console.log('Nota deletada com sucesso:', note.id);
+      // A lista será atualizada automaticamente pelo listener do Firestore
     } catch (error) {
       console.error('Erro ao deletar a nota:', error);
+      // Opcional: mostrar uma notificação de erro para o usuário
+    } finally {
+      // Limpa o estado da nota a ser deletada
+      this.noteToDelete.set(null);
     }
+  }
+
+  // Abre o modal para criar uma nova nota
+  openCreateNoteModal() {
+    this.isEditing.set(false);
+    this.currentNote.set({ title: '', content: '' });
+    this.isSavingNote.set(false); // Reset saving state
+    this.isNoteModalVisible.set(true);
+  }
+
+  // Fecha o modal de edição/criação
+  closeNoteModal() {
+    this.isNoteModalVisible.set(false);
+    this.currentNote.set({}); // Limpa a nota atual
+  }
+
+  // Salva (cria ou atualiza) a nota
+  async saveNote(noteData: Partial<Note>) {
+    if (!this.notebookId) return;
+
+    this.isSavingNote.set(true);
+    try {
+      if (this.isEditing() && noteData.id) {
+        await this.dataService.updateNote(this.notebookId, noteData.id, { title: noteData.title!, content: noteData.content! }); // Assuming updateNote expects an object
+      } else {
+        await this.dataService.createNote(this.notebookId, noteData.title!, noteData.content!);
+      }
+      this.closeNoteModal();
+    } catch (error) {
+      console.error('Erro ao salvar nota:', error);
+      // TODO: Exibir mensagem de erro para o usuário no modal ou componente principal
+    } finally {
+      this.isSavingNote.set(false);
+    }
+  }
+
+  onSearch(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchSubject.next(inputElement.value);
+  }
+
+  setViewMode(mode: ViewMode) {
+    this.viewMode.set(mode);
+    localStorage.setItem('notesViewMode', mode);
   }
 }

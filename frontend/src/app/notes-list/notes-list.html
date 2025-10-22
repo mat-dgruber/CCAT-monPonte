@@ -1,49 +1,140 @@
-<div class="container mx-auto p-4">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-bold">Minhas Notas</h2>
-    <div class="flex items-center gap-4">
-      <div class="view-switcher">
-        <button (click)="setViewMode('grid')" [class.active]="viewMode() === 'grid'"><i class="fas fa-th"></i></button>
-        <button (click)="setViewMode('list')" [class.active]="viewMode() === 'list'"><i class="fas fa-bars"></i></button>
+<div class="p-4">
+  <!-- Barra de Ferramentas: Busca e Botão de Criar -->
+  <div class="mb-4 flex flex-wrap items-center gap-4">
+    <div class="relative flex-grow">
+      <input
+        type="text"
+        placeholder="Buscar notas por título ou conteúdo..."
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
       </div>
-      <select (change)="changeSortOrder($event)" class="p-2 border rounded-lg">
-        <option value="createdAt-desc">Mais recentes</option>
-        <option value="createdAt-asc">Mais antigos</option>
-        <option value="title-asc">Título (A-Z)</option>
-        <option value="title-desc">Título (Z-A)</option>
-      </select>
-      <button (click)="openCreateNoteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Criar Nova Nota</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- Controles de Visualização -->
+      <div class="flex items-center rounded-lg bg-gray-200 p-0.5">
+        <button (click)="setViewMode('grid')" [class.bg-white]="viewMode() === 'grid'" [class.shadow-sm]="viewMode() === 'grid'" class="p-1.5 rounded-md text-gray-600 hover:bg-white" title="Visualização em Grade">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+        </button>
+        <button (click)="setViewMode('list')" [class.bg-white]="viewMode() === 'list'" [class.shadow-sm]="viewMode() === 'list'" class="p-1.5 rounded-md text-gray-600 hover:bg-white" title="Visualização em Lista">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+        </button>
+      </div>
+      <button (click)="openCreateNoteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">Criar Nota</button>
     </div>
   </div>
-  <div [ngClass]="{'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4': viewMode() === 'grid', 'flex flex-col gap-4': viewMode() === 'list'}">
-    @for (note of sortedNotes(); track note.id) {
-      <div class="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg" (click)="openNoteEditor(note)">
-        <h3 class="text-lg font-bold mb-2">{{ note.title }}</h3>
-        <p class="text-gray-700">{{ note.content }}</p>
-      </div>
+
+  @if (isLoading()) {
+    <p>Carregando notas...</p>
+  } @else if (error()) {
+    <p class="text-red-500">{{ error() }}</p>
+  } @else if (filteredNotes().length === 0) {
+    <div class="text-center py-10 px-4 bg-gray-50 rounded-lg">
+      <h3 class="text-lg font-medium text-gray-900">{{ searchTerm() ? 'Nenhuma nota encontrada para "' + searchTerm() + '"' : 'Nenhuma nota encontrada' }}</h3>
+      <p class="mt-1 text-sm text-gray-500">{{ !searchTerm() ? 'Crie sua primeira nota neste caderno!' : 'Tente uma busca diferente.' }}</p>
+    </div>
+  } @else {
+    @switch (viewMode()) {
+      @case ('grid') {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" @listAnimation>
+          @for (note of filteredNotes(); track note.id) {
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between relative group">
+              <div>
+                <h3 class="font-bold text-lg mb-2 truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+                <p class="text-gray-600 text-sm line-clamp-4" [innerHTML]="note.content | highlight: searchTerm()"></p>
+              </div>
+              <div class="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button (click)="openNoteEditor(note)" title="Editar Nota" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                </button>
+                <button (click)="deleteNote(note.id, note.title)" title="Deletar Nota" class="p-1 rounded-full text-red-500 hover:bg-red-100 hover:text-red-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd" /></svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @case ('list') {
+        <div class="space-y-2" @listAnimation>
+          @for (note of filteredNotes(); track note.id) {
+            <div class="bg-white rounded-lg shadow-md p-3 flex items-center justify-between group">
+              <div class="flex-grow overflow-hidden">
+                <h3 class="font-bold text-md truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+                <p class="text-gray-500 text-sm truncate" [innerHTML]="note.content | highlight: searchTerm()"></p>
+              </div>
+              <div class="flex items-center gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button (click)="openNoteEditor(note)" title="Editar Nota" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                </button>
+                <button (click)="deleteNote(note.id, note.title)" title="Deletar Nota" class="p-1 rounded-full text-red-500 hover:bg-red-100 hover:text-red-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd" /></svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
     }
-  </div>
+  }
 </div>
 
-@if (showNoteEditor()) {
-  <app-note-editor
-    [note]="noteToEdit()"
-    (onSave)="handleSaveNote($event)"
-    (onCancel)="closeNoteEditor()"
-  ></app-note-editor>
-}
+<!-- Modal de Confirmação de Exclusão -->
+<app-confirmation-modal
+  [isVisible]="showDeleteConfirmationModal()"
+  [message]="'Tem certeza que deseja deletar a nota \\'' + noteToDelete()?.title + '\\'? Esta ação não pode ser desfeita.'"
+  (confirm)="confirmDeleteNote()"
+  (cancel)="cancelDeleteNote()"
+></app-confirmation-modal>
 
-<!-- Modal de Criar Nota -->
-@if (showCreateNoteModal()) {
-<app-modal
-  title="Criar Nova Nota"
-  confirmText="Salvar"
-  (onConfirm)="handleCreateNote()"
-  (onCancel)="closeCreateNoteModal()"
->
-  <div class="flex flex-col gap-4">
-    <input type="text" [(ngModel)]="newNoteTitle" class="w-full p-2 border rounded-lg" placeholder="Título da nota">
-    <textarea [(ngModel)]="newNoteContent" class="w-full p-2 border rounded-lg" rows="5" placeholder="Conteúdo da nota"></textarea>
-  </div>
-</app-modal>
-}
+<!-- Modal de Edição/Criação de Nota -->
+<app-note-editor-modal
+  [isVisible]="isNoteModalVisible"
+  [note]="currentNote"
+  [isEditing]="isEditing"
+  [isSaving]="isSavingNote"
+  (saveNote)="saveNote($event)"
+  (closeModal)="closeNoteModal()"
+></app-note-editor-modal>
+          </div>
+          <div class="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <!-- Botão Editar -->
+            <button (click)="openNoteEditor(note)" title="Editar Nota" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <!-- Botão Deletar -->
+            <button (click)="deleteNote(note.id, note.title)" title="Deletar Nota" class="p-1 rounded-full text-red-500 hover:bg-red-100 hover:text-red-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<app-confirmation-modal
+  [isVisible]="showDeleteConfirmationModal()"
+  [message]="'Tem certeza que deseja deletar a nota \\'' + noteToDelete()?.title + '\\'? Esta ação não pode ser desfeita.'"
+  (confirm)="confirmDeleteNote()"
+  (cancel)="cancelDeleteNote()"
+></app-confirmation-modal>
+
+<!-- Modal de Edição/Criação de Nota -->
+<app-note-editor-modal
+  [isVisible]="isNoteModalVisible"
+  [note]="currentNote"
+  [isEditing]="isEditing"
+  [isSaving]="isSavingNote"
+  (saveNote)="saveNote($event)"
+  (closeModal)="closeNoteModal()"
+></app-note-editor-modal>

@@ -1,9 +1,4 @@
 <div class="notebooks-container">
-  @if (notification(); as notification) {
-    <div class="notification" [class.success]="notification.type === 'success'" [class.error]="notification.type === 'error'">
-      {{ notification.message }}
-    </div>
-  }
   <aside class="notebooks-sidebar">
     <div class="sidebar-header">
       <h2>Cadernos</h2>

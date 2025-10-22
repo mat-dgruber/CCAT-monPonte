@@ -9,7 +9,13 @@
       <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-6">Crie sua conta</h2>
       <p class="text-center text-gray-600 mb-8">Junte-se a nós e comece a organizar suas notas.</p>
 
-      <form class="space-y-6" (ngSubmit)="onSignup()">
+      @if (errorMessage) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <span class="block sm:inline">{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form #signupForm="ngForm" class="space-y-6" (ngSubmit)="onSignup()">
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
           <input
@@ -19,7 +25,14 @@
             autocomplete="name"
             required
             [(ngModel)]="name"
+            #nameInput="ngModel"
+            [class.border-red-500]="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          @if (nameInput.invalid && (nameInput.dirty || nameInput.touched)) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (nameInput.errors?.['required']) { O nome é obrigatório. }
+            </p>
+          }
         </div>
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700">Endereço de E-mail</label>
@@ -30,7 +43,16 @@
             autocomplete="email"
             required
             [(ngModel)]="email"
+            #emailInput="ngModel"
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+            [class.border-red-500]="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (emailInput.errors?.['required']) { O e-mail é obrigatório. }
+              @if (emailInput.errors?.['pattern']) { Por favor, insira um e-mail válido. }
+            </p>
+          }
         </div>
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
@@ -41,13 +63,29 @@
             autocomplete="new-password"
             required
             [(ngModel)]="password"
+            #passwordInput="ngModel"
+            minlength="6"
+            [class.border-red-500]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (passwordInput.errors?.['required']) { A senha é obrigatória. }
+              @if (passwordInput.errors?.['minlength']) { A senha deve ter no mínimo 6 caracteres. }
+            </p>
+          }
         </div>
         <div>
           <button
             type="submit"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Registrar
+            [disabled]="!signupForm.form.valid || isLoading"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed">
+            @if (isLoading) {
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
+            <span>{{ isLoading ? 'Registrando...' : 'Registrar' }}</span>
           </button>
         </div>
       </form>
