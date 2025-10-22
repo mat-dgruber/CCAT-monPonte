@@ -7,7 +7,7 @@ import { DataService, Notebook, SortBy, SortDirection } from '../services/data.s
 import { NotebookService } from '../services/notebook.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
-import { LucideAngularModule, PlusCircle, Pencil, Trash2 } from 'lucide-angular';
+import { LucideAngularModule } from 'lucide-angular';
 
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
