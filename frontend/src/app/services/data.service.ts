@@ -134,4 +134,20 @@ export class DataService {
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return deleteDoc(docRef);
   }
+
+  getNote(notebookId: string, noteId: string): Observable<Note | null> {
+    if (!this.userId) return of(null);
+
+    const noteDocRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
+    return new Observable<Note | null>(subscriber => {
+      const unsubscribe = onSnapshot(noteDocRef, (doc) => {
+        if (doc.exists()) {
+          subscriber.next({ id: doc.id, ...doc.data() } as Note);
+        } else {
+          subscriber.next(null);
+        }
+      });
+      return () => unsubscribe();
+    });
+  }
 }

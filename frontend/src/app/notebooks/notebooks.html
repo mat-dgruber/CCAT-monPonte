@@ -2,7 +2,10 @@
   <aside class="notebooks-sidebar">
     <div class="sidebar-header">
       <h2>Cadernos</h2>
-      <button class="add-notebook-btn" (click)="openCreateModal()" title="Criar novo caderno">+</button>
+      <button class="add-notebook-btn flex items-center justify-center gap-2" (click)="openCreateModal()" title="Criar novo caderno">
+        <lucide-icon name="plus-circle" size="16"></lucide-icon>
+        <span>Criar Caderno</span>
+      </button>
     </div>
     <div class="sort-options">
       <label for="sort-select">Ordenar por:</label>
@@ -26,7 +29,7 @@
         <button class="clear-search-btn" (click)="clearSearch(searchInput)" title="Limpar busca">&times;</button>
       }
     </div>
-    @if (isLoading()) {
+    @if (notebookService.isLoading()) {
       <div class="skeleton-container">
         @for (_ of [1, 2, 3, 4, 5]; track $index) {
           <div class="skeleton-item">
@@ -35,7 +38,7 @@
           </div>
         }
       </div>
-    } @else if (loadingError()) {
+    } @else if (notebookService.loadingError()) {
       <div class="error-indicator">
         <p>Falha ao carregar.</p>
         <button (click)="retryFetchNotebooks()">Tentar Novamente</button>
@@ -51,8 +54,12 @@
               @if (deletingNotebookIds().has(notebook.id)) {
                 <div class="spinner"></div>
               } @else {
-                <button class="rename-notebook-btn" (click)="openRenameModal(notebook.id, notebook.name)" title="Renomear caderno">✏️</button>
-                <button class="delete-notebook-btn" (click)="openDeleteModal(notebook.id, notebook.name)" title="Deletar caderno">🗑️</button>
+                <button class="rename-notebook-btn" (click)="openRenameModal(notebook.id, notebook.name)" title="Renomear caderno">
+                  <lucide-icon name="pencil" size="16"></lucide-icon>
+                </button>
+                <button class="delete-notebook-btn" (click)="openDeleteModal(notebook.id, notebook.name)" title="Deletar caderno">
+                  <lucide-icon name="trash-2" size="16"></lucide-icon>
+                </button>
               }
            
             </div>
