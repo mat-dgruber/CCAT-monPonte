@@ -21,7 +21,7 @@
   } @else {
     <div class="space-y-2" @listAnimation cdkDropList id="notes-list" [cdkDropListConnectedTo]="notebookService.notebookIds()">
       @for (note of filteredNotes(); track note.id) {
-        <div class="bg-white rounded-lg shadow-md p-3 cursor-pointer note-drag-item" cdkDrag [cdkDragData]="{note: note, fromNotebookId: notebookId}">
+        <div class="bg-white rounded-lg shadow-md p-3 cursor-pointer note-drag-item" [class.selected]="note.id === activeNoteId()" (click)="selectNote(note.id)" cdkDrag [cdkDragData]="{note: note, fromNotebookId: notebookId}">
           <h3 class="font-bold text-md truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
           <p class="text-gray-500 text-sm line-clamp-1" [innerHTML]="note.content | highlight: searchTerm()"></p>
         </div>

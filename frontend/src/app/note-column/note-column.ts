@@ -1,10 +1,10 @@
-import { Component, Input, OnChanges, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService, Note } from '../services/data.service';
-import { Subscription, debounceTime, Subject } from 'rxjs';
+import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NotebookService } from '../services/notebook.service';
@@ -29,20 +29,23 @@ import { Modal } from '../modal/modal';
     ])
   ]
 })
-export class NoteColumn implements OnChanges, OnInit {
+export class NoteColumn implements OnChanges, OnInit, OnDestroy {
   @Input() notebookId: string | null = null;
   @Output() noteSelected = new EventEmitter<string>();
 
   private dataService = inject(DataService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   notebookService = inject(NotebookService); // Injetado para o template
   private notesSubscription: Subscription | null = null;
   private searchSubject = new Subject<string>();
+  private routerSubscription: Subscription | null = null;
 
   notes: WritableSignal<Note[]> = signal([]);
   isLoading: WritableSignal<boolean> = signal(false);
   error: WritableSignal<string | null> = signal(null);
   searchTerm: WritableSignal<string> = signal('');
+  activeNoteId: WritableSignal<string | null> = signal(null);
   
   isNoteModalVisible: WritableSignal<boolean> = signal(false);
   currentNote: WritableSignal<Partial<Note>> = signal({});
@@ -60,12 +63,27 @@ export class NoteColumn implements OnChanges, OnInit {
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
       this.searchTerm.set(searchTerm);
     });
+
+    // Ouve as mudanças de rota para destacar a nota ativa
+    this.routerSubscription = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      // O NoteEditor é um filho da rota 'notebooks', então pegamos o 'firstChild'
+      const activeNoteId = this.route.firstChild?.snapshot.paramMap.get('noteId');
+      this.activeNoteId.set(activeNoteId || null);
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['notebookId'] && this.notebookId) {
       this.fetchNotes();
     }
+  }
+
+  ngOnDestroy() {
+    this.notesSubscription?.unsubscribe();
+    this.searchSubject.unsubscribe();
+    this.routerSubscription?.unsubscribe();
   }
 
   fetchNotes() {
