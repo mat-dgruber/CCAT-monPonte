@@ -1,33 +1,61 @@
-<div class="p-4">
-  <div class="mb-4 flex items-center gap-4">
-    <input
-      type="text"
-      placeholder="Buscar notas..."
-      [value]="searchTerm()"
-      (input)="onSearch($event)"
-      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-    <button (click)="openCreateNoteModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">Criar Nota</button>
+<div class="flex flex-col h-full rounded-xl bg-white dark:bg-gray-800">
+  <!-- Header with Search and Create Button -->
+  <div class="flex-shrink-0 p-3 border-b  rounded-xlborder-gray-200 dark:border-gray-700">
+    <div class="flex items-center gap-2">
+      <div class="relative flex-grow">
+        <lucide-icon name="search" size="16" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"></lucide-icon>
+        <input
+          type="text"
+          placeholder="Buscar notas..."
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:focus:ring-indigo-600"
+        />
+      </div>
+      <button (click)="openCreateNoteModal()" class="flex-shrink-0 px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">
+        <lucide-icon name="plus" size="16" class="inline-block -mt-px"></lucide-icon>
+        <span class="ml-1">Nova Nota</span>
+      </button>
+    </div>
   </div>
 
-  @if (isLoading()) {
-    <p>Carregando notas...</p>
-  } @else if (error()) {
-    <p class="text-red-500">{{ error() }}</p>
-  } @else if (filteredNotes().length === 0) {
-    <div class="text-center py-10 px-4 bg-gray-50 rounded-lg">
-      <h3 class="text-lg font-medium text-gray-900">Nenhuma nota encontrada</h3>
-    </div>
-  } @else {
-    <div class="space-y-2" @listAnimation>
-      @for (note of filteredNotes(); track note.id) {
-        <div class="bg-white rounded-lg shadow-md p-3 cursor-pointer note-drag-item" [class.selected]="note.id === activeNoteId()" (click)="selectNote(note.id)">
-          <h3 class="font-bold text-md truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
-          <p class="text-gray-500 text-sm line-clamp-1" [innerHTML]="note.content | highlight: searchTerm()"></p>
-        </div>
-      }
-    </div>
-  }
+  <!-- Notes List Area -->
+  <div class="flex-grow overflow-y-auto p-2">
+    @if (isLoading()) {
+      <div class="space-y-2">
+        @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+          <div class="h-20 bg-gray-200 rounded-lg dark:bg-gray-700 animate-pulse"></div>
+        }
+      </div>
+    } @else if (error()) {
+      <div class="p-4 text-center text-red-500">
+        <p>{{ error() }}</p>
+      </div>
+    } @else if (filteredNotes().length === 0) {
+      <div class="text-center py-10 px-4">
+        <lucide-icon name="file-text" size="48" class="mx-auto text-gray-400"></lucide-icon>
+        <h3 class="mt-2 text-lg font-medium text-gray-800 dark:text-gray-100">Nenhuma nota encontrada</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Crie uma nova nota para começar.</p>
+      </div>
+    } @else {
+      <div class="space-y-2" @listAnimation>
+        @for (note of filteredNotes(); track note.id) {
+          <div 
+            class="bg-white dark:bg-gray-700/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4"
+            [class.border-indigo-500]="note.id === activeNoteId()"
+            [class.bg-indigo-50]="note.id === activeNoteId()"
+            [class.dark:bg-indigo-900/50]="note.id === activeNoteId()"
+            [class.border-transparent]="note.id !== activeNoteId()"
+            [class.hover:bg-gray-100]="note.id !== activeNoteId()"
+            [class.dark:hover:bg-gray-700]="note.id !== activeNoteId()"
+            (click)="selectNote(note.id)">
+            <h3 class="font-semibold text-md truncate text-gray-800 dark:text-gray-100" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mt-1" [innerHTML]="note.content | highlight: searchTerm()"></p>
+          </div>
+        }
+      </div>
+    }
+  </div>
 </div>
 
 <!-- Modal de Criar/Editar Nota -->
@@ -39,8 +67,8 @@
     (onCancel)="closeNoteModal()"
   >
     <div class="space-y-4">
-      <input type="text" [(ngModel)]="currentNote().title" class="w-full p-2 border rounded-lg" placeholder="Título da nota">
-      <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg" placeholder="Conteúdo da nota" rows="5"></textarea>
+      <input type="text" [(ngModel)]="currentNote().title" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" placeholder="Título da nota">
+      <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" placeholder="Conteúdo da nota" rows="5"></textarea>
     </div>
   </app-modal>
 }

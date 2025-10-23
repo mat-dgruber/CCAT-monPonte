@@ -6,9 +6,3 @@
   transition: box-shadow 200ms ease-out, transform 200ms ease-out;
   z-index: 10; /* Garante que o item arrastado fique sobre os outros */
 }
-
-/* Estilo para a nota selecionada/ativa */
-.note-drag-item.selected {
-  background-color: #e0e7ff; /* Cor: indigo-100 do Tailwind */
-  border-left: 4px solid #4f46e5; /* Cor: indigo-600 do Tailwind */
-}

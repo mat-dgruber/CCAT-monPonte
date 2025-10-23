@@ -39,6 +39,12 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
         style({ transform: 'translateY(0)', opacity: 1 }),
         animate('200ms ease-in', style({ transform: 'translateX(20px)', opacity: 0 }))
       ])
+    ]),
+    trigger('routeAnimation', [
+      transition(':enter', [
+        style({ position: 'relative', opacity: 0, transform: 'translateY(10px)' }),
+        animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
     ])
   ]
 })

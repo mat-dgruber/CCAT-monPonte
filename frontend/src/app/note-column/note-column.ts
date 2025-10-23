@@ -9,10 +9,12 @@ import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-note-column',
   standalone: true,
-  imports: [CommonModule, FormsModule, Modal, HighlightPipe],
+  imports: [CommonModule, FormsModule, Modal, HighlightPipe, LucideAngularModule],
   templateUrl: './note-column.html',
   styleUrl: './note-column.css',
   animations: [

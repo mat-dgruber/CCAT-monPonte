@@ -13,6 +13,7 @@ export const routes: Routes = [
           component: LayoutComponent,
           canActivate: [authGuard],
           children: [
+               { path: '', redirectTo: 'notebooks', pathMatch: 'full' },
                {path: 'clip', loadComponent: () => import('./clip/clip').then(m => m.Clip)},
                {
                  path: 'notebooks',

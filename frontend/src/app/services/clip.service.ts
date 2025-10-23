@@ -99,7 +99,7 @@ export class ClipService {
 
     try {
       const expirationDate = new Date();
-      expirationDate.setHours(expirationDate.getHours() + 24);
+      expirationDate.setHours(expirationDate.getHours() + 1);
       await setDoc(this.docRef, { text, expiresAt: Timestamp.fromDate(expirationDate) });
     } catch (error) {
       console.error('Error saving document:', error);
