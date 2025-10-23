@@ -1,0 +1,13 @@
+.notebook-bg {
+  background-color: #fefcbf;
+  background-image: linear-gradient(to bottom, transparent 24px, #a5b4fc 25px);
+  background-size: 100% 25px;
+  line-height: 25px;
+  padding-top: 2px;
+}
+
+.dark .notebook-bg {
+  background-color: #2d3748;
+  background-image: linear-gradient(to bottom, transparent 24px, #4a5568 25px);
+  color: #f7fafc;
+}

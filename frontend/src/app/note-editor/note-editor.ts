@@ -8,6 +8,7 @@ import { Modal } from '../modal/modal';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
+import { ThemeService } from '../services/theme';
 
 @Component({
   selector: 'app-note-editor',
@@ -21,6 +22,7 @@ export class NoteEditor implements OnInit, OnDestroy {
   private router = inject(Router);
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
+  themeService = inject(ThemeService);
 
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);

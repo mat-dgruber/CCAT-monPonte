@@ -24,6 +24,10 @@ export class ClipService {
   selectedFontSize: WritableSignal<string> = signal('16px');
   characterCount: WritableSignal<number> = signal(0);
   wordCount: WritableSignal<number> = signal(0);
+  clipDisappearanceHours: WritableSignal<number> = signal(1);
+  showCounts: WritableSignal<boolean> = signal(true);
+  showFontSelect: WritableSignal<boolean> = signal(true);
+  showFontSizeSelect: WritableSignal<boolean> = signal(true);
 
   constructor() {
     this.loadInitialState();
@@ -38,6 +42,10 @@ export class ClipService {
       localStorage.setItem('clipShowAdvancedOptions', JSON.stringify(this.showAdvancedClipOptions()));
       localStorage.setItem('clipFontPreference', this.selectedFont());
       localStorage.setItem('clipFontSizePreference', this.selectedFontSize());
+      localStorage.setItem('clipDisappearanceHours', JSON.stringify(this.clipDisappearanceHours()));
+      localStorage.setItem('showCounts', JSON.stringify(this.showCounts()));
+      localStorage.setItem('showFontSelect', JSON.stringify(this.showFontSelect()));
+      localStorage.setItem('showFontSizeSelect', JSON.stringify(this.showFontSizeSelect()));
     });
   }
 
@@ -46,6 +54,10 @@ export class ClipService {
       this.showAdvancedClipOptions.set(JSON.parse(localStorage.getItem('clipShowAdvancedOptions') || 'false'));
       this.selectedFont.set(localStorage.getItem('clipFontPreference') || "'Courier Prime', monospace");
       this.selectedFontSize.set(localStorage.getItem('clipFontSizePreference') || '16px');
+      this.clipDisappearanceHours.set(JSON.parse(localStorage.getItem('clipDisappearanceHours') || '1'));
+      this.showCounts.set(JSON.parse(localStorage.getItem('showCounts') || 'true'));
+      this.showFontSelect.set(JSON.parse(localStorage.getItem('showFontSelect') || 'true'));
+      this.showFontSizeSelect.set(JSON.parse(localStorage.getItem('showFontSizeSelect') || 'true'));
     }
   }
 
@@ -99,7 +111,7 @@ export class ClipService {
 
     try {
       const expirationDate = new Date();
-      expirationDate.setHours(expirationDate.getHours() + 1);
+      expirationDate.setHours(expirationDate.getHours() + this.clipDisappearanceHours());
       await setDoc(this.docRef, { text, expiresAt: Timestamp.fromDate(expirationDate) });
     } catch (error) {
       console.error('Error saving document:', error);

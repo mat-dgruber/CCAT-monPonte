@@ -22,6 +22,7 @@ export const routes: Routes = [
                  children: [
                    { path: ':notebookId/notes/:noteId', loadComponent: () => import('./note-editor/note-editor').then(m => m.NoteEditor) }
                  ]},
+              {path: 'settings', loadComponent: () => import('./settings/settings').then(m => m.SettingsComponent)},
           ]
      },
      {path: '', redirectTo: 'login', pathMatch: 'full'}
