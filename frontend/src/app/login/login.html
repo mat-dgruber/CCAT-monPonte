@@ -1,14 +1,14 @@
 
-<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-  <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-lg relative overflow-hidden">
+<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-dark-primary p-4">
+  <div class="max-w-md w-full bg-white dark:bg-dark-secondary p-8 rounded-lg shadow-lg relative overflow-hidden">
     <!-- Animated background circles -->
     <div class="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
     <div class="absolute -bottom-8 -right-8 w-52 h-52 bg-gradient-to-r from-yellow-400 to-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
     <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
     <div class="relative z-10">
-      <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-6">Bem-vindo de volta!</h2>
-      <p class="text-center text-gray-600 mb-8">Faça login para acessar sua conta.</p>
+      <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-6">Bem-vindo de volta!</h2>
+      <p class="text-center text-gray-600 dark:text-dark-text-secondary mb-8">Faça login para acessar sua conta.</p>
 
       @if (errorMessage) {
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
@@ -17,9 +17,9 @@
       }
 
       <form #loginForm="ngForm" class="space-y-6" (ngSubmit)="onLogin()" aria-labelledby="login-form-title">
-        <h2 id="login-form-title" class="text-3xl font-extrabold text-gray-900 text-center mb-6">Bem-vindo de volta!</h2>
+        <h2 id="login-form-title" class="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-6">Bem-vindo de volta!</h2>
         <div role="form" aria-labelledby="login-form-title">
-          <label id="emailLabel" for="email" class="block text-sm font-medium text-gray-700">Endereço de E-mail</label>
+          <label id="emailLabel" for="email" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Endereço de E-mail</label>
           <input
             id="email"
             name="email"
@@ -28,7 +28,7 @@
             [(ngModel)]="email"
             #emailInput="ngModel"
             [class.border-red-500]="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
           @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
             <p class="mt-1 text-sm text-red-600">
               @if (emailInput.errors?.['required']) { O e-mail é obrigatório. }
@@ -36,7 +36,7 @@
           }
         </div>
         <div role="form" aria-labelledby="login-form-title">
-          <label id="passwordLabel" for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+          <label id="passwordLabel" for="password" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Senha</label>
           <input
             id="password"
             name="password"
@@ -46,7 +46,7 @@
             [(ngModel)]="password"
             #passwordInput="ngModel"
             [class.border-red-500]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
           @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
             <p class="mt-1 text-sm text-red-600">
               @if (passwordInput.errors?.['required']) { A senha é obrigatória. }
@@ -55,8 +55,8 @@
         </div>
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <input id="remember-me" name="remember-me" type="checkbox" [(ngModel)]="rememberMe" aria-describedby="rememberMeDescription" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-            <label id="rememberMeDescription" for="remember-me" class="ml-2 block text-sm text-gray-900">Lembrar-me</label>
+            <input id="remember-me" name="remember-me" type="checkbox" [(ngModel)]="rememberMe" aria-describedby="rememberMeDescription" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-dark-border rounded">
+            <label id="rememberMeDescription" for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-dark-text-secondary">Lembrar-me</label>
           </div>
         </div>
         <div>
@@ -74,9 +74,9 @@
           </button>
         </div>
       </form>
-      <p class="mt-6 text-center text-sm text-gray-600">
+      <p class="mt-6 text-center text-sm text-gray-600 dark:text-dark-text-secondary">
         Não tem uma conta?
-        <a routerLink="/signup" class="font-medium text-indigo-600 hover:text-indigo-500">
+        <a routerLink="/signup" class="font-medium text-indigo-600 hover:text-indigo-500 dark:hover:text-dark-text">
           Registre-se
         </a>
       </p>
