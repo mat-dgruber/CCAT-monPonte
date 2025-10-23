@@ -1,13 +1,8 @@
 
-<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-dark-primary p-4">
-  <div class="max-w-md w-full bg-white dark:bg-dark-secondary p-8 rounded-lg shadow-lg relative overflow-hidden">
-    <!-- Animated background circles -->
-    <div class="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-    <div class="absolute -bottom-8 -right-8 w-52 h-52 bg-gradient-to-r from-yellow-400 to-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-    <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
+  <div class="max-w-md w-full bg-white dark:bg-dark-secondary p-8 rounded-2xl shadow-2xl relative overflow-hidden">
     <div class="relative z-10">
-      <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-6">Bem-vindo de volta!</h2>
+      <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-2">Bem-vindo de volta!</h2>
       <p class="text-center text-gray-600 dark:text-dark-text-secondary mb-8">Faça login para acessar sua conta.</p>
 
       @if (errorMessage) {
@@ -28,7 +23,7 @@
             [(ngModel)]="email"
             #emailInput="ngModel"
             [class.border-red-500]="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
           @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
             <p class="mt-1 text-sm text-red-600">
               @if (emailInput.errors?.['required']) { O e-mail é obrigatório. }
@@ -46,7 +41,7 @@
             [(ngModel)]="password"
             #passwordInput="ngModel"
             [class.border-red-500]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
           @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
             <p class="mt-1 text-sm text-red-600">
               @if (passwordInput.errors?.['required']) { A senha é obrigatória. }
@@ -63,7 +58,7 @@
           <button
             type="submit" aria-label="Fazer login"
             [disabled]="!loginForm.form.valid || isLoading"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed">
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-transform duration-300">
             @if (isLoading) {
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
