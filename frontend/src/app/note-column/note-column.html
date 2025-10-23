@@ -19,7 +19,7 @@
       <h3 class="text-lg font-medium text-gray-900">Nenhuma nota encontrada</h3>
     </div>
   } @else {
-    <div class="space-y-2" @listAnimation cdkDropList id="notes-list" [cdkDropListConnectedTo]="notebookService.notebookIds()">
+    <div class="space-y-2" @listAnimation cdkDropList id="notes-list" [cdkDropListConnectedTo]="connectedDropLists">
       @for (note of filteredNotes(); track note.id) {
         <div class="bg-white rounded-lg shadow-md p-3 cursor-pointer note-drag-item" [class.selected]="note.id === activeNoteId()" (click)="selectNote(note.id)" cdkDrag [cdkDragData]="{note: note, fromNotebookId: notebookId}">
           <h3 class="font-bold text-md truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, WritableSignal, effect } from '@angular/core';
+import { Injectable, inject, signal, WritableSignal, effect, computed } from '@angular/core';
 import { DataService, Notebook, SortBy, SortDirection } from './data.service';
 import { AuthService } from './auth';
 import { Subscription } from 'rxjs';
@@ -13,6 +13,7 @@ export class NotebookService {
   private notebooksSubscription: Subscription | null = null;
 
   notebooks: WritableSignal<Notebook[]> = signal([]);
+  notebookIds = computed(() => this.notebooks().map(n => n.id));
   isLoading: WritableSignal<boolean> = signal(false);
   loadingError: WritableSignal<boolean> = signal(false);
   isSidebarCollapsed: WritableSignal<boolean> = signal(false);

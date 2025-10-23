@@ -16,7 +16,7 @@ import {
   where
 } from '@angular/fire/firestore';
 import { from, Observable, of, throwError } from 'rxjs';
-import { AuthService } from './auth';
+import { AuthService } from '../services/auth';
 
 export type SortBy = 'createdAt' | 'name';
 export type SortDirection = 'asc' | 'desc';

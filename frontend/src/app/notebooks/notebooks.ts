@@ -135,7 +135,7 @@ export class Notebooks implements OnInit {
     this.dataService.updateNotebooksOrder(notebooks);
   }
 
-  async onNoteDropped(event: CdkDragDrop<Note[], any, {note: Note, fromNotebookId: string}>) {
+  async onNoteDropped(event: CdkDragDrop<string, any, {note: Note, fromNotebookId: string}>) {
     const { note, fromNotebookId } = event.item.data;
     const toNotebookId = event.container.data;
 

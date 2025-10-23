@@ -37,3 +37,18 @@ Este é um projeto do Firebase com um aplicativo de front-end Angular.
     ```sh
     firebase deploy
     ```
+
+## Executando com Docker
+
+Você também pode executar o aplicativo usando o Docker.
+
+1.  Construa a imagem do Docker:
+    ```sh
+    docker build -t mon-ponte .
+    ```
+
+2.  Execute o contêiner:
+    ```sh
+    docker run -p 8080:80 mon-ponte
+    ```
+    O aplicativo estará disponível em `http://localhost:8080/`.

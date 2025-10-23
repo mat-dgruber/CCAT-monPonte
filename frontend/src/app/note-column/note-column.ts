@@ -59,6 +59,10 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
     return this.notes().filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
   });
 
+  get connectedDropLists(): string[] {
+    return this.notebookService.notebookIds();
+  }
+
   ngOnInit() {
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
       this.searchTerm.set(searchTerm);

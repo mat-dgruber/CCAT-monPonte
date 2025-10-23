@@ -10,6 +10,7 @@ import {
   addDoc,
   writeBatch, 
   getDocs,
+  getDoc,
   query,
   orderBy,
   where
@@ -162,7 +163,7 @@ export class DataService {
   }
 
   async moveNote(noteId: string, fromNotebookId: string, toNotebookId: string): Promise<void> {
-    if (!this.userId) return throwError(() => new Error('Usuário não autenticado.'));
+    if (!this.userId) throw new Error('Usuário não autenticado.');
     if (fromNotebookId === toNotebookId) return; // Não faz nada se for o mesmo caderno
 
     const fromNoteRef = doc(this.firestore, `users/${this.userId}/notebooks/${fromNotebookId}/notes/${noteId}`);
