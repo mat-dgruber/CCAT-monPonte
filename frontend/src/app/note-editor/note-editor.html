@@ -1,22 +1,22 @@
-<div class="note-editor-container bg-white dark:bg-gray-800 h-full flex flex-col transition-colors duration-300">
+<div class="note-editor-container bg-white dark:bg-dark-secondary h-full flex flex-col transition-colors duration-300">
   @if (isLoading()) {
-    <div class="p-8 text-center text-gray-500 dark:text-gray-400">Carregando nota...</div>
+    <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary">Carregando nota...</div>
   } @else if (note(); as currentNote) {
-    <div class="note-editor-header p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 bg-white dark:bg-gray-800 transition-colors duration-300">
+    <div class="note-editor-header p-4 border-b border-gray-200 dark:border-dark-border flex items-center gap-4 bg-white dark:bg-dark-secondary transition-colors duration-300">
       <input 
         type="text" 
         placeholder="Título da Nota" 
-        class="title-input flex-grow bg-transparent text-2xl font-bold focus:outline-none text-gray-900 dark:text-gray-100"
+        class="title-input flex-grow bg-transparent text-2xl font-bold focus:outline-none text-gray-900 dark:text-white"
         [(ngModel)]="currentNote.title"
         (ngModelChange)="onContentChange()"
       />
       <div class="actions flex items-center gap-4">
-        <button (click)="deleteNote()" class="delete-button p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-red-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-red-500" title="Deletar Nota">
+        <button (click)="deleteNote()" class="delete-button p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-red-600 dark:text-dark-text-secondary dark:hover:bg-dark-accent dark:hover:text-red-500" title="Deletar Nota">
           <lucide-icon name="trash-2" size="20"></lucide-icon>
         </button>
         <div class="save-status text-sm">
           @if (isSaving()) {
-            <span class="text-gray-500 dark:text-gray-400">Salvando...</span>
+            <span class="text-gray-500 dark:text-dark-text-secondary">Salvando...</span>
           } @else {
             <span class="text-green-600 dark:text-green-400">Salvo</span>
           }
@@ -25,7 +25,7 @@
     </div>
     <div class="note-content-wrapper flex-grow p-4">
       <textarea
-        class="note-content-textarea w-full h-full bg-transparent focus:outline-none resize-none text-gray-800 dark:text-gray-200"
+        class="note-content-textarea w-full h-full bg-transparent focus:outline-none resize-none text-gray-800 dark:text-white"
         placeholder="Comece a escrever sua nota aqui..."
         [(ngModel)]="currentNote.content"
         (ngModelChange)="onContentChange()"
@@ -33,7 +33,7 @@
       ></textarea>
     </div>
   } @else {
-    <div class="p-8 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center h-full">Selecione uma nota para editar.</div>
+    <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary flex items-center justify-center h-full">Selecione uma nota para editar.</div>
   }
 </div>
 
