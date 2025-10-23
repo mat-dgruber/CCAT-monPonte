@@ -1,34 +1,29 @@
 import { Injectable, signal, effect } from '@angular/core';
 
-export type Theme = 'Normal' | 'Escuro' | 'Caderno';
+export type Theme = 'Normal' | 'Escuro' | 'Alto Contraste';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService {
   theme = signal<Theme>(this.getInitialTheme());
-  primaryColor = signal<string>(this.getInitialColor('primary', '#ffffff'));
-  secondaryColor = signal<string>(this.getInitialColor('secondary', '#f8fafc'));
-  accentColor = signal<string>(this.getInitialColor('accent', '#3b82f6'));
+  notebookStyle = signal<boolean>(this.getInitialNotebookStyle());
 
   constructor() {
     effect(() => {
       const currentTheme = this.theme();
-      document.documentElement.classList.remove('dark', 'notebook-theme');
+      document.documentElement.classList.remove('dark', 'high-contrast');
       if (currentTheme === 'Escuro') {
         document.documentElement.classList.add('dark');
-      } else if (currentTheme === 'Caderno') {
-        document.documentElement.classList.add('notebook-theme');
+      } else if (currentTheme === 'Alto Contraste') {
+        document.documentElement.classList.add('high-contrast');
       }
       localStorage.setItem('theme', currentTheme);
+    });
 
-      document.documentElement.style.setProperty('--primary-color', this.primaryColor());
-      document.documentElement.style.setProperty('--secondary-color', this.secondaryColor());
-      document.documentElement.style.setProperty('--accent-color', this.accentColor());
-
-      localStorage.setItem('primaryColor', this.primaryColor());
-      localStorage.setItem('secondaryColor', this.secondaryColor());
-      localStorage.setItem('accentColor', this.accentColor());
+    effect(() => {
+      const currentNotebookStyle = this.notebookStyle();
+      localStorage.setItem('notebookStyle', JSON.stringify(currentNotebookStyle));
     });
   }
 
@@ -45,27 +40,21 @@ export class ThemeService {
     return 'Normal';
   }
 
-  private getInitialColor(name: string, defaultColor: string): string {
+  private getInitialNotebookStyle(): boolean {
     if (typeof localStorage !== 'undefined') {
-      const savedColor = localStorage.getItem(`${name}Color`);
-      if (savedColor) {
-        return savedColor;
+      const savedNotebookStyle = localStorage.getItem('notebookStyle');
+      if (savedNotebookStyle) {
+        return JSON.parse(savedNotebookStyle);
       }
     }
-    return defaultColor;
+    return false;
   }
 
   setTheme(theme: Theme) {
     this.theme.set(theme);
   }
 
-  setColor(name: 'primary' | 'secondary' | 'accent', color: string) {
-    this[`${name}Color`].set(color);
-  }
-
-  resetColors() {
-    this.primaryColor.set('#ffffff');
-    this.secondaryColor.set('#f8fafc');
-    this.accentColor.set('#3b82f6');
+  toggleNotebookStyle() {
+    this.notebookStyle.update(value => !value);
   }
 }

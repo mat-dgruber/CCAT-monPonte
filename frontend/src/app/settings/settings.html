@@ -5,27 +5,30 @@
   <div class="mb-8">
     <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-secondary text-gray-700 dark:text-gray-300">Aparência</h3>
     <div class="space-y-4">
-      <div class="flex items-center justify-between">
-        <label for="theme-select" class="text-gray-700 dark:text-gray-300">Tema</label>
-        <select id="theme-select" (change)="onThemeChange($event)" [value]="themeService.theme()" class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white">
-          <option value="Normal">Normal</option>
-          <option value="Escuro">Escuro</option>
-          <option value="Caderno">Caderno</option>
-        </select>
+      <div role="radiogroup" aria-labelledby="theme-label">
+        <span id="theme-label" class="text-gray-700 dark:text-gray-300">Tema</span>
+        <div class="mt-2 space-y-2">
+          <div class="flex items-center">
+            <input type="radio" id="light-theme" name="theme" value="Normal" [checked]="themeService.theme() === 'Normal'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+            <label for="light-theme" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Claro</label>
+          </div>
+          <div class="flex items-center">
+            <input type="radio" id="dark-theme" name="theme" value="Escuro" [checked]="themeService.theme() === 'Escuro'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+            <label for="dark-theme" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Escuro</label>
+          </div>
+          <div class="flex items-center">
+            <input type="radio" id="high-contrast-theme" name="theme" value="Alto Contraste" [checked]="themeService.theme() === 'Alto Contraste'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+            <label for="high-contrast-theme" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">Alto Contraste</label>
+          </div>
+        </div>
       </div>
       <div class="flex items-center justify-between">
-        <label for="primary-color" class="text-gray-700 dark:text-gray-300">Cor Primária</label>
-        <input type="color" id="primary-color" (input)="onColorChange($event, 'primary')" [value]="themeService.primaryColor()">
+        <label for="notebook-style-toggle" class="text-gray-700 dark:text-gray-300">Estilo de caderno no editor</label>
+        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+          <input type="checkbox" name="notebook-style-toggle" id="notebook-style-toggle" (change)="toggleNotebookStyle()" [checked]="themeService.notebookStyle()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+          <label for="notebook-style-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+        </div>
       </div>
-      <div class="flex items-center justify-between">
-        <label for="secondary-color" class="text-gray-700 dark:text-gray-300">Cor Secundária</label>
-        <input type="color" id="secondary-color" (input)="onColorChange($event, 'secondary')" [value]="themeService.secondaryColor()">
-      </div>
-      <div class="flex items-center justify-between">
-        <label for="accent-color" class="text-gray-700 dark:text-gray-300">Cor de Destaque</label>
-        <input type="color" id="accent-color" (input)="onColorChange($event, 'accent')" [value]="themeService.accentColor()">
-      </div>
-      <button (click)="resetColors()" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Restaurar Cores Padrão</button>
     </div>
   </div>
 
