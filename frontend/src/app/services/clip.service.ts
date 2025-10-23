@@ -1,5 +1,5 @@
-import { Injectable, signal, WritableSignal, effect, inject } from '@angular/core';
-import { Firestore, doc, onSnapshot, setDoc, serverTimestamp, Unsubscribe, DocumentReference, Timestamp } from '@angular/fire/firestore';
+import { Injectable, signal, WritableSignal, inject, computed } from '@angular/core';
+import { Firestore, doc, onSnapshot, setDoc, getDoc, Unsubscribe, DocumentReference, Timestamp } from '@angular/fire/firestore';
 import { AuthService } from './auth';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -11,72 +11,86 @@ export class ClipService {
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
 
-  private docRef: DocumentReference | null = null;
-  private snapshotSubscription: Unsubscribe | null = null;
+  private clipDocRef: DocumentReference | null = null;
+  private settingsDocRef: DocumentReference | null = null;
+  private clipSnapshotSubscription: Unsubscribe | null = null;
+  private settingsSnapshotSubscription: Unsubscribe | null = null;
   private userSubscription: Subscription | null = null;
   private textChangeSubject = new Subject<string>();
   private textChangeSubscription: Subscription | null = null;
 
-  // Writable signals for managing the clip's state
   copyText: WritableSignal<string> = signal('');
   showAdvancedClipOptions: WritableSignal<boolean> = signal(false);
   selectedFont: WritableSignal<string> = signal("'Courier Prime', monospace");
   selectedFontSize: WritableSignal<string> = signal('16px');
-  characterCount: WritableSignal<number> = signal(0);
-  wordCount: WritableSignal<number> = signal(0);
   clipDisappearanceHours: WritableSignal<number> = signal(1);
   showCounts: WritableSignal<boolean> = signal(true);
   showFontSelect: WritableSignal<boolean> = signal(true);
   showFontSizeSelect: WritableSignal<boolean> = signal(true);
 
+  characterCount = computed(() => this.copyText().length);
+  wordCount = computed(() => {
+    const text = this.copyText().trim();
+    return text === '' ? 0 : text.split(/\s+/).length;
+  });
+
   constructor() {
-    this.loadInitialState();
     this.subscribeToUser();
     this.setupTextChangeSubscription();
-
-    effect(() => {
-      const text = this.copyText();
-      this.characterCount.set(text.length);
-      const trimmedText = text.trim();
-      this.wordCount.set(trimmedText === '' ? 0 : trimmedText.split(/\s+/).length);
-      localStorage.setItem('clipShowAdvancedOptions', JSON.stringify(this.showAdvancedClipOptions()));
-      localStorage.setItem('clipFontPreference', this.selectedFont());
-      localStorage.setItem('clipFontSizePreference', this.selectedFontSize());
-      localStorage.setItem('clipDisappearanceHours', JSON.stringify(this.clipDisappearanceHours()));
-      localStorage.setItem('showCounts', JSON.stringify(this.showCounts()));
-      localStorage.setItem('showFontSelect', JSON.stringify(this.showFontSelect()));
-      localStorage.setItem('showFontSizeSelect', JSON.stringify(this.showFontSizeSelect()));
-    });
-  }
-
-  private loadInitialState(): void {
-    if (typeof localStorage !== 'undefined') {
-      this.showAdvancedClipOptions.set(JSON.parse(localStorage.getItem('clipShowAdvancedOptions') || 'false'));
-      this.selectedFont.set(localStorage.getItem('clipFontPreference') || "'Courier Prime', monospace");
-      this.selectedFontSize.set(localStorage.getItem('clipFontSizePreference') || '16px');
-      this.clipDisappearanceHours.set(JSON.parse(localStorage.getItem('clipDisappearanceHours') || '1'));
-      this.showCounts.set(JSON.parse(localStorage.getItem('showCounts') || 'true'));
-      this.showFontSelect.set(JSON.parse(localStorage.getItem('showFontSelect') || 'true'));
-      this.showFontSizeSelect.set(JSON.parse(localStorage.getItem('showFontSizeSelect') || 'true'));
-    }
   }
 
   private subscribeToUser(): void {
     this.userSubscription = this.authService.authState$.subscribe(user => {
       if (user) {
-        this.docRef = doc(this.firestore, `clip/${user.uid}`);
-        this.subscribeToSnapshot();
+        this.clipDocRef = doc(this.firestore, `clip/${user.uid}`);
+        this.settingsDocRef = doc(this.firestore, `user_settings/${user.uid}`);
+        this.subscribeToClipSnapshot();
+        this.subscribeToSettingsSnapshot();
       } else {
         this.cleanup();
+        this.resetToDefaults();
       }
     });
   }
 
-  private subscribeToSnapshot(): void {
-    if (this.snapshotSubscription) {
-      this.snapshotSubscription();
+  private async subscribeToSettingsSnapshot(): Promise<void> {
+    if (this.settingsSnapshotSubscription) this.settingsSnapshotSubscription();
+
+    const docSnap = await getDoc(this.settingsDocRef!);
+    if (!docSnap.exists() || !docSnap.data()?.['clipSettings']) {
+      await this.updateSettings({
+        showAdvancedClipOptions: this.showAdvancedClipOptions(),
+        selectedFont: this.selectedFont(),
+        selectedFontSize: this.selectedFontSize(),
+        clipDisappearanceHours: this.clipDisappearanceHours(),
+        showCounts: this.showCounts(),
+        showFontSelect: this.showFontSelect(),
+        showFontSizeSelect: this.showFontSizeSelect(),
+      });
     }
-    this.snapshotSubscription = onSnapshot(this.docRef!, (docSnap) => {
+
+    this.settingsSnapshotSubscription = onSnapshot(this.settingsDocRef!, (docSnap) => {
+      if (docSnap.metadata.hasPendingWrites) return;
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data && data['clipSettings']) {
+          const settings = data['clipSettings'];
+          this.showAdvancedClipOptions.set(settings.showAdvancedClipOptions ?? false);
+          this.selectedFont.set(settings.selectedFont ?? "'Courier Prime', monospace");
+          this.selectedFontSize.set(settings.selectedFontSize ?? '16px');
+          this.clipDisappearanceHours.set(settings.clipDisappearanceHours ?? 1);
+          this.showCounts.set(settings.showCounts ?? true);
+          this.showFontSelect.set(settings.showFontSelect ?? true);
+          this.showFontSizeSelect.set(settings.showFontSizeSelect ?? true);
+        }
+      }
+    });
+  }
+
+  private subscribeToClipSnapshot(): void {
+    if (this.clipSnapshotSubscription) this.clipSnapshotSubscription();
+    this.clipSnapshotSubscription = onSnapshot(this.clipDocRef!, (docSnap) => {
       if (docSnap.metadata.hasPendingWrites) return;
 
       if (docSnap.exists()) {
@@ -101,28 +115,87 @@ export class ClipService {
       .subscribe(text => this.saveClip(text));
   }
 
+  private async updateSettings(newSettings: any): Promise<void> {
+    if (!this.settingsDocRef) return;
+    try {
+      const currentSettings = (await getDoc(this.settingsDocRef)).data()?.['clipSettings'] || {};
+      const mergedSettings = { ...currentSettings, ...newSettings };
+      await setDoc(this.settingsDocRef, { clipSettings: mergedSettings }, { merge: true });
+    } catch (error) {
+      console.error('Error saving clip settings:', error);
+    }
+  }
+
   onTextChange(text: string): void {
     this.copyText.set(text);
     this.textChangeSubject.next(text);
   }
 
   async saveClip(text: string): Promise<void> {
-    if (!this.docRef) return;
+    if (!this.clipDocRef) return;
 
     try {
       const expirationDate = new Date();
       expirationDate.setHours(expirationDate.getHours() + this.clipDisappearanceHours());
-      await setDoc(this.docRef, { text, expiresAt: Timestamp.fromDate(expirationDate) });
+      await setDoc(this.clipDocRef, { text, expiresAt: Timestamp.fromDate(expirationDate) });
     } catch (error) {
       console.error('Error saving document:', error);
     }
   }
 
+  setShowAdvancedClipOptions(value: boolean) {
+    this.showAdvancedClipOptions.set(value);
+    this.updateSettings({ showAdvancedClipOptions: value });
+  }
+
+  setSelectedFont(font: string) {
+    this.selectedFont.set(font);
+    this.updateSettings({ selectedFont: font });
+  }
+
+  setSelectedFontSize(size: string) {
+    this.selectedFontSize.set(size);
+    this.updateSettings({ selectedFontSize: size });
+  }
+
+  setClipDisappearanceHours(hours: number) {
+    this.clipDisappearanceHours.set(hours);
+    this.updateSettings({ clipDisappearanceHours: hours });
+  }
+
+  setShowCounts(value: boolean) {
+    this.showCounts.set(value);
+    this.updateSettings({ showCounts: value });
+  }
+
+  setShowFontSelect(value: boolean) {
+    this.showFontSelect.set(value);
+    this.updateSettings({ showFontSelect: value });
+  }
+
+  setShowFontSizeSelect(value: boolean) {
+    this.showFontSizeSelect.set(value);
+    this.updateSettings({ showFontSizeSelect: value });
+  }
+
   private cleanup(): void {
-    this.snapshotSubscription?.();
-    this.snapshotSubscription = null;
-    this.docRef = null;
+    this.clipSnapshotSubscription?.();
+    this.settingsSnapshotSubscription?.();
+    this.clipSnapshotSubscription = null;
+    this.settingsSnapshotSubscription = null;
+    this.clipDocRef = null;
+    this.settingsDocRef = null;
     this.copyText.set('');
+  }
+
+  private resetToDefaults(): void {
+    this.showAdvancedClipOptions.set(false);
+    this.selectedFont.set("'Courier Prime', monospace");
+    this.selectedFontSize.set('16px');
+    this.clipDisappearanceHours.set(1);
+    this.showCounts.set(true);
+    this.showFontSelect.set(true);
+    this.showFontSizeSelect.set(true);
   }
 
   ngOnDestroy(): void {
