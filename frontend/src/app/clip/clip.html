@@ -1,119 +1,85 @@
-<div class="flex-grow  bg-gray p-4 rounded-lg  md:p-8 ">
+<div class="flex-grow bg-gray p-4 rounded-lg md:p-8">
 
   <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
 
-    <div class="p-4 sm:p-6"> <textarea
-        [(ngModel)]="copyText"
+    <div class="p-4 sm:p-6">
+      <textarea
+        [ngModel]="clipService.copyText()"
         (ngModelChange)="onTextChange($event)"
-        aria-label="Conteúdo do Clip" class="
-          w-full
-          border 
-          rounded-lg 
-          notebook-textarea    leading-6            pl-14                pt-2                 bg-yellow-50         border-gray-300      focus:border-sky-600 focus:ring-2         focus:ring-sky-600
-        "
+        aria-label="Conteúdo do Clip"
+        class="w-full border rounded-lg notebook-textarea leading-6 pl-14 pt-2 bg-yellow-50 border-gray-300 focus:border-sky-600 focus:ring-2 focus:ring-sky-600"
         placeholder="Cole seu texto aqui..."
-        rows="15" ></textarea>
-        @if (showAdvancedClipOptions()) { [style.fontFamily]="selectedFont()" }
-        @if (showAdvancedClipOptions()) { [style.fontSize]="selectedFontSize()" }
+        rows="15"
+        [style.fontFamily]="clipService.selectedFont()"
+        [style.fontSize]="clipService.selectedFontSize()">
+      </textarea>
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 border-t border-gray-200">
       
-      <!-- Contadores -->
-      <!-- <div class="text-sm text-gray-500 font-mono">
-        <span>Caracteres: {{ characterCount() }}</span>
-        <span class="mx-2">|</span>
-        <span>Palavras: {{ wordCount() }}</span>
-      </div> --> @if (showAdvancedClipOptions()) {
+      @if (clipService.showAdvancedClipOptions()) {
         <div class="text-sm text-gray-500 font-mono">
-          <span>Caracteres: {{ characterCount() }}</span>
+          <span>Caracteres: {{ clipService.characterCount() }}</span>
           <span class="mx-2">|</span>
-          <span>Palavras: {{ wordCount() }}</span>
+          <span>Palavras: {{ clipService.wordCount() }}</span>
         </div>
       }
 
       <div class="flex items-center gap-4">
         <button 
           (click)="clearText()" aria-label="Limpar conteúdo do Clip"
-          class="
-            px-4 py-2 
-            bg-gray-200 text-gray-800 
-            rounded-lg 
-            hover:bg-gray-300 
-            font-medium 
-            transition-colors duration-200
-          ">
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition-colors duration-200">
           Limpar
         </button>
         <button 
           (click)="onCopy()" aria-label="Copiar todo o conteúdo do Clip"
-          class="
-            px-4 py-2 
-            bg-blue-600 text-white 
-            rounded-lg 
-            hover:bg-blue-700 
-            font-medium 
-            transition-colors duration-200 
-            shadow-sm hover:shadow-md
-          ">
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
           Copiar tudo
         </button>
       </div>
 
-      <!-- Seletor de Fonte -->
-      @if (showAdvancedClipOptions()) {
+      @if (clipService.showAdvancedClipOptions()) {
         <div class="flex items-center gap-2">
-        <label for="font-select" class="text-sm font-medium text-gray-600">Fonte:</label>
-        <select id="font-select" 
-                class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                [value]="selectedFont()"
-                (change)="onFontChange($event)">
-          @for (font of availableFonts; track font.family) {
-            <option [value]="font.family">{{ font.name }}</option>
-          }
-        </select>
-      </div>}
-
-      <!-- Seletor de Tamanho da Fonte -->
-      @if (showAdvancedClipOptions()) {
-        
-        <div class="flex items-center gap-2">
-        <label for="font-size-select" class="text-sm font-medium text-gray-600">Tamanho:</label>
-        <select id="font-size-select"
-                class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                [value]="selectedFontSize()"
-                (change)="onFontSizeChange($event)">
-          @for (size of availableFontSizes; track size.size) {
-            <option [value]="size.size">{{ size.name }}</option>
-          }
-        </select>
-      </div>
+          <label for="font-select" class="text-sm font-medium text-gray-600">Fonte:</label>
+          <select id="font-select" 
+                  class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [value]="clipService.selectedFont()"
+                  (change)="onFontChange($event)">
+            @for (font of availableFonts; track font.family) {
+              <option [value]="font.family">{{ font.name }}</option>
+            }
+          </select>
+        </div>
       }
 
-      <!-- Botão de Toggle para Opções Avançadas -->
+      @if (clipService.showAdvancedClipOptions()) {
+        <div class="flex items-center gap-2">
+          <label for="font-size-select" class="text-sm font-medium text-gray-600">Tamanho:</label>
+          <select id="font-size-select"
+                  class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [value]="clipService.selectedFontSize()"
+                  (change)="onFontSizeChange($event)">
+            @for (size of availableFontSizes; track size.size) {
+              <option [value]="size.size">{{ size.name }}</option>
+            }
+          </select>
+        </div>
+      }
+
       <button (click)="toggleAdvancedClipOptions()"
               class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition-colors duration-200">
-        {{ showAdvancedClipOptions() ? 'Ocultar Opções' : 'Mostrar Opções' }}
+        {{ clipService.showAdvancedClipOptions() ? 'Ocultar Opções' : 'Mostrar Opções' }}
       </button>
-
 
       <button 
         (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
-        class="
-          px-4 py-2 
-          bg-green-600 text-white 
-          rounded-lg 
-          hover:bg-green-700 
-          font-medium 
-          transition-colors duration-200 
-          shadow-sm hover:shadow-md
-        ">
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
         Converter em Nota
       </button>
     </div>
   </div>
 </div>
-  @if (isModalVisible) { <!-- Modal para Converter em Nota -->
+@if (isModalVisible) {
   <div role="dialog" aria-modal="true" aria-labelledby="convert-note-modal-title" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" role="document">
 
@@ -125,7 +91,7 @@
       </div>
 
       <div class="mb-6">
-        @if (!isCreatingNewNotebook) { <!-- Selecionar Caderno Existente -->
+        @if (!isCreatingNewNotebook) {
           <label id="notebookSelectLabel" for="notebookSelect" class="block text-gray-700 font-bold mb-2">Salvar no Caderno:</label>
           <select id="notebookSelect" [(ngModel)]="selectedNotebookIdForNote" aria-labelledby="notebookSelectLabel" class="w-full p-2 border rounded-lg">
             <option [ngValue]="null" disabled>Selecione um caderno</option>
@@ -134,7 +100,7 @@
             }
           </select>
           <button (click)="isCreatingNewNotebook = true" aria-label="Criar novo caderno" class="mt-2 text-blue-600 hover:underline">+ Criar novo caderno</button>
-        } @else { <!-- Criar Novo Caderno -->
+        } @else {
           <label id="newNotebookNameLabel" for="newNotebookName" class="block text-gray-700 font-bold mb-2">Nome do Novo Caderno:</label>
           <input type="text" id="newNotebookName" [(ngModel)]="newNotebookName" aria-labelledby="newNotebookNameLabel" class="w-full p-2 border rounded-lg">
           <div class="mt-2 flex gap-2">

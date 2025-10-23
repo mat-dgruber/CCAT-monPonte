@@ -6,14 +6,13 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
-import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
 
 @Component({
   selector: 'app-note-column',
   standalone: true,
-  imports: [CommonModule, FormsModule, Modal, HighlightPipe, DragDropModule],
+  imports: [CommonModule, FormsModule, Modal, HighlightPipe],
   templateUrl: './note-column.html',
   styleUrl: './note-column.css',
   animations: [
@@ -58,10 +57,6 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
     }
     return this.notes().filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
   });
-
-  get connectedDropLists(): string[] {
-    return this.notebookService.notebookIds();
-  }
 
   ngOnInit() {
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {

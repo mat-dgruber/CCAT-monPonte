@@ -162,9 +162,9 @@ export class DataService {
     return deleteDoc(docRef);
   }
 
-  async moveNote(noteId: string, fromNotebookId: string, toNotebookId: string): Promise<void> {
+  async moveNote(noteId: string, fromNotebookId: string, toNotebookId: string): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado.');
-    if (fromNotebookId === toNotebookId) return; // Não faz nada se for o mesmo caderno
+    if (fromNotebookId === toNotebookId) return noteId;
 
     const fromNoteRef = doc(this.firestore, `users/${this.userId}/notebooks/${fromNotebookId}/notes/${noteId}`);
     const toNotesCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks/${toNotebookId}/notes`);
@@ -186,6 +186,9 @@ export class DataService {
     batch.delete(fromNoteRef);
 
     // 4. Executa a operação
-    return batch.commit();
+    await batch.commit();
+
+    // 5. Retorna o ID da nova nota
+    return newNoteRef.id;
   }
 }

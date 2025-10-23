@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes } from '@angular/animations';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AuthService } from '../services/auth';
 import { RouterOutlet } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
@@ -18,7 +18,7 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet, DragDropModule],
+  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
   templateUrl: './notebooks.html',
   styleUrl: './notebooks.css',
   animations: [
@@ -118,37 +118,9 @@ export class Notebooks implements OnInit {
     localStorage.setItem(SORT_PREFERENCE_KEY, JSON.stringify(newSortOption));
   }
 
-  onNotebookDrop(event: CdkDragDrop<Notebook[]>) {
-    // Não permitir reordenar se a lista estiver filtrada por busca
-    if (this.searchTerm()) {
-      this.notificationService.showError('Limpe a busca para reordenar os cadernos.');
-      return;
-    }
 
-    const notebooks = [...this.notebookService.notebooks()];
-    moveItemInArray(notebooks, event.previousIndex, event.currentIndex);
 
-    // Atualiza o estado local imediatamente para uma UI responsiva
-    this.notebookService.notebooks.set(notebooks);
 
-    // Persiste a nova ordem no banco de dados
-    this.dataService.updateNotebooksOrder(notebooks);
-  }
-
-  async onNoteDropped(event: CdkDragDrop<string, any, {note: Note, fromNotebookId: string}>) {
-    const { note, fromNotebookId } = event.item.data;
-    const toNotebookId = event.container.data;
-
-    if (fromNotebookId === toNotebookId) return;
-
-    try {
-      await this.dataService.moveNote(note.id, fromNotebookId, toNotebookId);
-      this.notificationService.showSuccess(`Nota movida com sucesso!`);
-    } catch (error) {
-      this.notificationService.showError('Erro ao mover a nota.');
-      console.error('Erro ao mover a nota:', error);
-    }
-  }
 
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;

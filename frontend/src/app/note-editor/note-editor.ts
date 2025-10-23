@@ -40,7 +40,7 @@ export class NoteEditor implements OnInit, OnDestroy {
       if (currentNote) {
         this.onContentChange();
       }
-    }, { allowSignalWrites: true });
+    });
   }
 
   ngOnInit(): void {
