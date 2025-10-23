@@ -1,38 +1,37 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+
+export type ToastType = 'success' | 'error' | 'info';
 
 export interface Toast {
-  id: number;
+  id: string;
   message: string;
-  type: 'success' | 'error' | 'info';
-  duration?: number;
+  type: ToastType;
+  duration: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-  toasts: WritableSignal<Toast[]> = signal([]);
-  private nextId = 0;
-
-  show(message: string, type: 'success' | 'error' | 'info' = 'info', duration = 4000) {
-    const newToast: Toast = { id: this.nextId++, message, type, duration };
-
-    this.toasts.update(currentToasts => [...currentToasts, newToast]);
-
-    if (duration > 0) {
-      setTimeout(() => this.remove(newToast.id), duration);
-    }
-  }
+  toasts = signal<Toast[]>([]);
 
   showSuccess(message: string, duration = 3000) {
-    this.show(message, 'success', duration);
+    this.addToast(message, 'success', duration);
   }
 
   showError(message: string, duration = 5000) {
-    this.show(message, 'error', duration);
+    this.addToast(message, 'error', duration);
   }
 
-  remove(toastId: number) {
+  private addToast(message: string, type: ToastType, duration: number) {
+    const id = Math.random().toString(36).substring(2, 9);
+    this.toasts.update(currentToasts => [
+      ...currentToasts,
+      { id, message, type, duration }
+    ]);
+  }
+
+  remove(toastId: string) {
     this.toasts.update(currentToasts => currentToasts.filter(toast => toast.id !== toastId));
   }
 }
