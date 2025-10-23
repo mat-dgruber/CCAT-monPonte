@@ -32,7 +32,9 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class NoteColumn implements OnChanges, OnInit, OnDestroy {
   @Input() notebookId: string | null = null;
+  @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
+  @Output() back = new EventEmitter<void>();
 
   private dataService = inject(DataService);
   private router = inject(Router);
