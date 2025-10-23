@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AuthService } from '../services/auth';
-import { RouterOutlet } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
 import { DataService, Notebook, Note, SortBy, SortDirection } from '../services/data.service';
 import { NotebookService } from '../services/notebook.service';
@@ -11,6 +11,9 @@ import { NotificationService } from '../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { ResponsiveService } from '../services/responsive';
 
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
@@ -20,7 +23,6 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
   standalone: true,
   imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
   templateUrl: './notebooks.html',
-  styleUrl: './notebooks.css',
   animations: [
     trigger('itemAnimation', [
       // Animação para quando um item entra na lista (é adicionado)
@@ -54,9 +56,15 @@ export class Notebooks implements OnInit {
   private dataService = inject(DataService);
   notebookService = inject(NotebookService);
   private notificationService = inject(NotificationService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  responsiveService = inject(ResponsiveService);
+  private routerSubscription!: Subscription;
+
   
   // Signals para o estado local do componente (UI)
   selectedNotebookId: WritableSignal<string | null> = signal(null);
+  currentNoteId: WritableSignal<string | null> = signal(null);
   selectedNoteId: WritableSignal<string | null> = signal(null);
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
   showDeleteModal: WritableSignal<boolean> = signal(false);
@@ -93,7 +101,29 @@ export class Notebooks implements OnInit {
   }
 
   ngOnInit() {
-    // Carrega a preferência de ordenação salva no localStorage
+    this.routerSubscription = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      setTimeout(() => {
+        let route = this.route.firstChild;
+        let noteId: string | null = null;
+        let notebookId: string | null = null;
+
+        while (route) {
+          if (route.snapshot.paramMap.has('noteId')) {
+            noteId = route.snapshot.paramMap.get('noteId');
+          }
+          if (route.snapshot.paramMap.has('notebookId')) {
+            notebookId = route.snapshot.paramMap.get('notebookId');
+          }
+          route = route.firstChild;
+        }
+
+        this.currentNoteId.set(noteId);
+        this.selectedNotebookId.set(notebookId);
+      });
+    });
+
     const savedSort = localStorage.getItem(SORT_PREFERENCE_KEY);
     if (savedSort) {
       try {
@@ -279,5 +309,18 @@ export class Notebooks implements OnInit {
 
   onNoteSelected(noteId: string) {
     this.selectedNoteId.set(noteId);
+  }
+
+  ngOnDestroy() {
+    this.routerSubscription?.unsubscribe();
+  }
+
+  navigateBack() {
+    if (this.currentNoteId() && this.responsiveService.isMobile()) {
+      this.router.navigate(['/notebooks', this.selectedNotebookId()]);
+    } else if (this.selectedNotebookId() && this.responsiveService.isMobile()) {
+      this.selectedNotebookId.set(null);
+      this.router.navigate(['/notebooks']);
+    }
   }
 }

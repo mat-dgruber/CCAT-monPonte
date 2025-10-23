@@ -1,94 +1,116 @@
-<div class="three-column-layout">
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
   <!-- Notebooks Sidebar -->
-  <aside class="notebooks-sidebar rounded-xl bg-gray-50 dark:bg-dark-panel-left transition-colors duration-300">
-    <!-- Header -->
-    <div class="sidebar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Cadernos</h2>
-      <button (click)="openCreateModal()" class="p-1 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-dark-accent dark:hover:text-white transition-colors duration-300" title="Criar novo caderno">
-        <lucide-icon name="plus-circle" size="18"></lucide-icon>
-      </button>
-    </div>
+  <aside
+    class="notebooks-sidebar w-full md:w-72 flex-shrink-0 bg-gray-50 dark:bg-dark-panel-left transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border"
+    [class.hidden]="responsiveService.isMobile() && (selectedNotebookId() || currentNoteId())"
+    [class.md:flex]="!responsiveService.isMobile()"
+    [class.flex]="responsiveService.isMobile() && !selectedNotebookId() && !currentNoteId()"
+  >
+    <div class="flex flex-col w-full">
+      <!-- Header -->
+      <div class="sidebar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Cadernos</h2>
+        <button (click)="openCreateModal()" class="p-1 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-dark-accent dark:hover:text-white transition-colors duration-300" title="Criar novo caderno">
+          <lucide-icon name="plus-circle" size="18"></lucide-icon>
+        </button>
+      </div>
 
-    <!-- Search Box -->
-    <div class="p-2">
-      <div class="relative">
-        <lucide-icon name="search" size="16" class="absolute  left-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
-        <input #searchInput
-               type="text"
-               placeholder="Buscar caderno..."
-               class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300"
-               [value]="searchTerm()"
-               (input)="onSearch($event)"
-               (keydown.escape)="clearSearch(searchInput)">
-        @if (searchTerm()) {
-          <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 dark:text-dark-text-secondary dark:hover:text-white" (click)="clearSearch(searchInput)" title="Limpar busca">
-            <lucide-icon name="x" size="16"></lucide-icon>
-          </button>
+      <!-- Search Box -->
+      <div class="p-2">
+        <div class="relative">
+          <lucide-icon name="search" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
+          <input #searchInput
+                type="text"
+                placeholder="Buscar caderno..."
+                class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300"
+                [value]="searchTerm()"
+                (input)="onSearch($event)"
+                (keydown.escape)="clearSearch(searchInput)">
+          @if (searchTerm()) {
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 dark:text-dark-text-secondary dark:hover:text-white" (click)="clearSearch(searchInput)" title="Limpar busca">
+              <lucide-icon name="x" size="16"></lucide-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Notebooks List / Loading / Error State -->
+      <div class="overflow-y-auto flex-grow">
+        @if (notebookService.isLoading()) {
+          <div class="px-2 py-4 space-y-2">
+            @for (_ of [1, 2, 3, 4, 5]; track $index) {
+              <div class="h-10 bg-gray-200 rounded-md dark:bg-dark-accent animate-pulse"></div>
+            }
+          </div>
+        } @else if (notebookService.loadingError()) {
+          <div class="p-4 text-center text-gray-500 dark:text-dark-text-secondary">
+            <p class="mb-2">Falha ao carregar cadernos.</p>
+            <button (click)="retryFetchNotebooks()" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Tentar Novamente</button>
+          </div>
+        } @else {
+          <ul class="notebook-list p-2 space-y-1">
+            @for (notebook of filteredNotebooks(); track notebook.id) {
+              <li
+                class="flex items-center justify-between px-4 py-2 rounded-md cursor-pointer transition-colors duration-150 group"
+                [class.bg-indigo-100]="notebook.id === selectedNotebookId()"
+                [class.dark:bg-dark-accent]="notebook.id === selectedNotebookId()"
+                [class.hover:bg-gray-200]="notebook.id !== selectedNotebookId()"
+                [class.dark:hover:bg-dark-primary]="notebook.id !== selectedNotebookId()"
+                (click)="selectNotebook(notebook.id)">
+
+                <span
+                  class="text-sm truncate"
+                  [class.font-semibold]="notebook.id === selectedNotebookId()"
+                  [class.font-medium]="notebook.id !== selectedNotebookId()"
+                  [class.text-gray-700]="notebook.id !== selectedNotebookId()"
+                  [class.dark:text-white]="notebook.id === selectedNotebookId()"
+                  [innerHTML]="notebook.name | highlight: searchTerm()">
+                </span>
+
+                <div class="notebook-actions flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 transition-colors duration-300">
+                  <button class="p-1 text-gray-500 rounded-full hover:bg-gray-300 dark:text-dark-text-secondary dark:hover:bg-dark-border" (click)="openRenameModal(notebook.id, notebook.name); $event.stopPropagation()" title="Renomear caderno">
+                    <lucide-icon name="pencil" size="14"></lucide-icon>
+                  </button>
+                  <button class="p-1 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50" (click)="openDeleteModal(notebook.id, notebook.name); $event.stopPropagation()" title="Deletar caderno">
+                    <lucide-icon name="trash-2" size="14"></lucide-icon>
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
         }
       </div>
-    </div>
-
-    <!-- Notebooks List / Loading / Error State -->
-    <div class="overflow-y-auto rounded-lg">
-      @if (notebookService.isLoading()) {
-        <div class="px-2 py-4 space-y-2">
-          @for (_ of [1, 2, 3, 4, 5]; track $index) {
-            <div class="h-10 bg-gray-200 rounded-md dark:bg-dark-accent animate-pulse"></div>
-          } 
-        </div>
-      } @else if (notebookService.loadingError()) {
-        <div class="p-4 text-center text-gray-500 dark:text-dark-text-secondary">
-          <p class="mb-2">Falha ao carregar cadernos.</p>
-          <button (click)="retryFetchNotebooks()" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Tentar Novamente</button>
-        </div>
-      } @else {
-        <ul class="notebook-list p-2 space-y-1">
-          @for (notebook of filteredNotebooks(); track notebook.id) {
-            <li 
-              class="flex items-center justify-between px-4 py-2 rounded-md cursor-pointer transition-colors duration-150 group"
-              [class.bg-indigo-100]="notebook.id === selectedNotebookId()"
-              [class.dark:bg-dark-accent]="notebook.id === selectedNotebookId()"
-              [class.hover:bg-gray-200]="notebook.id !== selectedNotebookId()"
-              [class.dark:hover:bg-dark-primary]="notebook.id !== selectedNotebookId()"
-              (click)="selectNotebook(notebook.id)">
-              
-              <span
-                class="text-sm truncate"
-                [class.font-semibold]="notebook.id === selectedNotebookId()"
-                [class.font-medium]="notebook.id !== selectedNotebookId()"
-                [class.text-gray-700]="notebook.id !== selectedNotebookId()"
-                [class.dark:text-white]="notebook.id === selectedNotebookId()"
-                [innerHTML]="notebook.name | highlight: searchTerm()">
-              </span>
-              
-              <div class="notebook-actions flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 transition-colors duration-300">
-                <button class="p-1 text-gray-500 rounded-full hover:bg-gray-300 dark:text-dark-text-secondary dark:hover:bg-dark-border" (click)="openRenameModal(notebook.id, notebook.name); $event.stopPropagation()" title="Renomear caderno">
-                  <lucide-icon name="pencil" size="14"></lucide-icon>
-                </button>
-                <button class="p-1 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50" (click)="openDeleteModal(notebook.id, notebook.name); $event.stopPropagation()" title="Deletar caderno">
-                  <lucide-icon name="trash-2" size="14"></lucide-icon>
-                </button>
-              </div>
-            </li>
-          }
-        </ul>
-      }
     </div>
   </aside>
 
   <!-- Notes Column -->
-  <main class="notes-column bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-colors duration-300">
+  <main
+    class="notes-column w-full md:w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out"
+    [class.hidden]="responsiveService.isMobile() && (!selectedNotebookId() || currentNoteId())"
+    [class.md:flex]="!responsiveService.isMobile()"
+    [class.flex]="responsiveService.isMobile() && selectedNotebookId() && !currentNoteId()"
+  >
     @if (selectedNotebookId()) {
-      <app-note-column [notebookId]="selectedNotebookId()" (noteSelected)="onNoteSelected($event)"></app-note-column>
+      <app-note-column
+        [notebookId]="selectedNotebookId()"
+        (noteSelected)="onNoteSelected($event)"
+        (back)="navigateBack()"
+        [showBackButton]="responsiveService.isMobile()"
+      ></app-note-column>
     } @else {
-      <div class="placeholder flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary">
+      <div class="placeholder hidden md:flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary">
         Selecione um caderno para ver as notas.
       </div>
     }
   </main>
 
   <!-- Note Editor -->
-  <section class="note-editor-column relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-colors duration-300">
+  <section
+    class="note-editor-column flex-grow relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out"
+    [class.hidden]="responsiveService.isMobile() && !currentNoteId()"
+    [class.md:flex]="!responsiveService.isMobile()"
+    [class.flex]="responsiveService.isMobile() && currentNoteId()"
+  >
     <div class="absolute inset-0" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>

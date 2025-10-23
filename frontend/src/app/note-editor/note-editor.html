@@ -1,19 +1,24 @@
-<div class="note-editor-container bg-white dark:bg-dark-secondary h-full flex flex-col transition-colors duration-300">
+<div class="note-editor-container bg-white dark:bg-dark-panel-right h-full flex flex-col transition-colors duration-300">
   @if (isLoading()) {
     <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary">Carregando nota...</div>
   } @else if (note(); as currentNote) {
-    <div class="note-editor-header p-4 border-b rounded-xl border-gray-200 dark:border-dark-border flex items-center gap-4 bg-white dark:bg-dark-secondary transition-colors duration-300">
+    <div class="note-editor-header p-3 border-b border-gray-200 dark:border-dark-border flex items-center gap-2 bg-white dark:bg-dark-panel-right transition-colors duration-300">
+      @if (responsiveService.isMobile()) {
+        <button (click)="navigateBack()" class="p-2 text-gray-500 rounded-full hover:bg-gray-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent">
+          <lucide-icon name="arrow-left" size="20"></lucide-icon>
+        </button>
+      }
       <input 
         type="text" 
         placeholder="Título da Nota" 
-        class="title-input flex-grow bg-transparent text-2xl font-bold focus:outline-none text-gray-900 dark:text-white"
+        class="title-input flex-grow bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-gray-900 dark:text-white"
         [(ngModel)]="currentNote.title"
         (ngModelChange)="onContentChange()"
       />
-      <div class="actions flex items-center gap-4">
-        <div class="save-status text-sm text-gray-500 dark:text-dark-text-secondary min-w-[70px] text-right">
+      <div class="actions flex items-center gap-2">
+        <div class="save-status text-xs sm:text-sm text-gray-500 dark:text-dark-text-secondary min-w-[70px] text-right">
           @if (isSaving()) {
-            <span>Salvando...</span>
+            <span class="italic">Salvando...</span>
           } @else {
             <span class="text-green-600 dark:text-green-400">Salvo</span>
           }
