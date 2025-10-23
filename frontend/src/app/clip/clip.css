@@ -86,7 +86,6 @@
 /* Estilo padrão do textarea, sem o visual de caderno */
 .notebook-textarea {
   background-color: transparent;
-  color: inherit; /* Herda a cor do texto do tema */
   outline: none;
   box-shadow: none;
   line-height: 1.75rem; /* Altura de linha padrão */
@@ -96,7 +95,6 @@
 /* Estilo padrão para o modo escuro, também sem visual de caderno */
 .dark .notebook-textarea {
   background-color: transparent;
-  color: inherit;
 }
 
 /*
