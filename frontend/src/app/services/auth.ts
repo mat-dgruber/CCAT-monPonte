@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth as FirebaseAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, authState, signOut, updateProfile, browserLocalPersistence, browserSessionPersistence, setPersistence, AuthError } from '@angular/fire/auth';
+import { Auth as FirebaseAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, authState, signOut, updateProfile, browserLocalPersistence, browserSessionPersistence, setPersistence, AuthError, updateEmail, updatePassword } from '@angular/fire/auth';
  
 @Injectable({
   providedIn: 'root'
@@ -37,5 +37,25 @@ export class AuthService {
     return this.auth.currentUser ? this.auth.currentUser.uid : null;
   }
   
+  updateProfile(profile: { displayName?: string; photoURL?: string; }) {
+    if (!this.auth.currentUser) {
+      throw new Error("User not logged in");
+    }
+    return updateProfile(this.auth.currentUser, profile);
+  }
+
+  updateEmail(newEmail: string) {
+    if (!this.auth.currentUser) {
+      throw new Error("User not logged in");
+    }
+    return updateEmail(this.auth.currentUser, newEmail);
+  }
+
+  updatePassword(newPassword: string) {
+    if (!this.auth.currentUser) {
+      throw new Error("User not logged in");
+    }
+    return updatePassword(this.auth.currentUser, newPassword);
+  }
 }
   

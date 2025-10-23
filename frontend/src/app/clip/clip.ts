@@ -7,6 +7,7 @@ import { ClipService } from '../services/clip.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth';
 import { Modal } from '../modal/modal'; // Importar o componente Modal
+import { ThemeService } from '../services/theme';
 
 @Component({
   selector: 'app-clip',
@@ -18,6 +19,7 @@ import { Modal } from '../modal/modal'; // Importar o componente Modal
 export class Clip implements OnInit, OnDestroy {
   
   clipService = inject(ClipService);
+  themeService = inject(ThemeService);
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
@@ -140,9 +142,6 @@ export class Clip implements OnInit, OnDestroy {
     this.clipService.selectedFontSize.set(selectedValue);
   }
 
-  toggleAdvancedClipOptions() {
-    this.clipService.showAdvancedClipOptions.update(value => !value);
-  }
 
   openConvertToNoteModal() {
     this.isModalVisible = true;

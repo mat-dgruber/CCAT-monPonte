@@ -24,12 +24,4 @@ export class HeaderComponent {
     this.darkModeService.toggleDarkMode();
   }
 
-  public async logout() {
-    try {
-      await this.authService.logout();
-      this.router.navigate(['/login']);
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  }
 }

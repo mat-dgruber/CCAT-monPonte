@@ -8,6 +8,7 @@
         (ngModelChange)="onTextChange($event)"
         aria-label="Conteúdo do Clip"
         class="w-full border rounded-lg notebook-textarea leading-6 pl-14 pt-2 bg-yellow-50 border-gray-300 focus:border-sky-600 focus:ring-2 focus:ring-sky-600 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:placeholder-dark-text-secondary dark:focus:border-sky-500 transition-colors duration-300"
+        [class.notebook-bg]="themeService.theme() === 'Caderno'"
         placeholder="Cole seu texto aqui..."
         rows="15"
         [style.fontFamily]="clipService.selectedFont()"
@@ -17,7 +18,7 @@
 
     <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-dark-secondary/50 border-t border-gray-200 dark:border-dark-border transition-colors duration-300">
       
-      @if (clipService.showAdvancedClipOptions()) {
+      @if (clipService.showAdvancedClipOptions() && clipService.showCounts()) {
         <div class="text-sm text-gray-500 dark:text-dark-text-secondary font-mono">
           <span>Caracteres: {{ clipService.characterCount() }}</span>
           <span class="mx-2">|</span>
@@ -38,7 +39,7 @@
         </button>
       </div>
 
-      @if (clipService.showAdvancedClipOptions()) {
+      @if (clipService.showAdvancedClipOptions() && clipService.showFontSelect()) {
         <div class="flex items-center gap-2">
           <label for="font-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Fonte:</label>
           <select id="font-select" 
@@ -52,7 +53,7 @@
         </div>
       }
 
-      @if (clipService.showAdvancedClipOptions()) {
+      @if (clipService.showAdvancedClipOptions() && clipService.showFontSizeSelect()) {
         <div class="flex items-center gap-2">
           <label for="font-size-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Tamanho:</label>
           <select id="font-size-select"
@@ -66,10 +67,6 @@
         </div>
       }
 
-      <button (click)="toggleAdvancedClipOptions()"
-              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition-colors duration-200 dark:bg-dark-accent dark:text-white dark:hover:bg-dark-border">
-        {{ clipService.showAdvancedClipOptions() ? 'Ocultar Opções' : 'Mostrar Opções' }}
-      </button>
 
       <button 
         (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
