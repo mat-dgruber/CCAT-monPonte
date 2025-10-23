@@ -6,13 +6,13 @@ import { NotificationService } from '../services/notification.service';
 import { ClipService } from '../services/clip.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth';
-import { Modal } from '../modal/modal'; // Importar o componente Modal
+import { Modal } from '../modal/modal';
 import { ThemeService } from '../services/theme';
 
 @Component({
   selector: 'app-clip',
   standalone: true,
-  imports: [FormsModule, CommonModule, Modal], // Adicionar Modal aos imports
+  imports: [FormsModule, CommonModule, Modal],
   templateUrl: './clip.html',
   styleUrls: ['./clip.css']
 })
@@ -26,10 +26,8 @@ export class Clip implements OnInit, OnDestroy {
   private notebooksSubscription: Subscription | null = null;
   private userSubscription: Subscription | null = null;
 
-
   userId: string | null = null;
 
-  // Modal-related properties remain in the component's state
   isModalVisible = false;
   newNoteTitle = '';
   notebooks: Notebook[] = [];
@@ -69,7 +67,6 @@ export class Clip implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.notebooksSubscription?.unsubscribe();
     this.userSubscription?.unsubscribe();
-
   }
 
   private loadNotebooks(): void {
@@ -133,14 +130,13 @@ export class Clip implements OnInit, OnDestroy {
 
   onFontChange(event: Event) {
     const selectedValue = (event.target as HTMLSelectElement).value;
-    this.clipService.selectedFont.set(selectedValue);
+    this.clipService.setSelectedFont(selectedValue);
   }
 
   onFontSizeChange(event: Event) {
     const selectedValue = (event.target as HTMLSelectElement).value;
-    this.clipService.selectedFontSize.set(selectedValue);
+    this.clipService.setSelectedFontSize(selectedValue);
   }
-
 
   openConvertToNoteModal() {
     this.isModalVisible = true;
