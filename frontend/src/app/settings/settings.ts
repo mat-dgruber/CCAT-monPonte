@@ -49,7 +49,7 @@ export class SettingsComponent implements OnInit {
   }
 
   onThemeChange(event: Event) {
-    const selectedTheme = (event.target as HTMLSelectElement).value as Theme;
+    const selectedTheme = (event.target as HTMLInputElement).value as Theme;
     this.themeService.setTheme(selectedTheme);
   }
 
@@ -91,12 +91,7 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  onColorChange(event: Event, colorName: 'primary' | 'secondary' | 'accent') {
-    const color = (event.target as HTMLInputElement).value;
-    this.themeService.setColor(colorName, color);
-  }
-
-  resetColors() {
-    this.themeService.resetColors();
+  toggleNotebookStyle() {
+    this.themeService.toggleNotebookStyle();
   }
 }
