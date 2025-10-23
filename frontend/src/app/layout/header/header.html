@@ -1,18 +1,33 @@
-<header class="bg-white dark:bg-dark-primary text-gray-800 dark:text-white shadow-md rounded-b-3xl transition-colors duration-300">
+<header class="bg-white dark:bg-dark-primary text-gray-800 dark:text-white shadow-md transition-colors duration-300">
   <div class="container mx-auto flex items-center justify-between p-4" role="banner">
     <h1 class="text-2xl font-bold">
       <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-indigo-600 dark:hover:text-dark-text">monPonte</a>
     </h1>
     @if (authState$ | async; as user) {
       <nav aria-label="Navegação principal" class="flex items-center gap-2">
-        <a routerLink="/clip" aria-label="Ir para a página do Clip" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-dark-secondary rounded-md">Clip</a>
-        <a routerLink="/notebooks" aria-label="Ir para a página de Cadernos" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-dark-secondary rounded-md">Cadernos</a>
-        <span class="px-4 text-sm text-gray-600 dark:text-dark-text-secondary">Olá, {{ user.displayName || user.email }}</span>
+        <!-- Desktop Links -->
+        <div class="hidden md:flex items-center gap-2">
+          <a routerLink="/clip" aria-label="Ir para a página do Clip" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-dark-secondary rounded-md">Clip</a>
+          <a routerLink="/notebooks" aria-label="Ir para a página de Cadernos" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-dark-secondary rounded-md">Cadernos</a>
+          <span class="px-4 text-sm text-gray-600 dark:text-dark-text-secondary">Olá, {{ user.displayName || user.email }}</span>
+        </div>
+
+        <!-- Common Settings and Mobile Menu Button -->
         <a routerLink="/settings" aria-label="Ir para as configurações"
-           class="p-2 rounded-full bg-gray-200 dark:bg-dark-accent hover:bg-gray-300 dark:hover:bg-dark-secondary border-2 border-transparent dark:focus:border-dark-text focus:outline-none transition-all duration-200">
+           class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent focus:outline-none transition-all duration-200">
           <lucide-icon name="settings" size="22" class="text-gray-800 dark:text-dark-text"></lucide-icon>
         </a>
+        <button (click)="toggleMobileMenu()" class="md:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
+          <lucide-icon name="menu" size="22"></lucide-icon>
+        </button>
       </nav>
     }
   </div>
+  <!-- Mobile Menu -->
+  @if (isMobileMenuOpen()) {
+    <div class="md:hidden bg-white dark:bg-dark-primary" (clickout)="closeMobileMenu()">
+      <a routerLink="/clip" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-secondary">Clip</a>
+      <a routerLink="/notebooks" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-secondary">Cadernos</a>
+    </div>
+  }
 </header>
