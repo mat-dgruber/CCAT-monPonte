@@ -6,11 +6,12 @@ import { NotificationService } from '../services/notification.service';
 import { ClipService } from '../services/clip.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth';
+import { Modal } from '../modal/modal'; // Importar o componente Modal
 
 @Component({
   selector: 'app-clip',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, Modal], // Adicionar Modal aos imports
   templateUrl: './clip.html',
   styleUrls: ['./clip.css']
 })

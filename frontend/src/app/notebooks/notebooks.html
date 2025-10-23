@@ -1,10 +1,10 @@
 <div class="three-column-layout">
   <!-- Notebooks Sidebar -->
-  <aside class="notebooks-sidebar rounded-xl bg-gray-50 dark:bg-gray-800">
+  <aside class="notebooks-sidebar rounded-xl bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
     <!-- Header -->
-    <div class="sidebar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="sidebar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
       <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Cadernos</h2>
-      <button (click)="openCreateModal()" class="p-1 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100" title="Criar novo caderno">
+      <button (click)="openCreateModal()" class="p-1 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100 transition-colors duration-300" title="Criar novo caderno">
         <lucide-icon name="plus-circle" size="18"></lucide-icon>
       </button>
     </div>
@@ -16,7 +16,7 @@
         <input #searchInput
                type="text"
                placeholder="Buscar caderno..."
-               class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:focus:ring-indigo-600"
+               class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:focus:ring-indigo-600 transition-colors duration-300"
                [value]="searchTerm()"
                (input)="onSearch($event)"
                (keydown.escape)="clearSearch(searchInput)">
@@ -34,7 +34,7 @@
         <div class="px-2 py-4 space-y-2">
           @for (_ of [1, 2, 3, 4, 5]; track $index) {
             <div class="h-10 bg-gray-200 rounded-md dark:bg-gray-700 animate-pulse"></div>
-          }
+          } 
         </div>
       } @else if (notebookService.loadingError()) {
         <div class="p-4 text-center text-gray-500">
@@ -47,14 +47,14 @@
             <li 
               class="flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors duration-150 group"
               [class.bg-indigo-100]="notebook.id === selectedNotebookId()"
-              [class.dark:bg-indigo-900]="notebook.id === selectedNotebookId()"
+              [class.dark:bg-indigo-900]="notebook.id === selectedNotebookId()" 
               [class.hover:bg-gray-200]="notebook.id !== selectedNotebookId()"
               [class.dark:hover:bg-gray-700]="notebook.id !== selectedNotebookId()"
               (click)="selectNotebook(notebook.id)">
               
               <span class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
               
-              <div class="notebook-actions flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+              <div class="notebook-actions flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 transition-colors duration-300">
                 <button class="p-1 text-gray-500 rounded-full hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-600" (click)="openRenameModal(notebook.id, notebook.name); $event.stopPropagation()" title="Renomear caderno">
                   <lucide-icon name="pencil" size="14"></lucide-icon>
                 </button>
@@ -70,18 +70,18 @@
   </aside>
 
   <!-- Notes Column -->
-  <main class="notes-column border-l border-gray-200 dark:border-gray-700">
+  <main class="notes-column border-l border-gray-200 dark:border-gray-700 transition-colors duration-300">
     @if (selectedNotebookId()) {
       <app-note-column [notebookId]="selectedNotebookId()" (noteSelected)="onNoteSelected($event)"></app-note-column>
     } @else {
-      <div class="placeholder flex items-center justify-center h-full text-gray-500">
+      <div class="placeholder flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
         Selecione um caderno para ver as notas.
       </div>
     }
   </main>
 
   <!-- Note Editor -->
-  <section class="note-editor-column relative border-l border-gray-200 dark:border-gray-700">
+  <section class="note-editor-column relative border-l border-gray-200 dark:border-gray-700 transition-colors duration-300">
     <div class="absolute inset-0" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>
@@ -104,7 +104,7 @@
     [title]="modalMode() === 'create' ? 'Criar Novo Caderno' : 'Renomear Caderno'"
     confirmText="Salvar"
     (onConfirm)="handleSaveNotebook()"
-    (onCancel)="closeCreateRenameModal()"
+    (onCancel)="closeCreateRenameModal()" 
   >
     <input #notebookNameInput type="text" [(ngModel)]="newNotebookName" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" placeholder="Nome do caderno" (keydown.enter)="handleSaveNotebook()">
   </app-modal>

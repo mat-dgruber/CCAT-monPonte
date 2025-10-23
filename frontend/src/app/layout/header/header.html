@@ -1,15 +1,17 @@
-<header class="bg-gray-900 text-white shadow-md rounded-b-3xl"> <div class="container mx-auto flex items-center justify-between p-4" role="banner">
+<header class="bg-white dark:bg-gray-900 text-gray-800 dark:text-white shadow-md rounded-b-3xl transition-colors duration-300">
+  <div class="container mx-auto flex items-center justify-between p-4" role="banner">
     <h1 class="text-2xl font-bold">
-      <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-gray-400">monPonte</a>
+      <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-indigo-600 dark:hover:text-indigo-400">monPonte</a>
     </h1>
     @if (authState$ | async; as user) {
-      <nav aria-label="Navegação principal" class="flex items-center">
-        <a routerLink="/clip" aria-label="Ir para a página do Clip" class="px-4 py-2 hover:bg-gray-700 rounded-md">Clip</a>
-        <a routerLink="/notebooks" aria-label="Ir para a página de Cadernos" class="px-4 py-2 hover:bg-gray-700 rounded-md">Cadernos</a>
-        <button (click)="toggleDarkMode()" class="px-4 py-2 hover:bg-gray-700 rounded-md" [attr.aria-label]="themeService.isDarkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'">
-          <lucide-icon [name]="themeService.isDarkMode() ? 'sun' : 'moon'" size="24"></lucide-icon>
+      <nav aria-label="Navegação principal" class="flex items-center gap-2">
+        <a routerLink="/clip" aria-label="Ir para a página do Clip" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">Clip</a>
+        <a routerLink="/notebooks" aria-label="Ir para a página de Cadernos" class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">Cadernos</a>
+        <span class="px-4 text-sm text-gray-600 dark:text-gray-300">Olá, {{ user.displayName || user.email }}</span>
+        <button (click)="toggleDarkMode()" aria-label="Alternar modo escuro"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+          <lucide-icon [name]="darkModeService.isDarkMode() ? 'sun' : 'moon'" size="20"></lucide-icon>
         </button>
-        <span class="px-4">Olá, {{ user.displayName || user.email }}</span>
         <button (click)="logout()" aria-label="Sair da conta" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md">Logout</button>
       </nav>
     }

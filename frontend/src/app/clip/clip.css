@@ -137,6 +137,40 @@
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Estilos para o modo noturno do textarea */
+.dark .notebook-textarea {
+  /* Fundo escuro para o "papel" */
+  background-color: #1f2937; /* gray-800 */
+
+  background-image: 
+    /* 1. Linha da margem vertical (vermelho mais escuro) */
+    linear-gradient(to right, 
+      transparent 2.9rem, 
+      #b91c1c 2.9rem, /* red-700 */
+      #b91c1c 3.0rem, 
+      transparent 3.0rem),
+    
+    /* 2. Linhas horizontais (azul mais escuro) */
+    linear-gradient(to bottom,
+      transparent calc(2rem - 1px),
+      #1d4ed8 calc(2rem - 1px) /* blue-700 */
+    );
+
+  /* As propriedades abaixo permanecem as mesmas, 
+     apenas as cores no background-image mudam.
+  */
+  background-size: 100% 100%, 100% 2rem;
+  background-attachment: local, local;
+  background-repeat: no-repeat, repeat-y;
+  line-height: 2rem; 
+  outline: none;
+  box-shadow: none;
+
+  /* Sombra de texto mais clara para contraste no fundo escuro */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+
 /* Quando o textarea está focado, apenas mostramos a borda 
   (que definimos no HTML com Tailwind) 
 */
