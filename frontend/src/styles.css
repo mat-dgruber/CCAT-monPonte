@@ -1,3 +1,16 @@
+@config "../tailwind.config.js";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.dark {
+    @apply bg-gray-900 text-white;
+}
+
+.dark body {
+    @apply bg-gray-900 text-white;
+}
+
+body {
+    @apply bg-white text-black;
+}

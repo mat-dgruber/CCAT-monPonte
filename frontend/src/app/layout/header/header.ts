@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
+import { ThemeService } from '../../services/theme';
 import { Observable } from 'rxjs';
 import { User } from 'firebase/auth';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,9 +17,14 @@ import { LucideAngularModule } from 'lucide-angular';
 export class HeaderComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
-  authState$: Observable<User | null> = this.authService.authState$;
+  public themeService = inject(ThemeService);
+  public authState$: Observable<User | null> = this.authService.authState$;
 
-  async logout() {
+  public toggleDarkMode() {
+    this.themeService.toggleDarkMode();
+  }
+
+  public async logout() {
     try {
       await this.authService.logout();
       this.router.navigate(['/login']);

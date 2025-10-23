@@ -6,6 +6,9 @@
       <nav aria-label="Navegação principal" class="flex items-center">
         <a routerLink="/clip" aria-label="Ir para a página do Clip" class="px-4 py-2 hover:bg-gray-700 rounded-md">Clip</a>
         <a routerLink="/notebooks" aria-label="Ir para a página de Cadernos" class="px-4 py-2 hover:bg-gray-700 rounded-md">Cadernos</a>
+        <button (click)="toggleDarkMode()" class="px-4 py-2 hover:bg-gray-700 rounded-md" [attr.aria-label]="themeService.isDarkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'">
+          <lucide-icon [name]="themeService.isDarkMode() ? 'sun' : 'moon'" size="24"></lucide-icon>
+        </button>
         <span class="px-4">Olá, {{ user.displayName || user.email }}</span>
         <button (click)="logout()" aria-label="Sair da conta" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md">Logout</button>
       </nav>
