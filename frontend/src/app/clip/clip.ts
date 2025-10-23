@@ -42,7 +42,6 @@ export class Clip implements OnInit, OnDestroy {
 
   availableFonts = [
     { name: 'Padrão', family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif" },
-    { name: 'Monoespaçado', family: "'Roboto Mono', monospace" },
     { name: 'Manuscrito', family: "'Caveat', cursive" },
     { name: 'Serifado', family: "'Georgia', serif" }
   ];

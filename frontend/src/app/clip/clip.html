@@ -18,55 +18,56 @@
 
     <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-dark-secondary/50 border-t border-gray-200 dark:border-dark-border transition-colors duration-300">
       
-      @if (clipService.showAdvancedClipOptions() && clipService.showCounts()) {
-        <div class="text-sm text-gray-500 dark:text-dark-text-secondary font-mono">
-          <span>Caracteres: {{ clipService.characterCount() }}</span>
-          <span class="mx-2">|</span>
-          <span>Palavras: {{ clipService.wordCount() }}</span>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-4">
+        <div class="flex items-center gap-2">
+          <button
+            (click)="clearText()" aria-label="Limpar conteúdo do Clip"
+            class="px-4 py-2 bg-transparent text-gray-600 rounded-lg hover:bg-gray-100 font-medium transition-colors duration-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent border border-gray-300 dark:border-dark-border">
+            Limpar
+          </button>
+          <button
+            (click)="onCopy()" aria-label="Copiar todo o conteúdo do Clip"
+            class="px-4 py-2 bg-transparent text-blue-600 rounded-lg hover:bg-blue-100 font-medium transition-colors duration-200 dark:text-blue-400 dark:hover:bg-dark-accent border border-blue-500 dark:border-blue-500">
+            Copiar tudo
+          </button>
         </div>
-      }
 
-      <div class="flex items-center gap-4">
-        <button 
-          (click)="clearText()" aria-label="Limpar conteúdo do Clip"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition-colors duration-200 dark:bg-dark-accent dark:text-white dark:hover:bg-dark-border">
-          Limpar
-        </button>
-        <button 
-          (click)="onCopy()" aria-label="Copiar todo o conteúdo do Clip"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
-          Copiar tudo
-        </button>
+        @if (clipService.showAdvancedClipOptions() && clipService.showCounts()) {
+          <div class="text-sm text-gray-500 dark:text-dark-text-secondary font-mono">
+            <span>Caracteres: {{ clipService.characterCount() }}</span>
+            <span class="mx-2">|</span>
+            <span>Palavras: {{ clipService.wordCount() }}</span>
+          </div>
+        }
+
+        @if (clipService.showAdvancedClipOptions() && clipService.showFontSelect()) {
+          <div class="flex items-center gap-2">
+            <label for="font-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Fonte:</label>
+            <select id="font-select"
+                    class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"
+                    [value]="clipService.selectedFont()"
+                    (change)="onFontChange($event)">
+              @for (font of availableFonts; track font.family) {
+                <option [value]="font.family">{{ font.name }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (clipService.showAdvancedClipOptions() && clipService.showFontSizeSelect()) {
+          <div class="flex items-center gap-2">
+            <label for="font-size-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Tamanho:</label>
+            <select id="font-size-select"
+                    class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"
+                    [value]="clipService.selectedFontSize()"
+                    (change)="onFontSizeChange($event)">
+              @for (size of availableFontSizes; track size.size) {
+                <option [value]="size.size">{{ size.name }}</option>
+              }
+            </select>
+          </div>
+        }
       </div>
-
-      @if (clipService.showAdvancedClipOptions() && clipService.showFontSelect()) {
-        <div class="flex items-center gap-2">
-          <label for="font-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Fonte:</label>
-          <select id="font-select" 
-                  class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"
-                  [value]="clipService.selectedFont()"
-                  (change)="onFontChange($event)">
-            @for (font of availableFonts; track font.family) {
-              <option [value]="font.family">{{ font.name }}</option>
-            }
-          </select>
-        </div>
-      }
-
-      @if (clipService.showAdvancedClipOptions() && clipService.showFontSizeSelect()) {
-        <div class="flex items-center gap-2">
-          <label for="font-size-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Tamanho:</label>
-          <select id="font-size-select"
-                  class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"
-                  [value]="clipService.selectedFontSize()"
-                  (change)="onFontSizeChange($event)">
-            @for (size of availableFontSizes; track size.size) {
-              <option [value]="size.size">{{ size.name }}</option>
-            }
-          </select>
-        </div>
-      }
-
 
       <button 
         (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
