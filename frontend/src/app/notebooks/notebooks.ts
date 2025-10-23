@@ -104,24 +104,16 @@ export class Notebooks implements OnInit {
     this.routerSubscription = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      setTimeout(() => {
-        let route = this.route.firstChild;
-        let noteId: string | null = null;
-        let notebookId: string | null = null;
-
-        while (route) {
-          if (route.snapshot.paramMap.has('noteId')) {
-            noteId = route.snapshot.paramMap.get('noteId');
-          }
-          if (route.snapshot.paramMap.has('notebookId')) {
-            notebookId = route.snapshot.paramMap.get('notebookId');
-          }
-          route = route.firstChild;
+      let route = this.route.firstChild;
+      while (route) {
+        if (route.snapshot.paramMap.has('noteId')) {
+          this.currentNoteId.set(route.snapshot.paramMap.get('noteId'));
         }
-
-        this.currentNoteId.set(noteId);
-        this.selectedNotebookId.set(notebookId);
-      });
+        if (route.snapshot.paramMap.has('notebookId')) {
+          this.selectedNotebookId.set(route.snapshot.paramMap.get('notebookId'));
+        }
+        route = route.firstChild;
+      }
     });
 
     const savedSort = localStorage.getItem(SORT_PREFERENCE_KEY);
