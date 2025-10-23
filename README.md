@@ -1,8 +1,8 @@
 # monPonte
 
-Este é um projeto do Firebase com um aplicativo de front-end Angular.
+Este é um projeto Firebase com uma aplicação front-end em Angular.
 
-## Configuração do Desenvolvimento
+## Configuração de Desenvolvimento
 
 ### Pré-requisitos
 
@@ -14,33 +14,39 @@ Este é um projeto do Firebase com um aplicativo de front-end Angular.
 
 1.  Clone o repositório:
     ```sh
-    git clone https://github.com/seu-usuario/mon-ponte.git
-    cd mon-ponte
+    git clone <URL_DO_REPOSITORIO>
+    cd monPonte
     ```
 
 2.  Instale as dependências do front-end:
     ```sh
-    cd frontend
-    npm install
+    npm install --prefix frontend
     ```
 
-### Executando o Aplicativo
+### Executando a Aplicação
 
 1.  Inicie o servidor de desenvolvimento do Angular:
     ```sh
-    cd frontend
-    npm start
+    npm start --prefix frontend
     ```
-    O aplicativo estará disponível em `http://localhost:4200/`.
+    A aplicação estará disponível em `http://localhost:4200/`.
 
-2.  Para implantar no Firebase, use o Firebase CLI:
+### Implantação no Firebase
+
+1.  Faça o login no Firebase (se ainda não estiver logado):
     ```sh
+    firebase login
+    ```
+
+2.  Construa a aplicação e implante no Firebase:
+    ```sh
+    npm run build --prefix frontend
     firebase deploy
     ```
 
 ## Executando com Docker
 
-Você também pode executar o aplicativo usando o Docker.
+Você também pode executar a aplicação usando o Docker.
 
 1.  Construa a imagem do Docker:
     ```sh
@@ -51,4 +57,4 @@ Você também pode executar o aplicativo usando o Docker.
     ```sh
     docker run -p 8080:80 mon-ponte
     ```
-    O aplicativo estará disponível em `http://localhost:8080/`.
+    A aplicação estará disponível em `http://localhost:8080/`.

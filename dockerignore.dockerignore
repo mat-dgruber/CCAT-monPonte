@@ -1,0 +1,12 @@
+# Ignore node_modules directory
+**/node_modules
+
+# Ignore Git directory
+.git
+
+# Ignore Angular cache and build output
+**/dist
+**/.angular
+
+# Ignore npm debug logs
+npm-debug.log
