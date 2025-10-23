@@ -29,6 +29,10 @@ export class NotificationService {
       ...currentToasts,
       { id, message, type, duration }
     ]);
+
+    setTimeout(() => {
+      this.remove(id);
+    }, duration);
   }
 
   remove(toastId: string) {
