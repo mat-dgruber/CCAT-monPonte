@@ -83,97 +83,82 @@
   background-color: #0056b3;
 }
 
+/* Estilo padrão do textarea, sem o visual de caderno */
 .notebook-textarea {
-  /* Define um fundo creme, parecido com papel de caderno.
-    Usei a cor 'yellow-50' do Tailwind.
-  */
-  background-color: #fefce8;
-
-  /* Esta é a parte principal! 
-    Usamos dois 'linear-gradient' para criar as linhas.
-    'background-attachment: local' é crucial para que as linhas
-    rolem junto com o texto que você digita.
-  */
-  background-image: 
-    /* 1. A linha da margem vertical (vermelha) */
-    /* Começa transparente, desenha a linha vermelha e continua transparente */
-    linear-gradient(to right, 
-      transparent 2.9rem, 
-      #f87171 2.9rem, /* Cor: red-400 do Tailwind */
-      #f87171 3.0rem, 
-      transparent 3.0rem),
-    
-    /* 2. As linhas horizontais (azul claro) */
-    /* A linha fica no final de um bloco de 1.5rem (tamanho da linha de texto) */
-    linear-gradient(to bottom,
-      transparent calc(2rem - 1px), /* Fica transparente até quase o final da linha */
-      #93c5fd calc(2rem - 1px)      /* Desenha a linha azul */
-    );
-
-  /* Define os tamanhos dos fundos:
-    - A margem vertical ocupa 100% da altura.
-    - As linhas horizontais se repetem a cada 1.5rem na altura.
-  */
-  background-size: 100% 100%, 100% 2rem;
-
-  /* Faz as linhas rolarem com o texto */
-  background-attachment: local, local;
-
-  /* A margem não se repete, as linhas horizontais sim (para baixo) */
-  background-repeat: no-repeat, repeat-y;
-  
-  /* Esta é a altura da linha do texto. 
-    DEVE ser igual ao tamanho do 'background-size' horizontal.
-    1.75rem = 28px (leading-7 no Tailwind)
-    2rem = 32px (leading-8 no Tailwind)
-  */
-  line-height: 2rem; 
-
-  /* Remove o anel de foco azul padrão para um visual mais limpo */
+  background-color: transparent;
+  color: inherit; /* Herda a cor do texto do tema */
   outline: none;
   box-shadow: none;
+  line-height: 1.75rem; /* Altura de linha padrão */
+  text-shadow: none;
+}
 
-  /* Adiciona uma sombra sutil ao texto para dar profundidade */
+/* Estilo padrão para o modo escuro, também sem visual de caderno */
+.dark .notebook-textarea {
+  background-color: transparent;
+  color: inherit;
+}
+
+/*
+  MODO CADERNO - ATIVADO VIA CLASSE '.notebook-mode'
+  Estes estilos recriam a aparência de uma folha de caderno pautada.
+*/
+
+/* Estilo do modo caderno para o tema claro */
+.notebook-mode .notebook-textarea {
+  /* Fundo creme, parecido com papel */
+  background-color: #fefce8; /* yellow-50 */
+
+  /* Desenha as linhas horizontais e a margem vertical */
+  background-image: 
+    /* Linha da margem vertical (vermelha) */
+    linear-gradient(to right, 
+      transparent 2.9rem, 
+      #f87171 2.9rem, /* red-400 */
+      #f87171 3.0rem, 
+      transparent 3.0rem),
+    /* Linhas horizontais (azul claro) */
+    linear-gradient(to bottom,
+      transparent calc(2rem - 1px),
+      #93c5fd calc(2rem - 1px) /* blue-300 */
+    );
+
+  /* Tamanho e repetição dos fundos */
+  background-size: 100% 100%, 100% 2rem;
+  background-attachment: local, local;
+  background-repeat: no-repeat, repeat-y;
+  
+  /* A altura da linha DEVE corresponder ao tamanho da linha do background */
+  line-height: 2rem; 
+
+  /* Sombra sutil no texto para profundidade */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilos para o modo noturno do textarea */
-.dark .notebook-textarea {
+/* Estilo do modo caderno para o tema escuro */
+.dark.notebook-mode .notebook-textarea {
   /* Fundo escuro para o "papel" */
   background-color: #1f2937; /* gray-800 */
 
+  /* Linhas com cores mais escuras para contraste */
   background-image: 
-    /* 1. Linha da margem vertical (vermelho mais escuro) */
+    /* Linha da margem vertical (vermelho escuro) */
     linear-gradient(to right, 
       transparent 2.9rem, 
       #b91c1c 2.9rem, /* red-700 */
       #b91c1c 3.0rem, 
       transparent 3.0rem),
-    
-    /* 2. Linhas horizontais (azul mais escuro) */
+    /* Linhas horizontais (azul escuro) */
     linear-gradient(to bottom,
       transparent calc(2rem - 1px),
       #1d4ed8 calc(2rem - 1px) /* blue-700 */
     );
 
-  /* As propriedades abaixo permanecem as mesmas, 
-     apenas as cores no background-image mudam.
-  */
-  background-size: 100% 100%, 100% 2rem;
-  background-attachment: local, local;
-  background-repeat: no-repeat, repeat-y;
-  line-height: 2rem; 
-  outline: none;
-  box-shadow: none;
-
-  /* Sombra de texto mais clara para contraste no fundo escuro */
+  /* Sombra de texto mais clara para contraste */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-
-/* Quando o textarea está focado, apenas mostramos a borda 
-  (que definimos no HTML com Tailwind) 
-*/
+/* Remove o anel de foco padrão em todos os modos */
 .notebook-textarea:focus {
   outline: none;
   box-shadow: none;
