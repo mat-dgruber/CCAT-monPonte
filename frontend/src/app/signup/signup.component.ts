@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthError } from '@angular/fire/auth';
@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth';
 @Component({
   selector: 'app-signup',
   standalone: true, // RouterLink removed as it's not used in this component's template
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './signup.html',
 })
 export class SignupComponent {
@@ -42,7 +42,10 @@ export class SignupComponent {
     }
   }
 
-  
+  goToLogin(event: MouseEvent) {
+    event.preventDefault(); // Prevent default anchor behavior
+    this.router.navigate(['/login']);
+  }
 
   private getFriendlyErrorMessage(error: AuthError): string {
     switch (error.code) {
