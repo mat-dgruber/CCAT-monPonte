@@ -11,14 +11,28 @@
         (ngModelChange)="onContentChange()"
       />
       <div class="actions flex items-center gap-4">
-        <button (click)="deleteNote()" class="delete-button p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-red-600 dark:text-dark-text-secondary dark:hover:bg-dark-accent dark:hover:text-red-500" title="Deletar Nota">
-          <lucide-icon name="trash-2" size="20"></lucide-icon>
-        </button>
-        <div class="save-status text-sm">
+        <div class="save-status text-sm text-gray-500 dark:text-dark-text-secondary min-w-[70px] text-right">
           @if (isSaving()) {
-            <span class="text-gray-500 dark:text-dark-text-secondary">Salvando...</span>
+            <span>Salvando...</span>
           } @else {
             <span class="text-green-600 dark:text-green-400">Salvo</span>
+          }
+        </div>
+        <div class="relative">
+          <button (click)="toggleMoreOptions()" class="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent" title="Mais opções">
+            <lucide-icon name="more-vertical" size="20"></lucide-icon>
+          </button>
+          @if (showMoreOptions()) {
+            <div @flyInOut class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-primary rounded-md shadow-lg z-10 border border-gray-200 dark:border-dark-border" (clickout)="closeMoreOptions()">
+              <ul>
+                <li>
+                  <a (click)="deleteNote()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-gray-100 dark:hover:bg-dark-accent cursor-pointer">
+                    <lucide-icon name="trash-2" size="16"></lucide-icon>
+                    <span>Deletar Nota</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
           }
         </div>
       </div>

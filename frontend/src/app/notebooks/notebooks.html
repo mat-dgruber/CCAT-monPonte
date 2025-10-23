@@ -1,6 +1,6 @@
 <div class="three-column-layout">
   <!-- Notebooks Sidebar -->
-  <aside class="notebooks-sidebar rounded-xl bg-gray-50 dark:bg-dark-secondary transition-colors duration-300">
+  <aside class="notebooks-sidebar rounded-xl bg-gray-50 dark:bg-dark-panel-left transition-colors duration-300">
     <!-- Header -->
     <div class="sidebar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
       <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Cadernos</h2>
@@ -45,14 +45,21 @@
         <ul class="notebook-list p-2 space-y-1">
           @for (notebook of filteredNotebooks(); track notebook.id) {
             <li 
-              class="flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors duration-150 group"
+              class="flex items-center justify-between px-4 py-2 rounded-md cursor-pointer transition-colors duration-150 group"
               [class.bg-indigo-100]="notebook.id === selectedNotebookId()"
               [class.dark:bg-dark-accent]="notebook.id === selectedNotebookId()"
               [class.hover:bg-gray-200]="notebook.id !== selectedNotebookId()"
               [class.dark:hover:bg-dark-primary]="notebook.id !== selectedNotebookId()"
               (click)="selectNotebook(notebook.id)">
               
-              <span class="text-sm font-medium text-gray-700 dark:text-white truncate" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
+              <span
+                class="text-sm truncate"
+                [class.font-semibold]="notebook.id === selectedNotebookId()"
+                [class.font-medium]="notebook.id !== selectedNotebookId()"
+                [class.text-gray-700]="notebook.id !== selectedNotebookId()"
+                [class.dark:text-white]="notebook.id === selectedNotebookId()"
+                [innerHTML]="notebook.name | highlight: searchTerm()">
+              </span>
               
               <div class="notebook-actions flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 transition-colors duration-300">
                 <button class="p-1 text-gray-500 rounded-full hover:bg-gray-300 dark:text-dark-text-secondary dark:hover:bg-dark-border" (click)="openRenameModal(notebook.id, notebook.name); $event.stopPropagation()" title="Renomear caderno">
@@ -70,7 +77,7 @@
   </aside>
 
   <!-- Notes Column -->
-  <main class="notes-column border-l border-gray-200 dark:border-dark-border transition-colors duration-300">
+  <main class="notes-column bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-colors duration-300">
     @if (selectedNotebookId()) {
       <app-note-column [notebookId]="selectedNotebookId()" (noteSelected)="onNoteSelected($event)"></app-note-column>
     } @else {
@@ -81,7 +88,7 @@
   </main>
 
   <!-- Note Editor -->
-  <section class="note-editor-column relative border-l border-gray-200 dark:border-dark-border transition-colors duration-300">
+  <section class="note-editor-column relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-colors duration-300">
     <div class="absolute inset-0" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>

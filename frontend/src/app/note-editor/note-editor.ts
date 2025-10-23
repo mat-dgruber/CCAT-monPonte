@@ -28,6 +28,7 @@ export class NoteEditor implements OnInit, OnDestroy {
   isLoading: WritableSignal<boolean> = signal(true);
   isSaving: WritableSignal<boolean> = signal(false);
   showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
+  showMoreOptions: WritableSignal<boolean> = signal(false);
 
   private notebookId: string | null = null;
   private noteId: string | null = null;
@@ -94,7 +95,16 @@ export class NoteEditor implements OnInit, OnDestroy {
 
   // --- Lógica de Deleção ---
 
+  toggleMoreOptions(): void {
+    this.showMoreOptions.set(!this.showMoreOptions());
+  }
+
+  closeMoreOptions(): void {
+    this.showMoreOptions.set(false);
+  }
+
   deleteNote(): void {
+    this.closeMoreOptions();
     this.showDeleteConfirmationModal.set(true);
   }
 
