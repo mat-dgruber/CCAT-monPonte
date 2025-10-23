@@ -1,8 +1,8 @@
-<div class="note-editor-container bg-white dark:bg-dark-secondary h-full flex flex-col transition-colors duration-300">
+<div class="note-editor-container dark:bg-dark-secondary h-full flex flex-col transition-colors duration-300">
   @if (isLoading()) {
     <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary">Carregando nota...</div>
   } @else if (note(); as currentNote) {
-    <div class="note-editor-header p-4 border-b rounded-xl border-gray-200 dark:border-dark-border flex items-center gap-4 bg-white dark:bg-dark-secondary transition-colors duration-300">
+    <div class="note-editor-header p-4 border-b rounded-xl border-gray-200 dark:border-dark-border flex items-center gap-4 dark:bg-dark-secondary transition-colors duration-300">
       <input 
         type="text" 
         placeholder="Título da Nota" 
