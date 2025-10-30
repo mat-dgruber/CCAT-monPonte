@@ -9,7 +9,6 @@ import { Modal } from '../modal/modal';
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
 import { ThemeService } from '../services/theme';
-import { ResponsiveService } from '../services/responsive';
 
 @Component({
   selector: 'app-note-editor',
@@ -25,13 +24,13 @@ export class NoteEditor implements OnInit, OnDestroy {
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
   themeService = inject(ThemeService);
-  responsiveService = inject(ResponsiveService);
 
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);
   isSaving: WritableSignal<boolean> = signal(false);
   showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
   showMoreOptions: WritableSignal<boolean> = signal(false);
+  tagInput: WritableSignal<string> = signal('');
 
   private notebookId: string | null = null;
   private noteId: string | null = null;
@@ -96,6 +95,46 @@ export class NoteEditor implements OnInit, OnDestroy {
     this.contentChanges.next();
   }
 
+  // --- Lógica de Tags ---
+
+  addTag(): void {
+    const newTag = this.tagInput().trim();
+    if (newTag && this.note()) {
+      const currentNote = this.note()!;
+      if (!currentNote.tags) {
+        currentNote.tags = [];
+      }
+      if (!currentNote.tags.includes(newTag)) {
+        currentNote.tags.push(newTag);
+        this.note.set({ ...currentNote });
+        this.updateTags();
+      }
+      this.tagInput.set('');
+    }
+  }
+
+  removeTag(tagToRemove: string): void {
+    if (this.note()) {
+      const currentNote = this.note()!;
+      currentNote.tags = currentNote.tags?.filter(tag => tag !== tagToRemove);
+      this.note.set({ ...currentNote });
+      this.updateTags();
+    }
+  }
+
+  private async updateTags(): Promise<void> {
+    if (!this.notebookId || !this.noteId || !this.note()?.tags) return;
+    try {
+      this.isSaving.set(true);
+      await this.dataService.updateNoteTags(this.notebookId, this.noteId, this.note()!.tags!);
+    } catch (error) {
+      this.notificationService.showError('Erro ao salvar as tags.');
+      console.error('Erro ao salvar as tags:', error);
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
   // --- Lógica de Deleção ---
 
   toggleMoreOptions(): void {
@@ -129,11 +168,4 @@ export class NoteEditor implements OnInit, OnDestroy {
     }
   }
 
-  navigateBack(): void {
-    if (this.notebookId) {
-      this.router.navigate(['/notebooks', this.notebookId]);
-    } else {
-      this.router.navigate(['/notebooks']);
-    }
-  }
 }

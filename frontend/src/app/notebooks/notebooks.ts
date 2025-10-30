@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate, keyframes } from '@angular/animations';
+import { trigger, transition, style, animate, keyframes, state } from '@angular/animations';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AuthService } from '../services/auth';
 import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
@@ -11,8 +11,8 @@ import { NotificationService } from '../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
-import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Subscription, Subject } from 'rxjs';
+import { filter, debounceTime } from 'rxjs/operators';
 import { ResponsiveService } from '../services/responsive';
 
 
@@ -47,6 +47,22 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
         style({ position: 'relative', opacity: 0, transform: 'translateY(10px)' }),
         animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
+    ]),
+    trigger('favoriteAnimation', [
+      // Animação para quando um item se torna favorito
+      transition('false => true', [
+        animate('400ms ease-in-out', keyframes([
+          style({ transform: 'scale(1)', offset: 0 }),
+          style({ transform: 'scale(1.1)', boxShadow: '0 0 10px #fbbf24', offset: 0.5 }), // Efeito de pulso e brilho amarelo
+          style({ transform: 'scale(1)', offset: 1.0 })
+        ]))
+      ]),
+      // Animação para quando um item DEIXA de ser favorito
+      transition('true => false', [
+        // A animação de "deslizar" será tratada pelo reordenamento da lista.
+        // Podemos manter um efeito sutil aqui ou remover. Por ora, vamos manter.
+        animate('200ms ease-out', style({ opacity: 0.7, transform: 'scale(0.95)' }))
+      ])
     ])
   ]
 })
@@ -59,7 +75,8 @@ export class Notebooks implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   responsiveService = inject(ResponsiveService);
-  private routerSubscription!: Subscription;
+  private subscriptions = new Subscription();
+  private searchSubject = new Subject<string>();
 
   
   // Signals para o estado local do componente (UI)
@@ -73,20 +90,68 @@ export class Notebooks implements OnInit {
   notebookToRename: WritableSignal<{ id: string; name: string } | null> = signal(null);
   modalMode: WritableSignal<'create' | 'rename'> = signal('create');
   newNotebookName: WritableSignal<string> = signal('');
+  newNotebookColor: WritableSignal<string> = signal('#FFFFFF');
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
   isNoteOpen: WritableSignal<boolean> = signal(false);
   isNavigating: WritableSignal<boolean> = signal(false); // Novo signal para o estado de navegação
 
+  availableColors: string[] = [
+    '#FFFFFF', '#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'
+  ];
+
   // Signal computado para filtrar os cadernos
   filteredNotebooks: Signal<Notebook[]> = computed(() => {
+    // 1. Pega os valores atuais dos signals de dependência
     const term = this.searchTerm().toLowerCase();
-    // Usa o signal de cadernos do serviço
-    const allNotebooks = this.notebookService.notebooks();
+    const notebooks = this.notebookService.notebooks();
+    const sort = this.sortOption();
 
-    if (!term) return allNotebooks;
+    // 2. Filtra os cadernos com base no termo de busca
+    const filtered = term
+      ? notebooks.filter(notebook => notebook.name.toLowerCase().includes(term))
+      : [...notebooks]; // Cria uma cópia para não modificar o array original
 
-    return allNotebooks.filter(notebook => notebook.name.toLowerCase().includes(term));
+    // 3. Ordena a lista filtrada
+    return filtered.sort((a, b) => {
+      const valA = sort.by === 'name' ? a.name.toLowerCase() : a.createdAt?.toMillis() || 0;
+      const valB = sort.by === 'name' ? b.name.toLowerCase() : b.createdAt?.toMillis() || 0;
+
+      if (valA < valB) {
+        return sort.direction === 'asc' ? -1 : 1;
+      }
+      if (valA > valB) {
+        return sort.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  });
+
+  favoriteNotebooks: Signal<Notebook[]> = computed(() => 
+    this.filteredNotebooks().filter(n => n.isFavorite)
+  );
+
+  regularNotebooks: Signal<Notebook[]> = computed(() =>
+    this.filteredNotebooks().filter(n => !n.isFavorite)
+  );
+
+  // NOVO: Signal computado para uma lista única, ordenada e agrupada
+  sortedAndGroupedNotebooks: Signal<Notebook[]> = computed(() => {
+    const notebooks = this.filteredNotebooks();
+    return [...notebooks].sort((a, b) => {
+      // 1. Prioridade máxima: Favoritos primeiro
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+
+      // 2. Se ambos são favoritos ou ambos não são, aplica a ordenação do usuário
+      const sort = this.sortOption();
+      const valA = sort.by === 'name' ? a.name.toLowerCase() : a.createdAt?.toMillis() || 0;
+      const valB = sort.by === 'name' ? b.name.toLowerCase() : b.createdAt?.toMillis() || 0;
+
+      if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
   });
 
   constructor() {
@@ -94,27 +159,46 @@ export class Notebooks implements OnInit {
     // e nenhum caderno está selecionado.
     effect(() => {
       const notebooks = this.notebookService.notebooks();
-      if (notebooks.length > 0 && !this.selectedNotebookId()) {
-        this.selectNotebook(notebooks[0].id);
+      const currentSelection = this.selectedNotebookId();
+      const isNoteOpen = this.currentNoteId();
+
+      // Condição para evitar a re-seleção automática:
+      // 1. A lista de cadernos não pode estar vazia.
+      // 2. Nenhum caderno deve estar selecionado (currentSelection é null).
+      // 3. Nenhuma nota deve estar aberta (isNoteOpen é null).
+      // 4. O ID do primeiro caderno da lista não pode ser o mesmo já selecionado.
+      if (notebooks.length > 0 && !currentSelection && !isNoteOpen) {
+         // Verifica se o primeiro caderno já não é o selecionado para evitar loops
+        if (currentSelection !== notebooks[0].id) {
+          this.selectNotebook(notebooks[0].id);
+        }
       }
     });
   }
 
   ngOnInit() {
-    this.routerSubscription = this.router.events.pipe(
+    // Assinatura para sincronizar o estado da rota com os signals
+    const routeSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       let route = this.route.firstChild;
+      let foundNotebookId = null;
+      let foundNoteId = null;
+
       while (route) {
         if (route.snapshot.paramMap.has('noteId')) {
-          this.currentNoteId.set(route.snapshot.paramMap.get('noteId'));
+          foundNoteId = route.snapshot.paramMap.get('noteId');
         }
         if (route.snapshot.paramMap.has('notebookId')) {
-          this.selectedNotebookId.set(route.snapshot.paramMap.get('notebookId'));
+          foundNotebookId = route.snapshot.paramMap.get('notebookId');
         }
         route = route.firstChild;
       }
+      this.currentNoteId.set(foundNoteId);
+      this.selectedNotebookId.set(foundNotebookId);
     });
+
+    this.subscriptions.add(routeSub);
 
     const savedSort = localStorage.getItem(SORT_PREFERENCE_KEY);
     if (savedSort) {
@@ -128,6 +212,14 @@ export class Notebooks implements OnInit {
         localStorage.removeItem(SORT_PREFERENCE_KEY);
       }
     }
+
+    // Assinatura para a busca com debounce
+    const searchSub = this.searchSubject.pipe(
+      debounceTime(300) // Espera 300ms após a última tecla digitada
+    ).subscribe(term => {
+      this.searchTerm.set(term);
+    });
+    this.subscriptions.add(searchSub);
   }
 
   retryFetchNotebooks() {
@@ -142,6 +234,10 @@ export class Notebooks implements OnInit {
     const newSortOption = { by, direction };
     this.sortOption.set(newSortOption);
 
+    // Não é mais necessário chamar o fetchNotebooks aqui.
+    // A mudança no signal 'sortOption' fará com que o 'filteredNotebooks'
+    // seja recalculado automaticamente.
+
     // Salva a nova preferência no localStorage
     localStorage.setItem(SORT_PREFERENCE_KEY, JSON.stringify(newSortOption));
   }
@@ -152,7 +248,7 @@ export class Notebooks implements OnInit {
 
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
-    this.searchTerm.set(inputElement.value);
+    this.searchSubject.next(inputElement.value);
   }
 
   clearSearch(inputElement: HTMLInputElement) {
@@ -163,13 +259,15 @@ export class Notebooks implements OnInit {
   openCreateModal() {
     this.modalMode.set('create');
     this.newNotebookName.set('');
+    this.newNotebookColor.set('#FFFFFF');
     this.showCreateRenameModal.set(true);
   }
 
-  openRenameModal(id: string, name: string) {
+  openRenameModal(id: string, name: string, color?: string) {
     this.modalMode.set('rename');
     this.notebookToRename.set({ id, name });
     this.newNotebookName.set(name);
+    this.newNotebookColor.set(color || '#FFFFFF');
     this.showCreateRenameModal.set(true);
   }
 
@@ -183,21 +281,22 @@ export class Notebooks implements OnInit {
     if (name === '') return;
 
     if (this.modalMode() === 'create') {
-      await this.createNotebook(name);
+      await this.createNotebook(name, this.newNotebookColor());
     } else if (this.notebookToRename()) {
       await this.updateNotebook(this.notebookToRename()!.id, name);
+      await this.updateNotebookColor(this.notebookToRename()!.id, this.newNotebookColor());
     }
     this.closeCreateRenameModal();
   }
 
-  private async createNotebook(name: string) {
+  private async createNotebook(name: string, color: string) {
     if (!this.authService.getCurrentUserId()) {
       this.notificationService.showError('Você precisa estar logado para criar um caderno.');
       return;
     }
 
     try {
-      const newId = await this.dataService.createNotebook(name);
+      const newId = await this.dataService.createNotebook(name, color);
       this.notificationService.showSuccess(`Caderno "${name}" criado com sucesso.`);
       // Re-busca os cadernos para atualizar a lista
       this.notebookService.fetchNotebooks();
@@ -221,6 +320,22 @@ export class Notebooks implements OnInit {
     } catch (error) {
       console.error('Erro ao atualizar o caderno:', error);
       this.notificationService.showError(`Erro ao renomear o caderno.`);
+    }
+  }
+
+  async updateNotebookColor(id: string, color: string) {
+    if (!this.authService.getCurrentUserId()) {
+      this.notificationService.showError('Você precisa estar logado para atualizar um caderno.');
+      return;
+    }
+
+    try {
+      await this.dataService.updateNotebookColor(id, color);
+      this.notificationService.showSuccess(`Cor do caderno atualizada.`);
+      // A lista será atualizada reativamente
+    } catch (error) {
+      console.error('Erro ao atualizar a cor do caderno:', error);
+      this.notificationService.showError(`Erro ao atualizar a cor do caderno.`);
     }
   }
 
@@ -299,12 +414,33 @@ export class Notebooks implements OnInit {
     this.selectedNoteId.set(null); // Reseta a nota selecionada ao trocar de caderno
   }
 
+  async toggleFavorite(notebook: Notebook) {
+    if (!this.authService.getCurrentUserId()) {
+      this.notificationService.showError('Você precisa estar logado para favoritar um caderno.');
+      return;
+    }
+
+    const newFavoriteStatus = !notebook.isFavorite;
+
+    try {
+      await this.dataService.updateNotebookFavoriteStatus(notebook.id, newFavoriteStatus);
+      const message = newFavoriteStatus 
+        ? `Caderno "${notebook.name}" adicionado aos favoritos.`
+        : `Caderno "${notebook.name}" removido dos favoritos.`;
+      this.notificationService.showSuccess(message);
+      // A UI será atualizada reativamente pelo onSnapshot do DataService
+    } catch (error) {
+      console.error('Erro ao atualizar o status de favorito:', error);
+      this.notificationService.showError('Erro ao atualizar o status de favorito.');
+    }
+  }
+
   onNoteSelected(noteId: string) {
     this.selectedNoteId.set(noteId);
   }
 
   ngOnDestroy() {
-    this.routerSubscription?.unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 
   navigateBack() {

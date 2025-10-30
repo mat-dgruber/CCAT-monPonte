@@ -2,16 +2,11 @@
   @if (isLoading()) {
     <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary">Carregando nota...</div>
   } @else if (note(); as currentNote) {
-    <div class="note-editor-header p-3 border-b border-gray-200 dark:border-dark-border flex items-center gap-2 bg-white dark:bg-dark-panel-right transition-colors duration-300">
-      @if (responsiveService.isMobile()) {
-        <button (click)="navigateBack()" class="p-2 text-gray-500 rounded-full hover:bg-gray-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent">
-          <lucide-icon name="arrow-left" size="20"></lucide-icon>
-        </button>
-      }
-      <input 
+    <div class="note-editor-header p-3 border-b border-gray-200 dark:border-dark-border flex items-center gap-2 bg-white dark:bg-dark-panel-right transition-colors duration-300 flex-shrink-0">      
+      <input
         type="text" 
         placeholder="Título da Nota" 
-        class="title-input flex-grow bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-gray-900 dark:text-white"
+        class="title-input flex-grow bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-gray-900 dark:text-white min-w-0"
         [(ngModel)]="currentNote.title"
         (ngModelChange)="onContentChange()"
       />
@@ -42,7 +37,7 @@
         </div>
       </div>
     </div>
-    <div class="note-content-wrapper flex-grow p-4">
+    <div class="note-content-wrapper flex-grow p-4 overflow-y-auto">
       <textarea
         class="note-content-textarea w-full h-full bg-transparent focus:outline-none resize-none text-gray-800 dark:text-white"
         [class.notebook-bg]="themeService.notebookStyle()"
@@ -51,6 +46,28 @@
         (ngModelChange)="onContentChange()"
         rows="15"
       ></textarea>
+    </div>
+
+    <!-- Tags Footer -->
+    <div class="note-editor-footer p-3 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-accent/20 flex-shrink-0">
+      <div class="tags-container flex flex-wrap items-center gap-2">
+        @for (tag of currentNote.tags; track tag) {
+          <div class="tag-pill flex items-center bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded-full dark:bg-indigo-900 dark:text-indigo-300">
+            <span>{{ tag }}</span>
+            <button (click)="removeTag(tag)" class="ml-1.5 -mr-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200">
+              <lucide-icon name="x" size="12"></lucide-icon>
+            </button>
+          </div>
+        }
+        <input 
+          type="text"
+          placeholder="Adicionar tag..."
+          class="tag-input bg-transparent focus:outline-none text-sm p-1 flex-grow"
+          [ngModel]="tagInput()"
+          (ngModelChange)="tagInput.set($event)"
+          (keydown.enter)="addTag()"
+        />
+      </div>
     </div>
   } @else {
     <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary flex items-center justify-center h-full">Selecione uma nota para editar.</div>

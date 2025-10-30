@@ -24,14 +24,17 @@ export type SortDirection = 'asc' | 'desc';
 export interface Notebook {
   id: string;
   name: string;
+  color?: string;
   order: number;
   createdAt?: any;
+  isFavorite?: boolean;
 }
 
 export interface Note {
   id: string;
   title: string;
   content: string;
+  tags?: string[];
   createdAt?: any;
 }
 
@@ -71,13 +74,25 @@ export class DataService {
     });
   }
 
-  async createNotebook(name: string): Promise<string> {
+  async createNotebook(name: string, color: string = '#FFFFFF'): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar caderno.');
     const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
     const snapshot = await getDocs(notebooksCollectionRef);
     const newOrder = snapshot.size; // O novo caderno será o último
-    const docRef = await addDoc(notebooksCollectionRef, { name, createdAt: serverTimestamp(), order: newOrder });
+    const docRef = await addDoc(notebooksCollectionRef, { name, createdAt: serverTimestamp(), order: newOrder, color, isFavorite: false });
     return docRef.id;
+  }
+
+  updateNotebookFavoriteStatus(notebookId: string, isFavorite: boolean): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar o status de favorito.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}`);
+    return updateDoc(docRef, { isFavorite });
+  }
+
+  updateNotebookColor(notebookId: string, color: string): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar a cor do caderno.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}`);
+    return updateDoc(docRef, { color });
   }
 
   updateNotebook(notebookId: string, newName: string): Promise<void> {
@@ -146,8 +161,14 @@ export class DataService {
   async createNote(notebookId: string, title: string, content: string): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar nota.');
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
-    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp() });
+    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags: [] });
     return docRef.id;
+  }
+
+  updateNoteTags(notebookId: string, noteId: string, tags: string[]): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar as tags da nota.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
+    return updateDoc(docRef, { tags });
   }
 
   updateNote(notebookId: string, noteId: string, data: { title?: string, content?: string }): Promise<void> {

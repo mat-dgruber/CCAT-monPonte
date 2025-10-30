@@ -1,8 +1,0 @@
-/* Estilo para a nota que está sendo arrastada */
-.note-drag-item.cdk-drag-dragging {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.15);
-  transform: scale(1.03) rotate(2deg);
-  cursor: grabbing;
-  transition: box-shadow 200ms ease-out, transform 200ms ease-out;
-  z-index: 10; /* Garante que o item arrastado fique sobre os outros */
-}
