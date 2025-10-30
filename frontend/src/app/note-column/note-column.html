@@ -1,8 +1,8 @@
-<div class="flex flex-col h-full bg-white dark:bg-dark-panel-middle transition-colors duration-300">
+<div class="flex flex-col h-full w-80 bg-white dark:bg-dark-panel-middle transition-colors duration-300">
   <!-- Header with Search and Create Button -->
   <div class="flex-shrink-0 p-3 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
     <div class="flex items-center gap-2">      
-      <div class="relative flex-grow">
+      <div class="relative flex-grow min-w-0">
         <lucide-icon name="search" size="16" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
         <input
           type="text"
@@ -41,16 +41,16 @@
       <div class="space-y-2" @listAnimation>
         @for (note of filteredNotes(); track note.id) {
           <div 
-            class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0"
+            class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24"
             [class.border-indigo-500]="note.id === activeNoteId()"
             [class.bg-indigo-50]="note.id === activeNoteId()"
             [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"
             [class.border-transparent]="note.id !== activeNoteId()"
             [class.hover:bg-gray-100]="note.id !== activeNoteId()"
             [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()"
-            (click)="selectNote(note.id)"> 
-            <h3 class="font-semibold text-md truncate text-gray-800 dark:text-white" [innerHTML]="note.title | highlight: searchTerm()"></h3>
-            <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1" [innerHTML]="note.content | highlight: searchTerm()"></p>
+            (click)="selectNote(note.id)">
+            <h3 class="font-semibold text-md truncate text-gray-800 dark:text-white flex-shrink-0" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+            <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow" [innerHTML]="note.content | highlight: searchTerm()"></p>
           </div>
         }
       </div>

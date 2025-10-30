@@ -130,7 +130,7 @@
 
   <!-- Notes Column -->
   <main
-    class="notes-column w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex"
+    class="notes-column w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex min-w-0"
   >
     @if (selectedNotebookId()) {
       <app-note-column
@@ -148,7 +148,7 @@
   <section
     class="note-editor-column flex-grow relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex"
   >
-    <div class="absolute inset-0" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
+    <div class="absolute inset-0 overflow-y-auto" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>
   </section>

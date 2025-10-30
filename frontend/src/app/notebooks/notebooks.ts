@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate, keyframes } from '@angular/animations';
+import { trigger, transition, style, animate, keyframes, state } from '@angular/animations';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AuthService } from '../services/auth';
 import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
@@ -13,6 +13,7 @@ import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, Subject } from 'rxjs';
 import { filter, debounceTime } from 'rxjs/operators';
+import { ResponsiveService } from '../services/responsive';
 
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
@@ -46,6 +47,22 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
         style({ position: 'relative', opacity: 0, transform: 'translateY(10px)' }),
         animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
+    ]),
+    trigger('favoriteAnimation', [
+      // Animação para quando um item se torna favorito
+      transition('false => true', [
+        animate('400ms ease-in-out', keyframes([
+          style({ transform: 'scale(1)', offset: 0 }),
+          style({ transform: 'scale(1.1)', boxShadow: '0 0 10px #fbbf24', offset: 0.5 }), // Efeito de pulso e brilho amarelo
+          style({ transform: 'scale(1)', offset: 1.0 })
+        ]))
+      ]),
+      // Animação para quando um item DEIXA de ser favorito
+      transition('true => false', [
+        // A animação de "deslizar" será tratada pelo reordenamento da lista.
+        // Podemos manter um efeito sutil aqui ou remover. Por ora, vamos manter.
+        animate('200ms ease-out', style({ opacity: 0.7, transform: 'scale(0.95)' }))
+      ])
     ])
   ]
 })
@@ -57,6 +74,7 @@ export class Notebooks implements OnInit {
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  responsiveService = inject(ResponsiveService);
   private subscriptions = new Subscription();
   private searchSubject = new Subject<string>();
 
@@ -117,6 +135,25 @@ export class Notebooks implements OnInit {
     this.filteredNotebooks().filter(n => !n.isFavorite)
   );
 
+  // NOVO: Signal computado para uma lista única, ordenada e agrupada
+  sortedAndGroupedNotebooks: Signal<Notebook[]> = computed(() => {
+    const notebooks = this.filteredNotebooks();
+    return [...notebooks].sort((a, b) => {
+      // 1. Prioridade máxima: Favoritos primeiro
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+
+      // 2. Se ambos são favoritos ou ambos não são, aplica a ordenação do usuário
+      const sort = this.sortOption();
+      const valA = sort.by === 'name' ? a.name.toLowerCase() : a.createdAt?.toMillis() || 0;
+      const valB = sort.by === 'name' ? b.name.toLowerCase() : b.createdAt?.toMillis() || 0;
+
+      if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  });
+
   constructor() {
     // Efeito para re-selecionar o primeiro caderno quando a lista é atualizada
     // e nenhum caderno está selecionado.
@@ -129,8 +166,12 @@ export class Notebooks implements OnInit {
       // 1. A lista de cadernos não pode estar vazia.
       // 2. Nenhum caderno deve estar selecionado (currentSelection é null).
       // 3. Nenhuma nota deve estar aberta (isNoteOpen é null).
+      // 4. O ID do primeiro caderno da lista não pode ser o mesmo já selecionado.
       if (notebooks.length > 0 && !currentSelection && !isNoteOpen) {
-        this.selectNotebook(notebooks[0].id);
+         // Verifica se o primeiro caderno já não é o selecionado para evitar loops
+        if (currentSelection !== notebooks[0].id) {
+          this.selectNotebook(notebooks[0].id);
+        }
       }
     });
   }
@@ -402,4 +443,12 @@ export class Notebooks implements OnInit {
     this.subscriptions.unsubscribe();
   }
 
+  navigateBack() {
+    if (this.currentNoteId() && this.responsiveService.isMobile()) {
+      this.router.navigate(['/notebooks', this.selectedNotebookId()]);
+    } else if (this.selectedNotebookId() && this.responsiveService.isMobile()) {
+      this.selectedNotebookId.set(null);
+      this.router.navigate(['/notebooks']);
+    }
+  }
 }

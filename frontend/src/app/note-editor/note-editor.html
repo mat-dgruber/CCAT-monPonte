@@ -2,8 +2,8 @@
   @if (isLoading()) {
     <div class="p-8 text-center text-gray-500 dark:text-dark-text-secondary">Carregando nota...</div>
   } @else if (note(); as currentNote) {
-    <div class="note-editor-header p-3 border-b border-gray-200 dark:border-dark-border flex items-center gap-2 bg-white dark:bg-dark-panel-right transition-colors duration-300">      
-      <input 
+    <div class="note-editor-header p-3 border-b border-gray-200 dark:border-dark-border flex items-center gap-2 bg-white dark:bg-dark-panel-right transition-colors duration-300 flex-shrink-0">      
+      <input
         type="text" 
         placeholder="Título da Nota" 
         class="title-input flex-grow bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-gray-900 dark:text-white min-w-0"
@@ -37,7 +37,7 @@
         </div>
       </div>
     </div>
-    <div class="note-content-wrapper flex-grow p-4">
+    <div class="note-content-wrapper flex-grow p-4 overflow-y-auto">
       <textarea
         class="note-content-textarea w-full h-full bg-transparent focus:outline-none resize-none text-gray-800 dark:text-white"
         [class.notebook-bg]="themeService.notebookStyle()"
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Tags Footer -->
-    <div class="note-editor-footer p-3 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-accent/20">
+    <div class="note-editor-footer p-3 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-accent/20 flex-shrink-0">
       <div class="tags-container flex flex-wrap items-center gap-2">
         @for (tag of currentNote.tags; track tag) {
           <div class="tag-pill flex items-center bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded-full dark:bg-indigo-900 dark:text-indigo-300">

@@ -6,15 +6,20 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
+import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmationModalComponent } from './modals/confirmation-modal.component';
 import { NotificationService } from '../services/notification.service';
-
-type ViewMode = 'grid' | 'list';
 
 @Component({
   selector: 'app-notes-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmationModalComponent, HighlightPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HighlightPipe,
+    LucideAngularModule, // Necessário para <lucide-icon>
+    ConfirmationModalComponent // Necessário para <app-confirmation-modal>
+  ],
   templateUrl: './notes-list.html',
   styleUrl: './notes-list.css',
   animations: [
@@ -56,9 +61,6 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   // Estado para a busca
   searchTerm: WritableSignal<string> = signal('');
 
-  // Estado para o modo de visualização
-  viewMode: WritableSignal<ViewMode> = signal('grid');
-
   // Signal computado para filtrar as notas
   filteredNotes: Signal<Note[]> = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -69,11 +71,6 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   });
 
   ngOnInit() {
-    const savedViewMode = localStorage.getItem('notesViewMode') as ViewMode;
-    if (savedViewMode && (savedViewMode === 'grid' || savedViewMode === 'list')) {
-      this.viewMode.set(savedViewMode);
-    }
-
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
       this.searchTerm.set(searchTerm);
     });
@@ -189,10 +186,5 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchSubject.next(inputElement.value);
-  }
-
-  setViewMode(mode: ViewMode) {
-    this.viewMode.set(mode);
-    localStorage.setItem('notesViewMode', mode);
   }
 }
