@@ -1,10 +1,7 @@
 <div class="flex h-[calc(100vh-64px)] overflow-hidden">
   <!-- Notebooks Sidebar -->
   <aside
-    class="notebooks-sidebar w-full md:w-72 flex-shrink-0 bg-gray-50 dark:bg-dark-panel-left transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border"
-    [class.hidden]="responsiveService.isMobile() && (selectedNotebookId() || currentNoteId())"
-    [class.md:flex]="!responsiveService.isMobile()"
-    [class.flex]="responsiveService.isMobile() && !selectedNotebookId() && !currentNoteId()"
+    class="notebooks-sidebar w-72 flex-shrink-0 bg-gray-50 dark:bg-dark-panel-left transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border flex"
   >
     <div class="flex flex-col w-full">
       <!-- Header -->
@@ -133,20 +130,15 @@
 
   <!-- Notes Column -->
   <main
-    class="notes-column w-full md:w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out"
-    [class.hidden]="responsiveService.isMobile() && (!selectedNotebookId() || currentNoteId())"
-    [class.md:flex]="!responsiveService.isMobile()"
-    [class.flex]="responsiveService.isMobile() && selectedNotebookId() && !currentNoteId()"
+    class="notes-column w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex"
   >
     @if (selectedNotebookId()) {
       <app-note-column
         [notebookId]="selectedNotebookId()"
         (noteSelected)="onNoteSelected($event)"
-        (back)="navigateBack()"
-        [showBackButton]="responsiveService.isMobile()"
       ></app-note-column>
     } @else {
-      <div class="placeholder hidden md:flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary">
+      <div class="placeholder flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary">
         Selecione um caderno para ver as notas.
       </div>
     }
@@ -154,10 +146,7 @@
 
   <!-- Note Editor -->
   <section
-    class="note-editor-column flex-grow relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out"
-    [class.hidden]="responsiveService.isMobile() && !currentNoteId()"
-    [class.md:flex]="!responsiveService.isMobile()"
-    [class.flex]="responsiveService.isMobile() && currentNoteId()"
+    class="note-editor-column flex-grow relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex"
   >
     <div class="absolute inset-0" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
       <router-outlet #outlet="outlet"></router-outlet>

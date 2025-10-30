@@ -13,7 +13,6 @@ import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, Subject } from 'rxjs';
 import { filter, debounceTime } from 'rxjs/operators';
-import { ResponsiveService } from '../services/responsive';
 
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
@@ -58,7 +57,6 @@ export class Notebooks implements OnInit {
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  responsiveService = inject(ResponsiveService);
   private subscriptions = new Subscription();
   private searchSubject = new Subject<string>();
 
@@ -404,12 +402,4 @@ export class Notebooks implements OnInit {
     this.subscriptions.unsubscribe();
   }
 
-  navigateBack() {
-    if (this.currentNoteId() && this.responsiveService.isMobile()) {
-      this.router.navigate(['/notebooks', this.selectedNotebookId()]);
-    } else if (this.selectedNotebookId() && this.responsiveService.isMobile()) {
-      this.selectedNotebookId.set(null);
-      this.router.navigate(['/notebooks']);
-    }
-  }
 }

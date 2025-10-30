@@ -9,7 +9,6 @@ import { Modal } from '../modal/modal';
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
 import { ThemeService } from '../services/theme';
-import { ResponsiveService } from '../services/responsive';
 
 @Component({
   selector: 'app-note-editor',
@@ -25,7 +24,6 @@ export class NoteEditor implements OnInit, OnDestroy {
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
   themeService = inject(ThemeService);
-  responsiveService = inject(ResponsiveService);
 
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);
@@ -170,11 +168,4 @@ export class NoteEditor implements OnInit, OnDestroy {
     }
   }
 
-  navigateBack(): void {
-    if (this.notebookId) {
-      this.router.navigate(['/notebooks', this.notebookId]);
-    } else {
-      this.router.navigate(['/notebooks']);
-    }
-  }
 }
