@@ -35,30 +35,36 @@
     <div class="space-y-2" @listAnimation role="region" aria-live="polite"> 
       @for (note of filteredNotes(); track note.id) {
         <div role="article" tabindex="0" class="bg-white dark:bg-dark-primary rounded-lg shadow-md p-3 flex items-center justify-between group cursor-pointer" (click)="openNoteEditor(note)">
-          <div class="flex-grow overflow-hidden min-w-0">
-            <div class="flex items-center gap-2">
-              @if(note.isPinned) {
-                <lucide-icon name="pin" size="16" class="text-indigo-500"></lucide-icon>
-              }
+          <!-- Main content area -->
+          <div class="flex items-center flex-grow overflow-hidden min-w-0">
+            <!-- Pin Button (Visible) -->
+            <button (click)="togglePin(note); $event.stopPropagation()"
+                    [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
+                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors mr-2 flex-shrink-0">
+              <lucide-icon name="pin" size="18"
+                           [ngClass]="note.isPinned ? 'text-indigo-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+            </button>
+        
+            <!-- Note Title, Content, and Tags -->
+            <div class="flex-grow overflow-hidden min-w-0">
               <h3 class="font-bold text-md truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
-            </div>
-            <div class="text-gray-500 dark:text-dark-text-secondary text-sm line-clamp-1" [innerHTML]="note.content | highlight: searchTerm()"></div>
-            <div class="mt-2 flex flex-wrap gap-1">
-              @for (tag of note.tags; track tag) {
-                <span class="bg-gray-200 dark:bg-dark-accent text-gray-700 dark:text-dark-text-secondary text-xs font-medium px-2 py-0.5 rounded-full">{{ tag }}</span>
-              }
+              <div class="text-gray-500 dark:text-dark-text-secondary text-sm line-clamp-1" [innerHTML]="note.content | highlight: searchTerm()"></div>
+               <div class="mt-2 flex flex-wrap gap-1">
+                @for (tag of note.tags; track tag) {
+                  <span class="bg-gray-200 dark:bg-dark-accent text-gray-700 dark:text-dark-text-secondary text-xs font-medium px-2 py-0.5 rounded-full">{{ tag }}</span>
+                }
+              </div>
             </div>
           </div>
-          <div class="relative">
+        
+          <!-- More Options Menu (to the right) -->
+          <div class="relative ml-2">
             <button (click)="toggleNoteMenu(note.id, $event)" class="menu-button p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
               <lucide-icon name="more-vertical" size="18"></lucide-icon>
             </button>
             @if (isNoteMenuOpen() === note.id) {
               <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-secondary rounded-md shadow-lg z-10" (click)="$event.stopPropagation()">
-                <button (click)="togglePin(note); closeNoteMenu()" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                  <lucide-icon name="pin" size="16"></lucide-icon>
-                  <span>{{ note.isPinned ? 'Desafixar Nota' : 'Fixar Nota' }}</span>
-                </button>
+                <!-- Pin button is removed from here -->
                 <button (click)="deleteNote(note.id, note.title); closeNoteMenu()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   <lucide-icon name="trash-2" size="16"></lucide-icon>
                   <span>Deletar Nota</span>
