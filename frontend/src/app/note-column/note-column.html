@@ -8,7 +8,7 @@
         </button>
       }
       <div class="relative flex-grow">
-        <lucide-icon name="search" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
+        <lucide-icon name="search" size="16" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
         <input
           type="text"
           placeholder="Buscar notas..."
@@ -17,7 +17,7 @@
           class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300"
         />
       </div>
-      <button (click)="openCreateNoteModal()" class="flex-shrink-0 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">
+      <button (click)="openCreateNoteModal()" class="flex items-center flex-shrink p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">
         <lucide-icon name="plus" size="18"></lucide-icon>
         <span class="ml-1 hidden sm:inline">Nova Nota</span>
       </button>
