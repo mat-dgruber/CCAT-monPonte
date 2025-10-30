@@ -46,7 +46,7 @@
       <div class="space-y-2" @listAnimation>
         @for (note of filteredNotes(); track note.id) {
           <div 
-            class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300"
+            class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0"
             [class.border-indigo-500]="note.id === activeNoteId()"
             [class.bg-indigo-50]="note.id === activeNoteId()"
             [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"

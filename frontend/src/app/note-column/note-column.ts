@@ -6,6 +6,7 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
+import { StripHtmlPipe } from '../pipes/strip-html.pipe';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
 
@@ -14,7 +15,7 @@ import { LucideAngularModule } from 'lucide-angular';
 @Component({
   selector: 'app-note-column',
   standalone: true,
-  imports: [CommonModule, FormsModule, Modal, HighlightPipe, LucideAngularModule],
+  imports: [CommonModule, FormsModule, Modal, HighlightPipe, StripHtmlPipe, LucideAngularModule],
   templateUrl: './note-column.html',
   styleUrl: './note-column.css',
   animations: [

@@ -27,6 +27,7 @@ export interface Notebook {
   color?: string;
   order: number;
   createdAt?: any;
+  isFavorite?: boolean;
 }
 
 export interface Note {
@@ -78,8 +79,14 @@ export class DataService {
     const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
     const snapshot = await getDocs(notebooksCollectionRef);
     const newOrder = snapshot.size; // O novo caderno será o último
-    const docRef = await addDoc(notebooksCollectionRef, { name, createdAt: serverTimestamp(), order: newOrder, color });
+    const docRef = await addDoc(notebooksCollectionRef, { name, createdAt: serverTimestamp(), order: newOrder, color, isFavorite: false });
     return docRef.id;
+  }
+
+  updateNotebookFavoriteStatus(notebookId: string, isFavorite: boolean): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar o status de favorito.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}`);
+    return updateDoc(docRef, { isFavorite });
   }
 
   updateNotebookColor(notebookId: string, color: string): Promise<void> {

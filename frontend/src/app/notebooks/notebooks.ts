@@ -111,12 +111,27 @@ export class Notebooks implements OnInit {
     });
   });
 
+  favoriteNotebooks: Signal<Notebook[]> = computed(() => 
+    this.filteredNotebooks().filter(n => n.isFavorite)
+  );
+
+  regularNotebooks: Signal<Notebook[]> = computed(() =>
+    this.filteredNotebooks().filter(n => !n.isFavorite)
+  );
+
   constructor() {
     // Efeito para re-selecionar o primeiro caderno quando a lista é atualizada
     // e nenhum caderno está selecionado.
     effect(() => {
       const notebooks = this.notebookService.notebooks();
-      if (notebooks.length > 0 && !this.selectedNotebookId()) {
+      const currentSelection = this.selectedNotebookId();
+      const isNoteOpen = this.currentNoteId();
+
+      // Condição para evitar a re-seleção automática:
+      // 1. A lista de cadernos não pode estar vazia.
+      // 2. Nenhum caderno deve estar selecionado (currentSelection é null).
+      // 3. Nenhuma nota deve estar aberta (isNoteOpen é null).
+      if (notebooks.length > 0 && !currentSelection && !isNoteOpen) {
         this.selectNotebook(notebooks[0].id);
       }
     });
@@ -358,6 +373,27 @@ export class Notebooks implements OnInit {
   selectNotebook(id: string) {
     this.selectedNotebookId.set(id);
     this.selectedNoteId.set(null); // Reseta a nota selecionada ao trocar de caderno
+  }
+
+  async toggleFavorite(notebook: Notebook) {
+    if (!this.authService.getCurrentUserId()) {
+      this.notificationService.showError('Você precisa estar logado para favoritar um caderno.');
+      return;
+    }
+
+    const newFavoriteStatus = !notebook.isFavorite;
+
+    try {
+      await this.dataService.updateNotebookFavoriteStatus(notebook.id, newFavoriteStatus);
+      const message = newFavoriteStatus 
+        ? `Caderno "${notebook.name}" adicionado aos favoritos.`
+        : `Caderno "${notebook.name}" removido dos favoritos.`;
+      this.notificationService.showSuccess(message);
+      // A UI será atualizada reativamente pelo onSnapshot do DataService
+    } catch (error) {
+      console.error('Erro ao atualizar o status de favorito:', error);
+      this.notificationService.showError('Erro ao atualizar o status de favorito.');
+    }
   }
 
   onNoteSelected(noteId: string) {
