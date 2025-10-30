@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -61,13 +61,27 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   // Estado para a busca
   searchTerm: WritableSignal<string> = signal('');
 
-  // Signal computado para filtrar as notas
+  // Estado para o menu de opções da nota
+  isNoteMenuOpen: WritableSignal<string | null> = signal(null);
+
+  // Signal computado para filtrar e ordenar as notas
   filteredNotes: Signal<Note[]> = computed(() => {
     const term = this.searchTerm().toLowerCase();
+    const notesToSort = this.notes();
+
+    // Ordena as notas
+    const sortedNotes = [...notesToSort].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      // Mantém a ordenação original (por data) se o status de 'pinned' for o mesmo
+      return 0;
+    });
+
     if (!term) {
-      return this.notes();
+      return sortedNotes;
     }
-    return this.notes().filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
+
+    return sortedNotes.filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
   });
 
   ngOnInit() {
@@ -186,5 +200,35 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchSubject.next(inputElement.value);
+  }
+
+  async togglePin(note: Note) {
+    if (!this.notebookId) return;
+
+    try {
+      await this.dataService.updateNotePinnedStatus(this.notebookId, note.id, !note.isPinned);
+      // A UI será atualizada automaticamente pelo onSnapshot do DataService
+    } catch (error) {
+      console.error('Erro ao fixar/desafixar a nota:', error);
+      this.notificationService.showError('Erro ao atualizar a nota.');
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Se o menu estiver aberto e o clique for fora de um botão de menu, fecha o menu
+    const target = event.target as HTMLElement;
+    if (this.isNoteMenuOpen() && !target.closest('.menu-button')) {
+      this.closeNoteMenu();
+    }
+  }
+
+  toggleNoteMenu(noteId: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.isNoteMenuOpen.set(this.isNoteMenuOpen() === noteId ? null : noteId);
+  }
+
+  closeNoteMenu() {
+    this.isNoteMenuOpen.set(null);
   }
 }

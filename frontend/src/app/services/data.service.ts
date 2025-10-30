@@ -36,6 +36,7 @@ export interface Note {
   content: string;
   tags?: string[];
   createdAt?: any;
+  isPinned?: boolean;
 }
 
 @Injectable({
@@ -136,8 +137,10 @@ export class DataService {
     if (!this.userId) return of([]);
 
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
+    const q = query(notesCollection, orderBy('createdAt', 'desc'));
+
     return new Observable<Note[]>(subscriber => {
-      const unsubscribe = onSnapshot(notesCollection, (snapshot) => {
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Note));
         subscriber.next(notes);
       });
@@ -161,7 +164,7 @@ export class DataService {
   async createNote(notebookId: string, title: string, content: string): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar nota.');
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
-    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags: [] });
+    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags: [], isPinned: false });
     return docRef.id;
   }
 
@@ -169,6 +172,12 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para atualizar as tags da nota.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return updateDoc(docRef, { tags });
+  }
+
+  updateNotePinnedStatus(notebookId: string, noteId: string, isPinned: boolean): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar o status de fixação da nota.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
+    return updateDoc(docRef, { isPinned });
   }
 
   updateNote(notebookId: string, noteId: string, data: { title?: string, content?: string }): Promise<void> {

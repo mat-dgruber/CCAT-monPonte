@@ -26,6 +26,12 @@
             <div @flyInOut class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-primary rounded-md shadow-lg z-10 border border-gray-200 dark:border-dark-border" (clickout)="closeMoreOptions()">
               <ul>
                 <li>
+                  <a (click)="togglePin()" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-accent cursor-pointer">
+                    <lucide-icon name="pin" size="16"></lucide-icon>
+                    <span>{{ note()?.isPinned ? 'Desafixar Nota' : 'Fixar Nota' }}</span>
+                  </a>
+                </li>
+                <li>
                   <a (click)="deleteNote()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-gray-100 dark:hover:bg-dark-accent cursor-pointer">
                     <lucide-icon name="trash-2" size="16"></lucide-icon>
                     <span>Deletar Nota</span>

@@ -95,6 +95,28 @@ export class NoteEditor implements OnInit, OnDestroy {
     this.contentChanges.next();
   }
 
+  async togglePin() {
+    if (!this.notebookId || !this.noteId || !this.note()) return;
+
+    const currentNote = this.note()!;
+    const newPinnedStatus = !currentNote.isPinned;
+
+    // Update local state immediately for better UX
+    this.note.set({ ...currentNote, isPinned: newPinnedStatus });
+
+    try {
+      await this.dataService.updateNotePinnedStatus(this.notebookId, this.noteId, newPinnedStatus);
+      this.notificationService.showSuccess(`Nota ${newPinnedStatus ? 'fixada' : 'desafixada'} com sucesso.`);
+    } catch (error) {
+      // Revert local state on error
+      this.note.set({ ...currentNote, isPinned: !newPinnedStatus });
+      this.notificationService.showError('Erro ao atualizar a nota.');
+      console.error('Erro ao fixar/desafixar a nota:', error);
+    } finally {
+      this.closeMoreOptions();
+    }
+  }
+
   // --- Lógica de Tags ---
 
   addTag(): void {
