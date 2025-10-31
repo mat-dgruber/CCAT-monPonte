@@ -50,7 +50,7 @@
             [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()"
             (click)="selectNote(note.id)">
             <div class="flex justify-between items-start">
-              <h3 class="font-semibold text-md truncate text-gray-800 dark:text-white flex-shrink-0" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+              <h3 class="font-semibold text-md line-clamp-1 text-gray-800 dark:text-white flex-1 min-w-0 truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
               <button (click)="togglePin(note); $event.stopPropagation()"
                     [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
                     class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
@@ -77,6 +77,14 @@
     <div class="space-y-4">
       <input type="text" [(ngModel)]="currentNote().title" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Título da nota">
       <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Conteúdo da nota" rows="5"></textarea>
-    </div>
+    </div>    <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Tags (separadas por vírgula):</label>
+        <input type="text" [(ngModel)]="currentNote().tags" class="flex-grow p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="tag1, tag2">
+      </div>
+    <div class="flex items-center mt-4">
+        <input type="checkbox" id="pinNote" [(ngModel)]="currentNote().isPinned" class="mr-2">
+        <label for="pinNote" class="text-sm text-gray-700 dark:text-dark-text-secondary">Fixar esta nota</label>
+      </div>
+
   </app-modal>
 }
