@@ -49,7 +49,15 @@
             [class.hover:bg-gray-100]="note.id !== activeNoteId()"
             [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()"
             (click)="selectNote(note.id)">
-            <h3 class="font-semibold text-md truncate text-gray-800 dark:text-white flex-shrink-0" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+            <div class="flex justify-between items-start">
+              <h3 class="font-semibold text-md truncate text-gray-800 dark:text-white flex-shrink-0" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+              <button (click)="togglePin(note); $event.stopPropagation()"
+                    [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
+                    class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
+                <lucide-icon name="pin" size="16"
+                             [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+              </button>
+            </div>
             <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow" [innerHTML]="note.content | highlight: searchTerm()"></p>
           </div>
         }

@@ -8,8 +8,9 @@ import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
-
 import { LucideAngularModule } from 'lucide-angular';
+
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-note-column',
@@ -39,6 +40,7 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
   private dataService = inject(DataService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private notificationService = inject(NotificationService);
   notebookService = inject(NotebookService); // Injetado para o template
   private notesSubscription: Subscription | null = null;
   private searchSubject = new Subject<string>();
@@ -98,7 +100,12 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
 
     this.notesSubscription = this.dataService.getNotes(this.notebookId).subscribe({
       next: (notes) => {
-        this.notes.set(notes);
+        const sortedNotes = [...notes].sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          return 0; // createdAt is already sorted by the query
+        });
+        this.notes.set(sortedNotes);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -144,6 +151,18 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
       this.closeNoteModal();
     } catch (error) {
       console.error('Erro ao salvar nota:', error);
+    }
+  }
+
+  async togglePin(note: Note) {
+    if (!this.notebookId) return;
+
+    try {
+      await this.dataService.updateNotePinnedStatus(this.notebookId, note.id, !note.isPinned);
+      // A UI será atualizada automaticamente pelo onSnapshot do DataService
+    } catch (error) {
+      console.error('Erro ao fixar/desafixar a nota:', error);
+      this.notificationService.showError('Erro ao atualizar a nota.');
     }
   }
 }

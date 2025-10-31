@@ -27,7 +27,7 @@
               <ul>
                 <li>
                   <a (click)="togglePin()" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-accent cursor-pointer">
-                    <lucide-icon name="pin" size="16"></lucide-icon>
+                    <lucide-icon name="pin" size="16" [ngClass]="note()?.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
                     <span>{{ note()?.isPinned ? 'Desafixar Nota' : 'Fixar Nota' }}</span>
                   </a>
                 </li>
