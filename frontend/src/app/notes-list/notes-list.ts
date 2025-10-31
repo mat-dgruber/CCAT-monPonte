@@ -8,7 +8,9 @@ import { Subscription, debounceTime, Subject } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmationModalComponent } from './modals/confirmation-modal.component';
+import { MoveNoteModalComponent } from './modals/move-note-modal/move-note-modal.component';
 import { NotificationService } from '../services/notification.service';
+import { Notebook } from '../services/data.service';
 
 @Component({
   selector: 'app-notes-list',
@@ -18,7 +20,8 @@ import { NotificationService } from '../services/notification.service';
     FormsModule,
     HighlightPipe,
     LucideAngularModule, // Necessário para <lucide-icon>
-    ConfirmationModalComponent // Necessário para <app-confirmation-modal>
+    ConfirmationModalComponent, // Necessário para <app-confirmation-modal>
+    MoveNoteModalComponent
   ],
   templateUrl: './notes-list.html',
   styleUrl: './notes-list.css',
@@ -64,6 +67,11 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   // Estado para o menu de opções da nota
   isNoteMenuOpen: WritableSignal<string | null> = signal(null);
 
+  // Estado para o modal de mover nota
+  showMoveNoteModal: WritableSignal<boolean> = signal(false);
+  noteToMove: WritableSignal<Note | null> = signal(null);
+  notebooks: WritableSignal<Notebook[]> = signal([]);
+
   // Signal computado para filtrar e ordenar as notas
   filteredNotes: Signal<Note[]> = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -88,6 +96,7 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
       this.searchTerm.set(searchTerm);
     });
+    this.fetchNotebooks();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -99,6 +108,13 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
   ngOnDestroy() {
     this.notesSubscription?.unsubscribe();
     this.searchSubject.unsubscribe();
+  }
+
+  fetchNotebooks() {
+    this.dataService.getNotebooks('name', 'asc').subscribe({
+      next: (notebooks) => this.notebooks.set(notebooks),
+      error: (err) => console.error('Erro ao buscar cadernos:', err)
+    });
   }
 
   fetchNotes() {
@@ -230,5 +246,36 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
 
   closeNoteMenu() {
     this.isNoteMenuOpen.set(null);
+  }
+
+  // --- Lógica para Mover Nota ---
+
+  openMoveNoteModal(note: Note) {
+    this.noteToMove.set(note);
+    this.showMoveNoteModal.set(true);
+    this.closeNoteMenu();
+  }
+
+  closeMoveNoteModal() {
+    this.showMoveNoteModal.set(false);
+    this.noteToMove.set(null);
+  }
+
+  async confirmMoveNote(toNotebookId: string) {
+    const note = this.noteToMove();
+    if (!note || !this.notebookId) {
+      this.closeMoveNoteModal();
+      return;
+    }
+
+    try {
+      await this.dataService.moveNote(note.id, this.notebookId, toNotebookId);
+      this.notificationService.showSuccess(`Nota "${note.title}" movida com sucesso.`);
+    } catch (error) {
+      console.error('Erro ao mover a nota:', error);
+      this.notificationService.showError('Erro ao mover a nota.');
+    } finally {
+      this.closeMoveNoteModal();
+    }
   }
 }
