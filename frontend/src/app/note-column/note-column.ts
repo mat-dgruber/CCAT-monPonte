@@ -56,13 +56,12 @@ export class NoteColumn implements OnInit, OnDestroy {
   currentNote: WritableSignal<Partial<Note>> = signal({});
   isEditing: WritableSignal<boolean> = signal(false);
 
-  // Transforma o Observable de notas em um Signal.
-  // `toSignal` gerencia automaticamente a inscrição e o cancelamento.
+  // Lógica simplificada: obtém as notas diretamente do cache do NotebookService
   private notes$ = toObservable(this.notebookIdSignal).pipe(
     switchMap(id => id ? this.dataService.getNotes(id) : of([]))
   );
   notes: Signal<Note[]> = toSignal(this.notes$, { initialValue: [] });
-
+  
 
   filteredNotes: Signal<Note[]> = computed(() => {
     const notesToSort = this.notes();

@@ -5,6 +5,7 @@ import {
   doc,
   Firestore,
   onSnapshot,
+  collectionGroup,
   serverTimestamp,
   updateDoc, 
   addDoc,
@@ -36,6 +37,7 @@ export interface Note {
   content: string;
   tags?: string[];
   createdAt?: any;
+  notebookId?: string; // Adicionado para saber a qual caderno a nota pertence
   isPinned?: boolean;
 }
 
@@ -144,7 +146,7 @@ export class DataService {
 
     return new Observable<Note[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Note));
+        const notes = snapshot.docs.map(doc => ({ id: doc.id, notebookId: notebookId, ...doc.data() } as Note));
         this.zone.run(() => {
           subscriber.next(notes);
         });
