@@ -224,8 +224,6 @@ export class Notebooks implements OnInit {
 
   retryFetchNotebooks() {
     console.log('Tentando buscar cadernos novamente...');
-    const { by, direction } = this.sortOption();
-    this.notebookService.fetchNotebooks(by, direction);
   }
 
   changeSortOrder(event: Event) {
@@ -298,8 +296,6 @@ export class Notebooks implements OnInit {
     try {
       const newId = await this.dataService.createNotebook(name, color);
       this.notificationService.showSuccess(`Caderno "${name}" criado com sucesso.`);
-      // Re-busca os cadernos para atualizar a lista
-      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao criar o caderno:', error);
       this.notificationService.showError(`Erro ao criar o caderno "${name}".`);
@@ -315,8 +311,6 @@ export class Notebooks implements OnInit {
     try {
       await this.dataService.updateNotebook(id, newName);
       this.notificationService.showSuccess(`Caderno renomeado para "${newName}".`);
-      // Re-busca os cadernos para atualizar a lista
-      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao atualizar o caderno:', error);
       this.notificationService.showError(`Erro ao renomear o caderno.`);
@@ -347,8 +341,6 @@ export class Notebooks implements OnInit {
 
     try {
       await this.dataService.deleteNotebook(id);
-       // Re-busca os cadernos para atualizar a lista
-      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao deletar o caderno:', error);
     }
