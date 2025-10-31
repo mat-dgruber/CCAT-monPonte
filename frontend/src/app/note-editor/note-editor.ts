@@ -7,6 +7,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Modal } from '../modal/modal';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
+import { ClickOutsideDirective } from '../directives/click-outside.directive';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
@@ -15,7 +16,7 @@ import { ThemeService } from '../services/theme';
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent, ClickOutsideDirective],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })

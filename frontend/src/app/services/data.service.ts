@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import {
   collection,
   deleteDoc,
@@ -46,13 +46,14 @@ export class DataService {
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
   private userId: string | null = null;
+  private zone = inject(NgZone);
 
   constructor() {
     this.authService.authState$.subscribe(user => {
       if (user) {
         this.userId = user.uid;
       } else {
-        this.userId = null;
+        this.userId = null; 
       }
     });
   }
@@ -68,7 +69,9 @@ export class DataService {
     return new Observable<Notebook[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const notebooks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notebook));
-        subscriber.next(notebooks);
+        this.zone.run(() => {
+          subscriber.next(notebooks);
+        });
       });
       // Retorna a função de unsubscribe para ser chamada quando o Observable for cancelado
       return () => unsubscribe();
@@ -142,7 +145,9 @@ export class DataService {
     return new Observable<Note[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Note));
-        subscriber.next(notes);
+        this.zone.run(() => {
+          subscriber.next(notes);
+        });
       });
       return () => unsubscribe();
     });
@@ -155,7 +160,9 @@ export class DataService {
     
     return new Observable<Note | null>(subscriber => {
       const unsubscribe = onSnapshot(noteDocRef, (docSnap) => {
-        subscriber.next(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Note : null);
+        this.zone.run(() => {
+          subscriber.next(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Note : null);
+        });
       });
       return () => unsubscribe();
     });

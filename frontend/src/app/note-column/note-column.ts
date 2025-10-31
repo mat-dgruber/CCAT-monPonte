@@ -1,10 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit, Output, EventEmitter, OnDestroy, effect } from '@angular/core';
+import { Component, Input, inject, signal, WritableSignal, computed, Signal, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService, Note } from '../services/data.service';
-import { Subscription, debounceTime, Subject, filter } from 'rxjs';
+import { Subscription, debounceTime, Subject, filter, switchMap, of } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
@@ -32,7 +33,7 @@ import { LucideAngularModule } from 'lucide-angular';
   ]
 })
 export class NoteColumn implements OnInit, OnDestroy {
-  @Input() set notebookId(id: string | null) {
+  @Input({ required: true }) set notebookId(id: string | null) {
     this.notebookIdSignal.set(id);
   }
   @Input() showBackButton = false;
@@ -44,14 +45,10 @@ export class NoteColumn implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   notebookService = inject(NotebookService); // Injetado para o template
   private notificationService = inject(NotificationService);
-  private notesSubscription: Subscription | null = null;
   private searchSubject = new Subject<string>();
   private routerSubscription: Subscription | null = null;
 
-  notes: WritableSignal<Note[]> = signal([]);
   notebookIdSignal: WritableSignal<string | null> = signal(null);
-  isLoading: WritableSignal<boolean> = signal(false);
-  error: WritableSignal<string | null> = signal(null);
   searchTerm: WritableSignal<string> = signal('');
   activeNoteId: WritableSignal<string | null> = signal(null);
   
@@ -59,24 +56,38 @@ export class NoteColumn implements OnInit, OnDestroy {
   currentNote: WritableSignal<Partial<Note>> = signal({});
   isEditing: WritableSignal<boolean> = signal(false);
 
+  // Transforma o Observable de notas em um Signal.
+  // `toSignal` gerencia automaticamente a inscrição e o cancelamento.
+  private notes$ = toObservable(this.notebookIdSignal).pipe(
+    switchMap(id => id ? this.dataService.getNotes(id) : of([]))
+  );
+  notes: Signal<Note[]> = toSignal(this.notes$, { initialValue: [] });
+
+
   filteredNotes: Signal<Note[]> = computed(() => {
+    const notesToSort = this.notes();
     const term = this.searchTerm().toLowerCase();
+
+    // Ordena as notas: fixadas primeiro, depois por data de criação
+    const sortedNotes = [...notesToSort].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      const dateA = a.createdAt?.toMillis() || 0;
+      const dateB = b.createdAt?.toMillis() || 0;
+      return dateB - dateA;
+    });
+
     if (!term) {
-      return this.notes();
+      return sortedNotes;
     }
-    return this.notes().filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
+    return sortedNotes.filter(note => 
+      note.title.toLowerCase().includes(term) || 
+      note.content.toLowerCase().includes(term) ||
+      (note.tags && note.tags.some(tag => tag.toLowerCase().includes(term)))
+    );
   });
 
-  constructor() {
-    effect(() => {
-      const notebookId = this.notebookIdSignal();
-      if (notebookId) {
-        this.fetchNotes(notebookId);
-      } else {
-        this.notes.set([]); // Limpa as notas se nenhum caderno for selecionado
-      }
-    });
-  }
+  constructor() {}
 
   ngOnInit() {
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
@@ -94,27 +105,8 @@ export class NoteColumn implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.notesSubscription?.unsubscribe();
     this.searchSubject.unsubscribe();
     this.routerSubscription?.unsubscribe();
-  }
-
-  fetchNotes(notebookId: string) {
-    this.isLoading.set(true);
-    this.error.set(null);
-    this.notesSubscription?.unsubscribe();
-
-    this.notesSubscription = this.dataService.getNotes(notebookId).subscribe({
-      next: (notes) => {
-        this.notes.set(notes);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Erro ao buscar notas:', err);
-        this.error.set('Não foi possível carregar as notas.');
-        this.isLoading.set(false);
-      }
-    });
   }
   
   selectNote(noteId: string) {

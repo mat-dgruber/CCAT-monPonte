@@ -1,16 +1,17 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit, HostListener } from '@angular/core';
+import { Component, Input, OnDestroy, inject, signal, WritableSignal, computed, Signal, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { DataService, Note } from '../services/data.service';
-import { Subscription, debounceTime, Subject } from 'rxjs';
+import { Subscription, debounceTime, Subject, switchMap, of } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmationModalComponent } from './modals/confirmation-modal.component';
 import { MoveNoteModalComponent } from './modals/move-note-modal/move-note-modal.component';
 import { NotificationService } from '../services/notification.service';
 import { Notebook } from '../services/data.service';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-notes-list',
@@ -38,18 +39,23 @@ import { Notebook } from '../services/data.service';
     ])
   ]
 })
-export class NotesList implements OnChanges, OnDestroy, OnInit {
-  @Input() notebookId: string | null = null;
+export class NotesList implements OnDestroy, OnInit {
+  notebookIdSignal: WritableSignal<string | null> = signal(null);
+  @Input() set notebookId(id: string | null) {
+    this.notebookIdSignal.set(id);
+  }
 
   private dataService = inject(DataService);
   private router = inject(Router);
   private notificationService = inject(NotificationService);
-  private notesSubscription: Subscription | null = null;
-
   private searchSubject = new Subject<string>();
-  notes: WritableSignal<Note[]> = signal([]);
-  isLoading: WritableSignal<boolean> = signal(false);
-  error: WritableSignal<string | null> = signal(null);
+
+  // Transforma o Observable de notas em um Signal.
+  private notes$ = toObservable(this.notebookIdSignal).pipe(
+    switchMap(id => id ? this.dataService.getNotes(id) : of([]))
+  );
+  notes: Signal<Note[]> = toSignal(this.notes$, { initialValue: [] });
+
 
   // Estado para o modal de edição/criação
   isNoteModalVisible: WritableSignal<boolean> = signal(false);
@@ -81,15 +87,21 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
     const sortedNotes = [...notesToSort].sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-      // Mantém a ordenação original (por data) se o status de 'pinned' for o mesmo
-      return 0;
+      // Se o status de 'pinned' for o mesmo, ordena pela data de criação (mais novas primeiro)
+      const dateA = a.createdAt?.toMillis() || 0;
+      const dateB = b.createdAt?.toMillis() || 0;
+      return dateB - dateA;
     });
 
     if (!term) {
       return sortedNotes;
     }
 
-    return sortedNotes.filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
+    return sortedNotes.filter(note => 
+      note.title.toLowerCase().includes(term) || 
+      note.content.toLowerCase().includes(term) ||
+      (note.tags && note.tags.some(tag => tag.toLowerCase().includes(term)))
+    );
   });
 
   ngOnInit() {
@@ -99,14 +111,7 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
     this.fetchNotebooks();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['notebookId'] && this.notebookId) {
-      this.fetchNotes();
-    }
-  }
-
   ngOnDestroy() {
-    this.notesSubscription?.unsubscribe();
     this.searchSubject.unsubscribe();
   }
 
@@ -114,26 +119,6 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
     this.dataService.getNotebooks('name', 'asc').subscribe({
       next: (notebooks) => this.notebooks.set(notebooks),
       error: (err) => console.error('Erro ao buscar cadernos:', err)
-    });
-  }
-
-  fetchNotes() {
-    if (!this.notebookId) return;
-
-    this.isLoading.set(true);
-    this.error.set(null);
-    this.notesSubscription?.unsubscribe();
-
-    this.notesSubscription = this.dataService.getNotes(this.notebookId).subscribe({
-      next: (notes) => {
-        this.notes.set(notes);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Erro ao buscar notas:', err);
-        this.error.set('Não foi possível carregar as notas.');
-        this.isLoading.set(false);
-      }
     });
   }
 
@@ -263,13 +248,13 @@ export class NotesList implements OnChanges, OnDestroy, OnInit {
 
   async confirmMoveNote(toNotebookId: string) {
     const note = this.noteToMove();
-    if (!note || !this.notebookId) {
+    if (!note || !this.notebookIdSignal()) {
       this.closeMoveNoteModal();
       return;
     }
 
     try {
-      await this.dataService.moveNote(note.id, this.notebookId, toNotebookId);
+      await this.dataService.moveNote(note.id, this.notebookIdSignal()!, toNotebookId);
       this.notificationService.showSuccess(`Nota "${note.title}" movida com sucesso.`);
     } catch (error) {
       console.error('Erro ao mover a nota:', error);

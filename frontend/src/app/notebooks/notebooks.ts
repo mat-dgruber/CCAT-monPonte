@@ -155,25 +155,9 @@ export class Notebooks implements OnInit {
   });
 
   constructor() {
-    // Efeito para re-selecionar o primeiro caderno quando a lista é atualizada
-    // e nenhum caderno está selecionado.
-    effect(() => {
-      const notebooks = this.notebookService.notebooks();
-      const currentSelection = this.selectedNotebookId();
-      const isNoteOpen = this.currentNoteId();
-
-      // Condição para evitar a re-seleção automática:
-      // 1. A lista de cadernos não pode estar vazia.
-      // 2. Nenhum caderno deve estar selecionado (currentSelection é null).
-      // 3. Nenhuma nota deve estar aberta (isNoteOpen é null).
-      // 4. O ID do primeiro caderno da lista não pode ser o mesmo já selecionado.
-      if (notebooks.length > 0 && !currentSelection && !isNoteOpen) {
-         // Verifica se o primeiro caderno já não é o selecionado para evitar loops
-        if (currentSelection !== notebooks[0].id) {
-          this.selectNotebook(notebooks[0].id);
-        }
-      }
-    });
+    // O efeito que re-selecionava o primeiro caderno foi removido
+    // para evitar condições de corrida e comportamento inesperado.
+    // A seleção de um caderno agora é uma ação explícita do usuário.
   }
 
   ngOnInit() {
@@ -195,7 +179,13 @@ export class Notebooks implements OnInit {
         route = route.firstChild;
       }
       this.currentNoteId.set(foundNoteId);
-      this.selectedNotebookId.set(foundNotebookId);
+      
+      // Apenas atualiza o caderno selecionado se um ID for encontrado na rota.
+      // Isso evita que a seleção manual do usuário seja sobrescrita com 'null'
+      // ao navegar para uma rota que não contém um ID de caderno.
+      if (foundNotebookId) {
+        this.selectedNotebookId.set(foundNotebookId);
+      }
     });
 
     this.subscriptions.add(routeSub);

@@ -21,10 +21,8 @@
     </div>
   </div>
 
-  @if (isLoading()) {
+  @if (notebookIdSignal() && notes().length === 0 && searchTerm() === '') {
     <p class="text-center text-gray-500 dark:text-dark-text-secondary">Carregando notas...</p>
-  } @else if (error()) {
-    <p class="text-red-500" role="alert">{{ error() }}</p>
   } @else if (filteredNotes().length === 0) {    
     <div class="text-center py-10 px-4 bg-gray-50 dark:bg-dark-accent/20 rounded-lg transition-colors duration-300" role="status">
       <lucide-icon name="file-text" size="48" class="mx-auto text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
@@ -42,7 +40,7 @@
                     [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
                     class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors mr-2 flex-shrink-0">
               <lucide-icon name="pin" size="18"
-                           [ngClass]="note.isPinned ? 'text-indigo-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+                           [ngClass]="note.isPinned ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
             </button>
         
             <!-- Note Title, Content, and Tags -->
@@ -51,7 +49,7 @@
               <div class="text-gray-500 dark:text-dark-text-secondary text-sm line-clamp-1" [innerHTML]="note.content | highlight: searchTerm()"></div>
                <div class="mt-2 flex flex-wrap gap-1">
                 @for (tag of note.tags; track tag) {
-                  <span class="bg-gray-200 dark:bg-dark-accent text-gray-700 dark:text-dark-text-secondary text-xs font-medium px-2 py-0.5 rounded-full">{{ tag }}</span>
+                  <span class="bg-gray-200 dark:bg-dark-accent text-gray-700 dark:text-dark-text-secondary text-xs font-medium px-2 py-0.5 rounded-full" [innerHTML]="tag | highlight: searchTerm()"></span>
                 }
               </div>
             </div>
