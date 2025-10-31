@@ -63,8 +63,12 @@
               <lucide-icon name="more-vertical" size="18"></lucide-icon>
             </button>
             @if (isNoteMenuOpen() === note.id) {
-              <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-secondary rounded-md shadow-lg z-10" (click)="$event.stopPropagation()">
-                <!-- Pin button is removed from here -->
+              <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-secondary rounded-md shadow-lg z-10" (click)="$event.stopPropagation()">
+                <button (click)="openMoveNoteModal(note)" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                  <lucide-icon name="move" size="16"></lucide-icon>
+                  <span>Mover para Caderno...</span>
+                </button>
+                <div class="border-t border-gray-200 dark:border-dark-border my-1"></div>
                 <button (click)="deleteNote(note.id, note.title); closeNoteMenu()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                   <lucide-icon name="trash-2" size="16"></lucide-icon>
                   <span>Deletar Nota</span>
@@ -86,3 +90,12 @@
   (confirm)="confirmDeleteNote()"
   (cancel)="cancelDeleteNote()"
 ></app-confirmation-modal>
+
+<!-- Modal para Mover Nota -->
+<app-move-note-modal
+  [isVisible]="showMoveNoteModal()"
+  [notebooks]="notebooks()"
+  [currentNotebookId]="notebookId"
+  (confirm)="confirmMoveNote($event)"
+  (cancel)="closeMoveNoteModal()"
+></app-move-note-modal>

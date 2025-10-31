@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap, of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { Modal } from '../modal/modal';
+import { HighlightPipe } from '../pipes/highlight.pipe';
+import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
@@ -13,7 +15,7 @@ import { ThemeService } from '../services/theme';
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
@@ -32,6 +34,14 @@ export class NoteEditor implements OnInit, OnDestroy {
   showMoreOptions: WritableSignal<boolean> = signal(false);
   tagInput: WritableSignal<string> = signal('');
 
+  // Busca no editor
+  showSearch: WritableSignal<boolean> = signal(false);
+  searchTerm: WritableSignal<string> = signal('');
+  searchResultCount: WritableSignal<number> = signal(0);
+
+  // Modal de estatísticas
+  showStatsModal: WritableSignal<boolean> = signal(false);
+
   private notebookId: string | null = null;
   private noteId: string | null = null;
 
@@ -44,6 +54,18 @@ export class NoteEditor implements OnInit, OnDestroy {
       const currentNote = this.note();
       if (currentNote) {
         this.onContentChange();
+      }
+    });
+
+    // Efeito para contar os resultados da busca
+    effect(() => {
+      const term = this.searchTerm();
+      const content = this.note()?.content || '';
+      if (term && content) {
+        const matches = content.match(new RegExp(term, 'gi'));
+        this.searchResultCount.set(matches ? matches.length : 0);
+      } else {
+        this.searchResultCount.set(0);
       }
     });
   }
@@ -161,6 +183,26 @@ export class NoteEditor implements OnInit, OnDestroy {
 
   toggleMoreOptions(): void {
     this.showMoreOptions.set(!this.showMoreOptions());
+  }
+
+  // --- Lógica de Busca ---
+
+  toggleSearch(): void {
+    this.showSearch.set(!this.showSearch());
+    if (!this.showSearch()) {
+      this.searchTerm.set('');
+    }
+  }
+
+  // --- Lógica do Modal de Estatísticas ---
+
+  openStatsModal(): void {
+    this.showStatsModal.set(true);
+    this.closeMoreOptions();
+  }
+
+  closeStatsModal(): void {
+    this.showStatsModal.set(false);
   }
 
   closeMoreOptions(): void {
