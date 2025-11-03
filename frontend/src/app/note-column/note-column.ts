@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { DataService, Note } from '../services/data.service';
 import { Subscription, debounceTime, Subject, filter, switchMap, of } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
 import { NotificationService } from '../services/notification.service'; 
+import { NoteService, Note } from '../services/note.service';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -35,32 +34,30 @@ import { LucideAngularModule } from 'lucide-angular';
 export class NoteColumn implements OnInit, OnDestroy {
   @Input({ required: true }) set notebookId(id: string | null) {
     this.notebookIdSignal.set(id);
+    this.noteService.loadNotesForNotebook(id);
   }
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
 
-  private dataService = inject(DataService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  notebookService = inject(NotebookService); // Injetado para o template
+  notebookService = inject(NotebookService);
   private notificationService = inject(NotificationService);
+  noteService = inject(NoteService);
   private searchSubject = new Subject<string>();
   private routerSubscription: Subscription | null = null;
 
   notebookIdSignal: WritableSignal<string | null> = signal(null);
   searchTerm: WritableSignal<string> = signal('');
   activeNoteId: WritableSignal<string | null> = signal(null);
-  
+
   isNoteModalVisible: WritableSignal<boolean> = signal(false);
   currentNote: WritableSignal<Partial<Note>> = signal({});
   isEditing: WritableSignal<boolean> = signal(false);
 
-  // Lógica simplificada: obtém as notas diretamente do cache do NotebookService
-  private notes$ = toObservable(this.notebookIdSignal).pipe(
-    switchMap(id => id ? this.dataService.getNotes(id) : of([]))
-  );
-  notes: Signal<Note[]> = toSignal(this.notes$, { initialValue: [] });
+  // As notas agora vêm do NoteService
+  notes: Signal<Note[]> = this.noteService.notes;
   
 
   filteredNotes: Signal<Note[]> = computed(() => {
@@ -133,25 +130,21 @@ export class NoteColumn implements OnInit, OnDestroy {
   }
   
   async togglePin(note: Note) {
-    if (!this.notebookId) return;
-
     try {
-      await this.dataService.updateNotePinnedStatus(this.notebookId, note.id, !note.isPinned);
+      await this.noteService.updateNotePinnedStatus(note.id, !note.isPinned);
       // A UI será atualizada automaticamente pelo onSnapshot do DataService
-    } catch (error) {
+    } catch (error) { 
       console.error('Erro ao fixar/desafixar a nota:', error);
       this.notificationService.showError('Erro ao atualizar a nota.');
     }
   }
 
   async saveNote(noteData: Partial<Note>) {
-    if (!this.notebookId) return;
-
     try {
       if (this.isEditing() && noteData.id) {
-        await this.dataService.updateNote(this.notebookId, noteData.id, { title: noteData.title!, content: noteData.content! });
+        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content! });
       } else {
-        await this.dataService.createNote(this.notebookId, noteData.title!, noteData.content!);
+        await this.noteService.createNote(noteData.title!, noteData.content!);
       }
       this.closeNoteModal();
     } catch (error) {

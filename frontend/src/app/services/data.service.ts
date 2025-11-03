@@ -18,7 +18,9 @@ import {
 } from '@angular/fire/firestore';
 import { from, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth';
+import { Note } from './note.service';
 
+export type { Note };
 export type SortBy = 'createdAt' | 'name';
 export type SortDirection = 'asc' | 'desc';
 
@@ -29,16 +31,6 @@ export interface Notebook {
   order: number;
   createdAt?: any;
   isFavorite?: boolean;
-}
-
-export interface Note {
-  id: string;
-  title: string;
-  content: string;
-  tags?: string[];
-  createdAt?: any;
-  notebookId?: string; // Adicionado para saber a qual caderno a nota pertence
-  isPinned?: boolean;
 }
 
 @Injectable({
@@ -201,33 +193,5 @@ export class DataService {
     return deleteDoc(docRef);
   }
 
-  async moveNote(noteId: string, fromNotebookId: string, toNotebookId: string): Promise<string> {
-    if (!this.userId) throw new Error('Usuário não autenticado.');
-    if (fromNotebookId === toNotebookId) return noteId;
-
-    const fromNoteRef = doc(this.firestore, `users/${this.userId}/notebooks/${fromNotebookId}/notes/${noteId}`);
-    const toNotesCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks/${toNotebookId}/notes`);
-
-    const batch = writeBatch(this.firestore);
-
-    // 1. Lê a nota original
-    const noteDoc = await getDoc(fromNoteRef);
-    if (!noteDoc.exists()) {
-      throw new Error("A nota que você está tentando mover não existe.");
-    }
-    const noteData = noteDoc.data();
-
-    // 2. Cria uma nova nota no caderno de destino com os mesmos dados
-    const newNoteRef = doc(toNotesCollectionRef); // Gera um novo ID
-    batch.set(newNoteRef, noteData);
-
-    // 3. Deleta a nota original
-    batch.delete(fromNoteRef);
-
-    // 4. Executa a operação
-    await batch.commit();
-
-    // 5. Retorna o ID da nova nota
-    return newNoteRef.id;
-  }
+ 
 }

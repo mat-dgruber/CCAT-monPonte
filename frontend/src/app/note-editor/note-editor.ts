@@ -161,7 +161,7 @@ export class NoteEditor implements OnInit, OnDestroy {
   removeTag(tagToRemove: string): void {
     if (this.note()) {
       const currentNote = this.note()!;
-      currentNote.tags = currentNote.tags?.filter(tag => tag !== tagToRemove);
+      currentNote.tags = currentNote.tags?.filter((tag: string) => tag !== tagToRemove);
       this.note.set({ ...currentNote });
       this.updateTags();
     }
