@@ -21,7 +21,7 @@
 
   <!-- Notes List Area -->
   <div class="flex-grow overflow-y-auto p-2">
-    @if (notebookIdSignal() && notes().length === 0 && searchTerm() === '') {
+    @if (noteService.isLoading()) {
       <div class="space-y-2">
         @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
           <div class="h-20 bg-gray-200 rounded-lg dark:bg-dark-accent animate-pulse"></div>

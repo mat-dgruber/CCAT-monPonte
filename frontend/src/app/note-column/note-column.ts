@@ -34,7 +34,7 @@ import { LucideAngularModule } from 'lucide-angular';
 export class NoteColumn implements OnInit, OnDestroy {
   @Input({ required: true }) set notebookId(id: string | null) {
     this.notebookIdSignal.set(id);
-    this.noteService.loadNotesForNotebook(id);
+    this.noteService.activeNotebookId.set(id);
   }
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();

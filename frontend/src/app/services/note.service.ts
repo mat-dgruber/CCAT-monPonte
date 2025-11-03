@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, WritableSignal, OnDestroy } from '@angular/core';
+import { Injectable, inject, signal, WritableSignal, OnDestroy, effect, NgZone } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService } from './data.service';
 import { AuthService } from './auth';
@@ -25,6 +25,8 @@ export class NoteService implements OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
+  private zone = inject(NgZone); // 2. Injete o NgZone
+  private notesSubscription: Subscription | null = null;
 
   // State Signals
   notes: WritableSignal<Note[]> = signal([]);
@@ -32,52 +34,59 @@ export class NoteService implements OnDestroy {
   loadingError: WritableSignal<boolean> = signal(false);
   activeNotebookId: WritableSignal<string | null> = signal(null);
 
-  private notesSubscription: Subscription | null = null;
-
   constructor() {
+    // Usando a sua versão original do código (sem onCleanup, por clareza)
+    effect(() => {
+      const notebookId = this.activeNotebookId();
+      const user = this.authService.getCurrentUserId();
+
+      if (this.notesSubscription) {
+        this.notesSubscription.unsubscribe();
+      }
+
+      if (notebookId && user) {
+        this.isLoading.set(true);
+        this.loadingError.set(false);
+        this.notes.set([]); 
+
+        this.notesSubscription = this.dataService.getNotes(notebookId).pipe(
+          catchError(error => {
+            console.error('Erro ao buscar notas:', error);
+            this.loadingError.set(true);
+            return of([]); 
+          }),
+          takeUntil(this.destroy$)
+        ).subscribe(notes => {
+          // 3. Force a atualização dos signals dentro da zona
+          this.zone.run(() => {
+            this.notes.set(notes);
+            this.isLoading.set(false);
+          });
+        });
+      } else {
+        // 4. Faça o mesmo para o 'else'
+        this.zone.run(() => {
+          this.notes.set([]);
+          this.isLoading.set(false);
+          this.loadingError.set(false);
+        });
+      }
+    });
+
+    // Efeito para limpar o estado no logout
     this.authService.authState$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(user => {
       if (!user) {
-        this.notes.set([]);
         this.activeNotebookId.set(null);
-        this.isLoading.set(false);
       }
-    });
-  }
-
-  loadNotesForNotebook(notebookId: string | null) {
-    if (this.notesSubscription) {
-      this.notesSubscription.unsubscribe();
-    }
-
-    if (!notebookId) {
-      this.notes.set([]);
-      this.activeNotebookId.set(null);
-      this.isLoading.set(false);
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.loadingError.set(false);
-    this.activeNotebookId.set(notebookId);
-
-    this.notesSubscription = this.dataService.getNotes(notebookId).pipe(
-      catchError(error => {
-        console.error('Erro ao buscar notas:', error);
-        this.loadingError.set(true);
-        return of([]);
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe(notes => {
-      this.notes.set(notes);
-      this.isLoading.set(false);
     });
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.notesSubscription?.unsubscribe();
   }
 
   // --- Métodos de Ação --- 
