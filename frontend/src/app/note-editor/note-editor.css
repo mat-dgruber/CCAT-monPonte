@@ -1,78 +1,206 @@
-.note-editor-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* Ocupa toda a altura da viewport */
-  overflow: hidden; /* Impede o overflow no container principal */
-}
-
-.note-editor-header {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.back-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  margin-right: 1rem;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-}
-.back-button:hover {
-  background-color: #e5e7eb;
-}
-
-.title-input {
-  flex-grow: 1;
-  font-size: 1.5rem;
-  font-weight: 600;
-  border: none;
+/* Estilos Globais para o Editor Tiptap */
+.note-content-wrapper .tiptap {
+  min-height: 100%;
   outline: none;
+}
+
+/* Estilização do Placeholder */
+.note-content-wrapper .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+.dark .note-content-wrapper .tiptap p.is-editor-empty:first-child::before {
+  color: #4a5568;
+}
+
+/* Estilos para o Bubble Menu (Menu Flutuante) */
+.bubble-menu .is-active {
+  background-color: #52525b; /* zinc-600 */
+}
+
+.dark .bubble-menu .is-active {
+  background-color: #3f3f46; /* zinc-700 */
+}
+
+/* Estilos para Tabelas */
+.note-content-wrapper .tiptap table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.note-content-wrapper .tiptap th,
+.note-content-wrapper .tiptap td {
+  border: 1px solid #d1d5db; /* gray-300 */
   padding: 0.5rem;
-  background-color: transparent;
+  min-width: 1em;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.note-content-wrapper .tiptap th {
+  font-weight: bold;
+  text-align: left;
+  background-color: #f3f4f6; /* gray-100 */
 }
 
-.save-button {
+.dark .note-content-wrapper .tiptap th,
+.dark .note-content-wrapper .tiptap td {
+  border-color: #4b5563; /* gray-600 */
+}
+
+.dark .note-content-wrapper .tiptap th {
+  background-color: #374151; /* gray-700 */
+}
+
+.note-content-wrapper .tiptap .column-resizing {
+  background-color: #60a5fa; /* blue-400 */
+}
+
+/* Estilos para Blocos de Código (Code Blocks) */
+.note-content-wrapper .tiptap pre {
+  background: #1e293b; /* slate-800 */
+  color: #f8fafc; /* slate-50 */
+  font-family: 'JetBrainsMono', monospace;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.note-content-wrapper .tiptap pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.85em;
+}
+
+/* Cores do Highlight.js (exemplo para tema escuro) */
+.note-content-wrapper .tiptap pre .hljs-comment,
+.note-content-wrapper .tiptap pre .hljs-quote {
+  color: #94a3b8; /* slate-400 */
+}
+
+.note-content-wrapper .tiptap pre .hljs-variable,
+.note-content-wrapper .tiptap pre .hljs-template-variable,
+.note-content-wrapper .tiptap pre .hljs-tag,
+.note-content-wrapper .tiptap pre .hljs-name,
+.note-content-wrapper .tiptap pre .hljs-selector-id,
+.note-content-wrapper .tiptap pre .hljs-selector-class,
+.note-content-wrapper .tiptap pre .hljs-regexp,
+.note-content-wrapper .tiptap pre .hljs-deletion {
+  color: #f472b6; /* pink-400 */
+}
+
+.note-content-wrapper .tiptap pre .hljs-number,
+.note-content-wrapper .tiptap pre .hljs-built_in,
+.note-content-wrapper .tiptap pre .hljs-literal,
+.note-content-wrapper .tiptap pre .hljs-type,
+.note-content-wrapper .tiptap pre .hljs-params,
+.note-content-wrapper .tiptap pre .hljs-meta,
+.note-content-wrapper .tiptap pre .hljs-link {
+  color: #fb923c; /* orange-400 */
+}
+
+.note-content-wrapper .tiptap pre .hljs-attribute {
+  color: #facc15; /* yellow-400 */
+}
+
+.note-content-wrapper .tiptap pre .hljs-string,
+.note-content-wrapper .tiptap pre .hljs-symbol,
+.note-content-wrapper .tiptap pre .hljs-bullet,
+.note-content-wrapper .tiptap pre .hljs-addition {
+  color: #818cf8; /* indigo-400 */
+}
+
+.note-content-wrapper .tiptap pre .hljs-title,
+.note-content-wrapper .tiptap pre .hljs-section {
+  color: #60a5fa; /* blue-400 */
+}
+
+.note-content-wrapper .tiptap pre .hljs-keyword,
+.note-content-wrapper .tiptap pre .hljs-selector-tag {
+  color: #c084fc; /* purple-400 */
+}
+
+/* Estilos para Listas de Tarefas (Task Lists) */
+.note-content-wrapper .tiptap ul[data-type='taskList'] {
+  list-style: none;
+  padding: 0;
+}
+
+.note-content-wrapper .tiptap li[data-type='taskItem'] {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background-color: white;
+}
+
+.note-content-wrapper .tiptap li[data-type='taskItem'] > label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.note-content-wrapper .tiptap li[data-type='taskItem'] > div {
+  flex: 1 1 auto;
+}
+
+.note-content-wrapper .tiptap li[data-type='taskItem'] input[type='checkbox'] {
   cursor: pointer;
-  transition: background-color 0.2s;
-}
-.save-button:hover {
-  background-color: #f3f4f6;
-}
-.save-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
+  border-color: #9ca3af; /* gray-400 */
 }
 
-.note-content-wrapper {
-  flex-grow: 1;
-  overflow-y: auto; /* Permite scroll vertical apenas no wrapper do conteúdo */
-  padding: 1.5rem;
+.note-content-wrapper .tiptap li[data-type='taskItem'] input[type='checkbox']:checked {
+  background-color: #4f46e5; /* indigo-600 */
+  border-color: #4f46e5;
 }
 
-.note-content-textarea {
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-  padding: 1rem;
-  font-size: 1rem;
-  line-height: 1.6;
-  resize: none;
+.dark .note-content-wrapper .tiptap li[data-type='taskItem'] input[type='checkbox'] {
+  border-color: #6b7280; /* gray-500 */
+  background-color: #374151; /* gray-700 */
+}
+
+.dark .note-content-wrapper .tiptap li[data-type='taskItem'] input[type='checkbox']:checked {
+  background-color: #6366f1; /* indigo-500 */
+  border-color: #6366f1;
+}
+
+.note-content-wrapper .tiptap li[data-type='taskItem'][data-checked='true'] > div > p {
+  text-decoration: line-through;
+  color: #6b7280; /* gray-500 */
+}
+
+.dark .note-content-wrapper .tiptap li[data-type='taskItem'][data-checked='true'] > div > p {
+  color: #4b5563; /* gray-600 */
+}
+
+/* Estilos para Menções (Tags) */
+.note-content-wrapper .tiptap .mention {
+  color: #4f46e5; /* indigo-600 */
+  background-color: #e0e7ff; /* indigo-200 */
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-weight: 500;
+}
+
+.dark .note-content-wrapper .tiptap .mention {
+  color: #a5b4fc; /* indigo-300 */
+  background-color: #3730a3; /* indigo-800 */
+}
+
+/* Estilos para o pop-up de sugestão (Tippy.js) */
+.tippy-box {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.tippy-content {
+  padding: 0 !important;
 }

@@ -22,9 +22,7 @@
               }
             ],
             "styles": [
-              "src/styles.css",
-              "node_modules/@fontsource/material-symbols-outlined/index.css",
-              "node_modules/@flogeez/angular-tiptap-editor/src/lib/styles/index.css"
+              "src/styles.css"
             ]
           },
           "configurations": {
