@@ -193,5 +193,43 @@ export class DataService {
     return deleteDoc(docRef);
   }
 
- 
+  // --- Métodos para Tags ---
+
+  getAllUserTags(): Observable<string[]> {
+    if (!this.userId) return of([]);
+
+    const userPath = `users/${this.userId}`;
+    const notesCollectionGroup = collectionGroup(this.firestore, 'notes');
+
+    // Precisamos garantir que a consulta seja feita dentro do caminho do usuário.
+    // Isso requer que o 'userId' esteja em algum campo dentro do documento da nota.
+    // Vamos assumir que não está, então teremos que buscar todos os cadernos primeiro.
+
+    return new Observable<string[]>(subscriber => {
+      const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
+      getDocs(notebooksCollectionRef).then(notebooksSnapshot => {
+        const allTags = new Set<string>();
+        const notePromises: Promise<any>[] = [];
+
+        notebooksSnapshot.forEach(notebookDoc => {
+          const notesCollectionRef = collection(notebookDoc.ref, 'notes');
+          notePromises.push(getDocs(notesCollectionRef));
+        });
+
+        Promise.all(notePromises).then(notesSnapshots => {
+          notesSnapshots.forEach(notesSnapshot => {
+            notesSnapshot.forEach((noteDoc: { data: () => { (): any; new(): any; tags: any[]; }; }) => {
+              const noteData = noteDoc.data();
+              if (noteData.tags && Array.isArray(noteData.tags)) {
+                noteData.tags.forEach(tag => allTags.add(tag));
+              }
+            });
+          });
+          this.zone.run(() => {
+            subscriber.next(Array.from(allTags));
+          });
+        });
+      });
+    });
+  }
 }

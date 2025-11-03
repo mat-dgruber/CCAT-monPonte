@@ -19,7 +19,7 @@ import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { BubbleMenu } from '@tiptap/extension-bubble-menu';
 import { Mention } from '@tiptap/extension-mention';
-import { SuggestionOptions, SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
+import { SuggestionOptions, SuggestionProps } from '@tiptap/suggestion';
 import * as lowlight from 'lowlight';
 import typescript from 'highlight.js/lib/languages/typescript';
 import javascript from 'highlight.js/lib/languages/javascript';
@@ -98,7 +98,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // Carregar todas as tags do usuário
-    this.dataService.getAllUserTags().subscribe((tags: string[]) => this.allTags.set(tags));
+    this.dataService.getAllTags().subscribe(tags => this.allTags.set(tags));
   }
 
   ngOnInit(): void {
@@ -188,28 +188,24 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
               interactive: true,
               trigger: 'manual',
               placement: 'bottom-start',
-            }) as unknown as Instance<Props>;
+            });
 
             componentRef.instance.itemSelected.subscribe((item: string) => {
               props.command({ id: item, label: item });
-              if (tippyInstance) {
-                tippyInstance.hide();
-              }
+              tippyInstance.hide();
             });
           },
           onUpdate: (props: SuggestionProps) => {
             componentRef.instance.items = props.items;
-            if (!props.items.length && tippyInstance) {
+            if (!props.items.length) {
               tippyInstance.hide();
             }
           },
-          onKeyDown: (props: SuggestionKeyDownProps) => {
+          onKeyDown: (props: SuggestionProps) => {
             return componentRef.instance.onKeyDown(props);
           },
           onExit: () => {
-            if (tippyInstance) {
-              tippyInstance.destroy();
-            }
+            tippyInstance.destroy();
             componentRef.destroy();
           },
         };

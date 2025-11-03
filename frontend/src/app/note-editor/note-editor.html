@@ -8,7 +8,7 @@
         placeholder="Título da Nota" 
         class="title-input flex-grow bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-gray-900 dark:text-white min-w-0"
         [(ngModel)]="currentNote.title"
-        (ngModelChange)="onContentChange()"
+        (ngModelChange)="onTitleChange()"
       />
       <div class="actions flex items-center gap-2">
         <div class="save-status text-xs sm:text-sm text-gray-500 dark:text-dark-text-secondary min-w-[70px] text-right">
@@ -73,15 +73,29 @@
       </div>
     }
 
-    <div class="note-content-wrapper flex-grow p-4 overflow-y-auto">
+    <div class="note-content-wrapper flex-grow overflow-y-auto relative" [class.searching]="searchTerm()">
       @if (searchTerm()) {
-        <div class="note-content-preview whitespace-pre-wrap" [innerHTML]="currentNote.content | highlight: searchTerm()"></div>
+        <div class="note-content-preview whitespace-pre-wrap p-4" [innerHTML]="currentNote.content | highlight: searchTerm()"></div>
       } @else {
-        <angular-tiptap-editor 
-          [content]="currentNote.content"
-          (contentChange)="onContentChanged($event)"
-          placeholder="Comece a escrever sua nota aqui..."
-        ></angular-tiptap-editor>
+        <!-- Bubble Menu -->
+        @if (editor) {
+          <div #bubbleMenu class="bubble-menu absolute z-10 bg-gray-800 dark:bg-black rounded-md shadow-lg p-1 flex gap-1">
+            <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+              <lucide-icon name="bold" size="16"></lucide-icon>
+            </button>
+            <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+              <lucide-icon name="italic" size="16"></lucide-icon>
+            </button>
+            <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+              <lucide-icon name="strikethrough" size="16"></lucide-icon>
+            </button>
+            <button (click)="editor.chain().focus().toggleCode().run()" [class.is-active]="editor.isActive('code')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+              <lucide-icon name="code" size="16"></lucide-icon>
+            </button>
+          </div>
+        }
+
+        <div #editorContainer></div>
       }
     </div>
 
