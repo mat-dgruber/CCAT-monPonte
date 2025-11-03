@@ -20,7 +20,7 @@ import { TaskItem } from '@tiptap/extension-task-item';
 import { BubbleMenu } from '@tiptap/extension-bubble-menu';
 import { Mention } from '@tiptap/extension-mention';
 import { SuggestionOptions, SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
-import * as lowlight from 'lowlight';
+import { createLowlight } from 'lowlight';
 import typescript from 'highlight.js/lib/languages/typescript';
 import javascript from 'highlight.js/lib/languages/javascript';
 import html from 'highlight.js/lib/languages/xml'; // for HTML
@@ -37,15 +37,13 @@ import { ThemeService } from '../services/theme';
 import { SuggestionListComponent } from './components/suggestion-list/suggestion-list';
 
 // Registrar linguagens para o highlight
-lowlight.registerLanguage('typescript', typescript);
-lowlight.registerLanguage('javascript', javascript);
-lowlight.registerLanguage('html', html);
-lowlight.registerLanguage('css', css);
+const lowlight = createLowlight();
+lowlight.register({ typescript, javascript, html, css });
 
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent, ClickOutsideDirective, SuggestionListComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent, ClickOutsideDirective],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
