@@ -77,14 +77,11 @@
       @if (searchTerm()) {
         <div class="note-content-preview whitespace-pre-wrap" [innerHTML]="currentNote.content | highlight: searchTerm()"></div>
       } @else {
-        <textarea
-          class="note-content-textarea w-full h-full bg-transparent focus:outline-none resize-none text-gray-800 dark:text-white"
-          [class.notebook-bg]="themeService.notebookStyle()"
+        <angular-tiptap-editor 
+          [content]="currentNote.content"
+          (contentChange)="onContentChanged($event)"
           placeholder="Comece a escrever sua nota aqui..."
-          [(ngModel)]="currentNote.content"
-          (ngModelChange)="onContentChange()"
-          rows="15"
-        ></textarea>
+        ></angular-tiptap-editor>
       }
     </div>
 

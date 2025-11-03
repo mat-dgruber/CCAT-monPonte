@@ -8,6 +8,7 @@ import { Modal } from '../modal/modal';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
+import { AngularTiptapEditorComponent } from '@flogeez/angular-tiptap-editor';
 
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
@@ -16,7 +17,7 @@ import { ThemeService } from '../services/theme';
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent, ClickOutsideDirective, AngularTiptapEditorComponent],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
@@ -116,6 +117,13 @@ export class NoteEditor implements OnInit, OnDestroy {
 
   onContentChange(): void {
     this.contentChanges.next();
+  }
+
+  onContentChanged(newContent: string): void {
+    if (this.note()) {
+      this.note.set({ ...this.note()!, content: newContent });
+      this.onContentChange();
+    }
   }
 
   async togglePin() {

@@ -30,6 +30,7 @@
     "@angular/forms": "^20.1.0",
     "@angular/platform-browser": "^20.1.0",
     "@angular/router": "^20.1.0",
+    "@flogeez/angular-tiptap-editor": "^0.3.3",
     "@tailwindcss/line-clamp": "^0.4.4",
     "firebase": "^11.10.0",
     "lucide-angular": "^0.546.0",
