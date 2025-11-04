@@ -14,10 +14,13 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
+import { CodeBlock } from '@tiptap/extension-code-block';
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { BubbleMenu } from '@tiptap/extension-bubble-menu';
+import { Blockquote } from '@tiptap/extension-blockquote';
+
 import { Mention } from '@tiptap/extension-mention';
 import { SuggestionOptions, SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
 import { createLowlight } from 'lowlight';
@@ -28,6 +31,8 @@ import css from 'highlight.js/lib/languages/css';
 
 // Componentes e Serviços
 import { Modal } from '../modal/modal';
+
+
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
@@ -72,6 +77,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   showSearch: WritableSignal<boolean> = signal(false);
   searchTerm: WritableSignal<string> = signal('');
   searchResultCount: WritableSignal<number> = signal(0);
+
   showStatsModal: WritableSignal<boolean> = signal(false);
 
   private notebookId: string | null = null;
@@ -115,7 +121,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       this.isLoading.set(false);
       if (note) {
         this.note.set(note);
-        this.setupEditor(note.content);
+        setTimeout(() => this.setupEditor(note.content));
       } else {
         this.router.navigate(['/notebooks']);
       }
@@ -145,9 +151,12 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
         Placeholder.configure({ placeholder: 'Comece a escrever sua nota aqui...' }),
         Table.configure({ resizable: true }),
         TableRow, TableHeader, TableCell,
+        CodeBlock,
         CodeBlockLowlight.configure({ lowlight }),
         TaskList, TaskItem.configure({ nested: true }),
         BubbleMenu.configure({ element: this.bubbleMenu.nativeElement }),
+        Blockquote,
+
         Mention.configure({
           HTMLAttributes: { class: 'mention' },
           suggestion: this.getTagSuggestionConfig(),
@@ -155,7 +164,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       ],
       content: content,
       editorProps: {
-        attributes: { class: 'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none' },
+        attributes: { class: 'focus:outline-none' },
       },
       onUpdate: ({ editor }) => {
         const newContent = editor.getHTML();
@@ -294,6 +303,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   toggleMoreOptions(): void { this.showMoreOptions.set(!this.showMoreOptions()); }
   toggleSearch(): void { this.showSearch.set(!this.showSearch()); if (!this.showSearch()) this.searchTerm.set(''); }
+
   openStatsModal(): void { this.showStatsModal.set(true); this.closeMoreOptions(); }
   closeStatsModal(): void { this.showStatsModal.set(false); }
   closeMoreOptions(): void { this.showMoreOptions.set(false); }

@@ -19,6 +19,8 @@
           }
         </div>
 
+
+
         <button (click)="toggleSearch()" class="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent" title="Buscar na nota">
           <lucide-icon name="search" size="20"></lucide-icon>
         </button>
@@ -56,6 +58,8 @@
       </div>
     </div>
 
+
+
     <!-- Barra de Busca -->
     @if (showSearch()) {
       <div class="search-bar p-2 border-b border-gray-200 dark:border-dark-border flex items-center gap-2">
@@ -73,30 +77,36 @@
       </div>
     }
 
-    <div class="note-content-wrapper flex-grow overflow-y-auto relative" [class.searching]="searchTerm()">
+    <div class="note-content-wrapper flex-grow overflow-y-auto relative">
       @if (searchTerm()) {
         <div class="note-content-preview whitespace-pre-wrap p-4" [innerHTML]="currentNote.content | highlight: searchTerm()"></div>
-      } @else {
-        <!-- Bubble Menu -->
-        @if (editor) {
-          <div #bubbleMenu class="bubble-menu absolute z-10 bg-gray-800 dark:bg-black rounded-md shadow-lg p-1 flex gap-1">
-            <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
-              <lucide-icon name="bold" size="16"></lucide-icon>
-            </button>
-            <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
-              <lucide-icon name="italic" size="16"></lucide-icon>
-            </button>
-            <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
-              <lucide-icon name="strikethrough" size="16"></lucide-icon>
-            </button>
-            <button (click)="editor.chain().focus().toggleCode().run()" [class.is-active]="editor.isActive('code')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
-              <lucide-icon name="code" size="16"></lucide-icon>
-            </button>
-          </div>
-        }
-
-        <div #editorContainer></div>
       }
+
+      <!-- Bubble Menu -->
+      @if (editor) {
+        <div #bubbleMenu class="bubble-menu absolute z-10 bg-gray-800 dark:bg-black rounded-md shadow-lg p-1 flex gap-1">
+          <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+            <lucide-icon name="bold" size="16"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+            <lucide-icon name="italic" size="16"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+            <lucide-icon name="strikethrough" size="16"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleCode().run()" [class.is-active]="editor.isActive('code')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+            <lucide-icon name="code" size="16"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleCodeBlock().run()" [class.is-active]="editor.isActive('codeBlock')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+            <lucide-icon name="square-code" size="16"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleBlockquote().run()" [class.is-active]="editor.isActive('blockquote')" class="p-2 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-800">
+            <lucide-icon name="quote" size="16"></lucide-icon>
+          </button>
+        </div>
+      }
+
+      <div #editorContainer [hidden]="searchTerm()"></div>
     </div>
 
     <!-- Tags Footer -->

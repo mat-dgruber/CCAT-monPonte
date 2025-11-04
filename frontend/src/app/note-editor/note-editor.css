@@ -1,7 +1,12 @@
 /* Estilos Globais para o Editor Tiptap */
 .note-content-wrapper .tiptap {
-  min-height: 100%;
+  min-height: 100px; /* Garante uma altura mínima para o editor */
   outline: none;
+  z-index: 10; /* Garante que o editor fique acima de outros elementos */
+}
+
+.note-content-wrapper .tiptap:focus {
+  z-index: 10;
 }
 
 /* Estilização do Placeholder */
