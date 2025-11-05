@@ -77,12 +77,17 @@
       </div>
     }
 
-    <div class="note-content-wrapper flex-grow overflow-y-auto relative">
+    <div class="note-content-wrapper flex-grow overflow-y-auto">
       @if (searchTerm()) {
-        <div class="note-content-preview whitespace-pre-wrap p-4" [innerHTML]="currentNote.content | highlight: searchTerm()"></div>
+        <div class="note-content-preview whitespace-pre-wrap p-4" [innerHTML]="(note()?.content ?? '') | highlight: searchTerm()"></div>
+      } @else {
+        <textarea
+          class="w-full h-full p-4 bg-transparent focus:outline-none resize-none dark:text-white"
+          [(ngModel)]="note()!.content"
+          (ngModelChange)="onContentChange($event)"
+          placeholder="Comece a escrever sua nota aqui..."
+        ></textarea>
       }
-
-      <div class="note-content-preview whitespace-pre-wrap p-4" [innerHTML]="currentNote.content"></div>
     </div>
 
     <!-- Tags Footer -->

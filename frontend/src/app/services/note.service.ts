@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, WritableSignal, OnDestroy, effect, NgZone } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService } from './data.service';
 import { AuthService } from './auth';
@@ -35,42 +36,36 @@ export class NoteService implements OnDestroy {
   activeNotebookId: WritableSignal<string | null> = signal(null);
 
   constructor() {
-    // Usando a sua versão original do código (sem onCleanup, por clareza)
-    effect(() => {
-      const notebookId = this.activeNotebookId();
-      const user = this.authService.getCurrentUserId();
+    // Combina o estado de autenticação e a seleção do caderno
+    const notebookChanges$ = combineLatest([
+      this.authService.authState$,
+      toObservable(this.activeNotebookId) // Converte o signal para um observable
+    ]);
 
-      if (this.notesSubscription) {
-        this.notesSubscription.unsubscribe();
-      }
-
-      if (notebookId && user) {
-        this.isLoading.set(true);
-        this.loadingError.set(false);
-        this.notes.set([]); 
-
-        this.notesSubscription = this.dataService.getNotes(notebookId).pipe(
-          catchError(error => {
-            console.error('Erro ao buscar notas:', error);
-            this.loadingError.set(true);
-            return of([]); 
-          }),
-          takeUntil(this.destroy$)
-        ).subscribe(notes => {
-          // 3. Force a atualização dos signals dentro da zona
-          this.zone.run(() => {
-            this.notes.set(notes);
-            this.isLoading.set(false);
-          });
-        });
-      } else {
-        // 4. Faça o mesmo para o 'else'
-        this.zone.run(() => {
-          this.notes.set([]);
-          this.isLoading.set(false);
+    this.notesSubscription = notebookChanges$.pipe(
+      switchMap(([user, notebookId]) => {
+        if (user && notebookId) {
+          this.isLoading.set(true);
           this.loadingError.set(false);
-        });
-      }
+          this.notes.set([]); // Limpa as notas imediatamente
+
+          return this.dataService.getNotes(notebookId).pipe(
+            catchError(error => {
+              console.error('Erro ao buscar notas:', error);
+              this.loadingError.set(true);
+              return of([]); // Em caso de erro, emite um array vazio
+            })
+          );
+        } else {
+          return of([]); // Se não houver usuário ou caderno, emite um array vazio
+        }
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe(notes => {
+      this.zone.run(() => {
+        this.notes.set(notes);
+        this.isLoading.set(false);
+      });
     });
 
     // Efeito para limpar o estado no logout

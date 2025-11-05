@@ -221,6 +221,14 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
     }, 1000);
   }
 
+  onContentChange(newContent: string): void {
+    const currentNote = this.note();
+    if (currentNote) {
+      this.note.set({ ...currentNote, content: newContent });
+      this.contentChanges.next(newContent);
+    }
+  }
+
   async togglePin() {
     if (!this.notebookId || !this.noteId || !this.note()) return;
     const currentNote = this.note()!;
