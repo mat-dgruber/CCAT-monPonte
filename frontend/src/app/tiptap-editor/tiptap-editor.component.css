@@ -33,10 +33,62 @@
   background-color: #334155;
   color: #ffffff;
 }
+.tiptap-editor-container .editor-header > .menu > select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+}
 
 .tiptap-editor-container > [tiptapEditor] {
   border: 1px solid #e2e8f0;
   border-radius: 0 0 0.5rem 0.5rem;
   padding: 1rem;
   min-height: 15rem;
+}
+
+/* Estilos para o novo seletor de cor */
+.color-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.color-palette {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 8px;
+  z-index: 10;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+}
+
+.color-swatch-remove {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
 }

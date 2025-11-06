@@ -13,28 +13,22 @@
       <button (click)="editor.chain().focus().toggleUnderline().run()" [class.is-active]="editor.isActive('underline')" title="Underline">
         <lucide-icon name="underline"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleHighlight().run()" [class.is-active]="editor.isActive('highlight')" title="Highlight">
-        <lucide-icon name="highlighter"></lucide-icon>
-      </button>
-      <input type="color" (input)="setColorValue($event)" [value]="editor?.getAttributes('textStyle')?.['color']" title="Text Color">
-      <select (change)="setFontFamilyValue($event)" [value]="editor?.getAttributes('textStyle')?.['fontFamily'] || ''">
-        <option value="">Select Font</option>
-        <option value="Arial">Arial</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Helvetica">Helvetica</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Verdana">Verdana</option>
-      </select>
-      <select (change)="setFontSizeValue($event)" [value]="editor?.getAttributes('textStyle')?.['fontSize']?.replace('px','') || ''">
-        <option value="">Select Size</option>
-        <option value="12">12</option>
-        <option value="14">14</option>
-        <option value="16">16</option>
-        <option value="18">18</option>
-        <option value="20">20</option>
-        <option value="24">24</option>
-      </select>
-      <button (click)="editor.chain().focus().setTextAlign('left').run()" [class.is-active]="editor.isActive({ textAlign: 'left' })" title="Align Left">
+
+      <!-- Novo Seletor de Cor de Realce -->
+      <div class="color-picker-wrapper">
+        <button (click)="showHighlightPalette = !showHighlightPalette" [class.is-active]="editor.isActive('highlight')" title="Highlight">
+          <lucide-icon name="highlighter"></lucide-icon>
+        </button>
+        <div *ngIf="showHighlightPalette" class="color-palette">
+          <button *ngFor="let color of predefinedHighlightColors"
+                  class="color-swatch"
+                  [style.backgroundColor]="color"
+                  (click)="setHighlightColorFromPalette(color)"></button>
+          <button (click)="unsetHighlight()" class="color-swatch-remove" title="Remover realce">
+            <lucide-icon name="x-circle" size="16"></lucide-icon>
+          </button>
+        </div>
+      </div>      <button (click)="editor.chain().focus().setTextAlign('left').run()" [class.is-active]="editor.isActive({ textAlign: 'left' })" title="Align Left">
         <lucide-icon name="align-left"></lucide-icon>
       </button>
       <button (click)="editor.chain().focus().setTextAlign('center').run()" [class.is-active]="editor.isActive({ textAlign: 'center' })" title="Align Center">
@@ -48,9 +42,6 @@
       </button>
       <button (click)="setLink()" [class.is-active]="editor.isActive('link')" title="Link">
         <lucide-icon name="link"></lucide-icon>
-      </button>
-      <button (click)="addImage()" title="Add Image">
-        <lucide-icon name="image"></lucide-icon>
       </button>
       <button (click)="addYoutubeVideo()" title="Add YouTube Video">
         <lucide-icon name="youtube"></lucide-icon>

@@ -7,18 +7,13 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
 import TextAlign from '@tiptap/extension-text-align';
-import Highlight from '@tiptap/extension-highlight';
-import { Color } from '@tiptap/extension-color';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import YouTube from '@tiptap/extension-youtube';
-import Image from '@tiptap/extension-image';
 import Document from '@tiptap/extension-document';
 
 import Placeholder from '@tiptap/extension-placeholder';
-import { TextStyle } from '@tiptap/extension-text-style';
-import { FontFamily } from '@tiptap/extension-font-family';
-import { FontSize } from './font-size.extension';
+import Highlight from '@tiptap/extension-highlight';
 
 @Component({
   selector: 'app-tiptap-editor',
@@ -33,29 +28,38 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   editor: Editor | null = null;
 
+  showHighlightPalette = false;
+  predefinedHighlightColors = [
+    '#ffff00', // Amarelo
+    '#90ee90', // Verde Claro
+    '#ffc0cb', // Rosa
+    '#add8e6', // Azul Claro
+    '#ffa500', // Laranja
+    '#d3d3d3'  // Cinza Claro
+  ];
+
   constructor() {}
 
   ngOnInit(): void {
     this.editor = new Editor({
       extensions: [
         StarterKit.configure({
+          // Desabilitar heading se você estiver usando botões separados
         }),
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
-        Highlight,
-        Color,
         Underline,
         Link,
         YouTube,
-        Image,
+        YouTube.configure({
+          controls: false,
+        }),
         Document,
         Placeholder.configure({
           placeholder: 'Write something…',
         }),
-        TextStyle,
-        FontFamily,
-        FontSize,
+        Highlight.configure({ multicolor: true }),
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
@@ -83,13 +87,6 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  addImage() {
-    const url = window.prompt('URL');
-    if (this.editor && url) {
-      this.editor.chain().focus().setImage({ src: url }).run();
-    }
-  }
-
   addYoutubeVideo() {
     const url = window.prompt('URL');
     if (this.editor && url) {
@@ -97,25 +94,24 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  closeHighlightPalette() {
+    this.showHighlightPalette = false;
+  }
+
+  setHighlightColorFromPalette(color: string) {
+    this.editor?.chain().focus().setHighlight({ color: color }).run();
+    this.showHighlightPalette = false;
+  }
+
+  unsetHighlight() {
+    this.editor?.chain().focus().unsetHighlight().run();
+    this.showHighlightPalette = false;
+  }
+
   getInputValue(event: Event): string {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) {
       return event.target.value;
     }
     return '';
-  }
-
-  setColorValue(event: Event) {
-    const color = this.getInputValue(event);
-    this.editor?.chain().focus().setColor(color).run();
-  }
-
-  setFontFamilyValue(event: Event) {
-    const fontFamily = this.getInputValue(event);
-    this.editor?.chain().focus().setFontFamily(fontFamily).run();
-  }
-
-  setFontSizeValue(event: Event) {
-    const fontSize = this.getInputValue(event);
-    this.editor?.chain().focus().setFontSize(fontSize + 'px').run();
   }
 }

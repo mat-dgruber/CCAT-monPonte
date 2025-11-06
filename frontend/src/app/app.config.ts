@@ -6,7 +6,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { firebaseConfig } from '../../../firebaseConfig';
-import { LucideAngularModule, PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, Heading1, Heading2, Heading3, List, ListOrdered, Code, Quote, Minus } from 'lucide-angular';
+import { LucideAngularModule, PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, Heading1, Heading2, Heading3, List, ListOrdered, Code, Quote, Minus, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Link, Youtube, Highlighter } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +16,6 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
-    importProvidersFrom(LucideAngularModule.pick({ PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, Heading1, Heading2, Heading3, List, ListOrdered, Code, Quote, Minus })),
+    importProvidersFrom(LucideAngularModule.pick({ PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, Heading1, Heading2, Heading3, List, ListOrdered, Code, Quote, Minus, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Link, Youtube, Highlighter })),
   ],
 };
