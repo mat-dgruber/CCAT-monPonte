@@ -1,10 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+import { ClickOutsideDirective } from '../directives/click-outside.directive';
 
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
@@ -18,7 +19,7 @@ import Highlight from '@tiptap/extension-highlight';
 @Component({
   selector: 'app-tiptap-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TiptapEditorDirective, LucideAngularModule],
+  imports: [CommonModule, FormsModule, TiptapEditorDirective, LucideAngularModule, ClickOutsideDirective],
   templateUrl: './tiptap-editor.component.html',
   styleUrls: ['./tiptap-editor.component.css'],
 })
@@ -38,13 +39,17 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     '#d3d3d3'  // Cinza Claro
   ];
 
-  constructor() {}
+  showAlignDropdown = false;
+
+  showListsDropdown = false;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.editor = new Editor({
       extensions: [
         StarterKit.configure({
-          // Desabilitar heading se você estiver usando botões separados
+          heading: false,
         }),
         TextAlign.configure({
           types: ['heading', 'paragraph'],
@@ -113,5 +118,22 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
       return event.target.value;
     }
     return '';
+  }
+
+  toggleAlignDropdown() {
+    this.showAlignDropdown = !this.showAlignDropdown;
+    this.showListsDropdown = false;
+  }
+
+
+
+  toggleListsDropdown() {
+    this.showListsDropdown = !this.showListsDropdown;
+    this.showAlignDropdown = false;
+  }
+
+  closeAllDropdowns() {
+    this.showAlignDropdown = false;
+    this.showListsDropdown = false;
   }
 }

@@ -28,39 +28,49 @@
             <lucide-icon name="x-circle" size="16"></lucide-icon>
           </button>
         </div>
-      </div>      <button (click)="editor.chain().focus().setTextAlign('left').run()" [class.is-active]="editor.isActive({ textAlign: 'left' })" title="Align Left">
-        <lucide-icon name="align-left"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().setTextAlign('center').run()" [class.is-active]="editor.isActive({ textAlign: 'center' })" title="Align Center">
-        <lucide-icon name="align-center"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().setTextAlign('right').run()" [class.is-active]="editor.isActive({ textAlign: 'right' })" title="Align Right">
-        <lucide-icon name="align-right"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().setTextAlign('justify').run()" [class.is-active]="editor.isActive({ textAlign: 'justify' })" title="Align Justify">
-        <lucide-icon name="align-justify"></lucide-icon>
-      </button>
+      </div>      <div class="dropdown-wrapper">
+        <button (click)="toggleAlignDropdown()" title="Align">
+          <lucide-icon name="align-left"></lucide-icon>
+        </button>
+        <div *ngIf="showAlignDropdown" class="dropdown-menu" (clickOutside)="closeAllDropdowns()">
+          <button (click)="editor.chain().focus().setTextAlign('left').run()" [class.is-active]="editor.isActive({ textAlign: 'left' })" title="Align Left">
+            <lucide-icon name="align-left"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().setTextAlign('center').run()" [class.is-active]="editor.isActive({ textAlign: 'center' })" title="Align Center">
+            <lucide-icon name="align-center"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().setTextAlign('right').run()" [class.is-active]="editor.isActive({ textAlign: 'right' })" title="Align Right">
+            <lucide-icon name="align-right"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().setTextAlign('justify').run()" [class.is-active]="editor.isActive({ textAlign: 'justify' })" title="Align Justify">
+            <lucide-icon name="align-justify"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
       <button (click)="setLink()" [class.is-active]="editor.isActive('link')" title="Link">
         <lucide-icon name="link"></lucide-icon>
       </button>
       <button (click)="addYoutubeVideo()" title="Add YouTube Video">
         <lucide-icon name="youtube"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleHeading({ level: 1 }).run()" [class.is-active]="editor.isActive('heading', { level: 1 })" title="Heading 1">
-        <lucide-icon name="heading-1"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().toggleHeading({ level: 2 }).run()" [class.is-active]="editor.isActive('heading', { level: 2 })" title="Heading 2">
-        <lucide-icon name="heading-2"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().toggleHeading({ level: 3 }).run()" [class.is-active]="editor.isActive('heading', { level: 3 })" title="Heading 3">
-        <lucide-icon name="heading-3"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().toggleBulletList().run()" [class.is-active]="editor.isActive('bulletList')" title="Bullet List">
-        <lucide-icon name="list"></lucide-icon>
-      </button>
-      <button (click)="editor.chain().focus().toggleOrderedList().run()" [class.is-active]="editor.isActive('orderedList')" title="Ordered List">
-        <lucide-icon name="list-ordered"></lucide-icon>
-      </button>
+
+
+
+      <div class="dropdown-wrapper">
+        <button (click)="toggleListsDropdown()" title="Lists">
+          <lucide-icon name="list"></lucide-icon>
+        </button>
+        <div *ngIf="showListsDropdown" class="dropdown-menu" (clickOutside)="closeAllDropdowns()">
+          <button (click)="editor.chain().focus().toggleBulletList().run()" [class.is-active]="editor.isActive('bulletList')" title="Bullet List">
+            <lucide-icon name="list"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleOrderedList().run()" [class.is-active]="editor.isActive('orderedList')" title="Ordered List">
+            <lucide-icon name="list-ordered"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
       <button (click)="editor.chain().focus().toggleCodeBlock().run()" [class.is-active]="editor.isActive('codeBlock')" title="Code Block">
         <lucide-icon name="code"></lucide-icon>
       </button>

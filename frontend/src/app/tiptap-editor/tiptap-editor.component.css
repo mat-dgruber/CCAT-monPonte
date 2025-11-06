@@ -8,7 +8,7 @@
 .tiptap-editor-container .editor-header > .menu {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .tiptap-editor-container .editor-header > .menu > button {
@@ -91,4 +91,34 @@
   align-items: center;
   justify-content: center;
   background-color: #f8f9fa;
+}
+
+.dropdown-wrapper {
+  position: relative;
+  display: flex;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 2px solid blue;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.5rem 0.75rem;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f1f5f9;
 }
