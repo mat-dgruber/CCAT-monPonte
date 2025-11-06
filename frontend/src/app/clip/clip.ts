@@ -159,9 +159,11 @@ export class Clip implements OnInit, OnDestroy {
 
     try {
       await this.dataService.createNote(
-        this.selectedNotebookIdForNote,
+        this.selectedNotebookIdForNote!,
         title,
-        this.clipService.copyText()
+        this.clipService.copyText(),
+        [], // tags
+        false // isPinned
       );
       this.notificationService.showSuccess('Nota criada com sucesso!');
 

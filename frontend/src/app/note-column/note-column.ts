@@ -57,6 +57,9 @@ export class NoteColumn implements OnInit, OnDestroy {
   currentNote: WritableSignal<Partial<Note>> = signal({});
   isEditing: WritableSignal<boolean> = signal(false);
 
+  modalTags: WritableSignal<string> = signal('');
+  modalIsPinned: WritableSignal<boolean> = signal(false);
+
   // As notas agora vêm do NoteService
   notes: Signal<Note[]> = this.noteService.notes;
   
@@ -122,6 +125,8 @@ export class NoteColumn implements OnInit, OnDestroy {
   openCreateNoteModal() {
     this.isEditing.set(false);
     this.currentNote.set({ title: '', content: '' });
+    this.modalTags.set('');
+    this.modalIsPinned.set(false);
     this.isNoteModalVisible.set(true);
   }
 
@@ -142,10 +147,13 @@ export class NoteColumn implements OnInit, OnDestroy {
 
   async saveNote(noteData: Partial<Note>) {
     try {
+      const tagsArray = this.modalTags().split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      const isPinned = this.modalIsPinned();
+
       if (this.isEditing() && noteData.id) {
-        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content! });
+        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content!, tags: tagsArray, isPinned: isPinned });
       } else {
-        await this.noteService.createNote(noteData.title!, noteData.content!);
+        await this.noteService.createNote(noteData.title!, noteData.content!, tagsArray, isPinned);
       }
       this.closeNoteModal();
     } catch (error) {

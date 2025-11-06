@@ -162,10 +162,10 @@ export class DataService {
     });
   }
 
-  async createNote(notebookId: string, title: string, content: string): Promise<string> {
+  async createNote(notebookId: string, title: string, content: string, tags: string[], isPinned: boolean): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar nota.');
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
-    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags: [], isPinned: false });
+    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags, isPinned });
     return docRef.id;
   }
 
