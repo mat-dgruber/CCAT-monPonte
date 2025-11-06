@@ -81,7 +81,6 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       switchMap(params => {
         this.notebookId = params.get('notebookId');
         this.noteId = params.get('noteId');
-        this.editor?.destroy(); 
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
           return this.dataService.getNote(this.notebookId, this.noteId);
