@@ -85,12 +85,20 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
       this.editor.commands.clearSearchHighlights();
     }
 
-    if (changes['content'] && changes['content'].currentValue !== this.editor.getHTML()) {
-      // If the content is changing and the editor has unsaved changes, emit them first.
-      if (this.editor.getHTML() !== this.content) { // Check if editor content differs from the last @Input content
+    if (changes['content']) {
+      const newContent = changes['content'].currentValue;
+      const oldContentInput = changes['content'].previousValue; // This is the content of the *previous* note as per input
+
+      // If it's not the first change and the editor's current content is different from the old input content,
+      // it means the user made changes to the previous note that haven't been saved yet.
+      if (oldContentInput !== undefined && this.editor.getHTML() !== oldContentInput) {
         this.contentChange.emit(this.editor.getHTML());
       }
-      this.editor.commands.setContent(changes['content'].currentValue, { emitUpdate: false });
+
+      // Only update the editor if the new content is different from what's currently in the editor
+      if (this.editor.getHTML() !== newContent) {
+        this.editor.commands.setContent(newContent, { emitUpdate: false });
+      }
     }
 
     // Apply new highlights if a search term is present
