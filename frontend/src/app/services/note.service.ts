@@ -86,16 +86,16 @@ export class NoteService implements OnDestroy {
 
   // --- Métodos de Ação --- 
 
-  createNote(title: string, content: string): Promise<string | null> {
+  createNote(title: string, content: string, tags: string[] = [], isPinned: boolean = false): Promise<string | null> {
     const notebookId = this.activeNotebookId();
     if (!notebookId) {
       console.error('Nenhum caderno ativo para criar a nota.');
       return Promise.resolve(null);
     }
-    return this.dataService.createNote(notebookId, title, content);
+    return this.dataService.createNote(notebookId, title, content, tags, isPinned);
   }
 
-  updateNote(noteId: string, data: { title?: string, content?: string }): Promise<void | null> {
+  updateNote(noteId: string, data: { title?: string, content?: string, tags?: string[], isPinned?: boolean }): Promise<void | null> {
     const notebookId = this.activeNotebookId();
     if (!notebookId) {
       console.error('Nenhum caderno ativo para atualizar a nota.');

@@ -75,10 +75,10 @@
       <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Conteúdo da nota" rows="5"></textarea>
     </div>    <div class="flex items-center gap-2">
         <label class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Tags (separadas por vírgula):</label>
-        <input type="text" [(ngModel)]="currentNote().tags" class="flex-grow p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="tag1, tag2">
+        <input type="text" [(ngModel)]="modalTags" class="flex-grow p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="tag1, tag2">
       </div>
     <div class="flex items-center mt-4">
-        <input type="checkbox" id="pinNote" [(ngModel)]="currentNote().isPinned" class="mr-2">
+        <input type="checkbox" id="pinNote" [(ngModel)]="modalIsPinned" class="mr-2">
         <label for="pinNote" class="text-sm text-gray-700 dark:text-dark-text-secondary">Fixar esta nota</label>
       </div>
 
