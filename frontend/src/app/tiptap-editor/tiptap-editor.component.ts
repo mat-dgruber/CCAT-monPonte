@@ -86,6 +86,10 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     if (changes['content'] && changes['content'].currentValue !== this.editor.getHTML()) {
+      // If the content is changing and the editor has unsaved changes, emit them first.
+      if (this.editor.getHTML() !== this.content) { // Check if editor content differs from the last @Input content
+        this.contentChange.emit(this.editor.getHTML());
+      }
       this.editor.commands.setContent(changes['content'].currentValue, { emitUpdate: false });
     }
 
@@ -99,7 +103,10 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    // Clear any active search highlights before destroying the editor
+    // Emit any unsaved changes before destroying the editor
+    if (this.editor && this.editor.getHTML() !== this.content) {
+      this.contentChange.emit(this.editor.getHTML());
+    }
     this.editor?.commands.clearSearchHighlights();
     this.editor?.destroy();
   }
