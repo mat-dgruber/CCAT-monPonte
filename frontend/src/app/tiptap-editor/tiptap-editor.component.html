@@ -10,6 +10,51 @@
       <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" title="Strike">
         <lucide-icon name="strikethrough"></lucide-icon>
       </button>
+      <button (click)="editor.chain().focus().toggleUnderline().run()" [class.is-active]="editor.isActive('underline')" title="Underline">
+        <lucide-icon name="underline"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().toggleHighlight().run()" [class.is-active]="editor.isActive('highlight')" title="Highlight">
+        <lucide-icon name="highlighter"></lucide-icon>
+      </button>
+      <input type="color" (input)="setColorValue($event)" [value]="editor?.getAttributes('textStyle')?.['color']" title="Text Color">
+      <select (change)="setFontFamilyValue($event)" [value]="editor?.getAttributes('textStyle')?.['fontFamily'] || ''">
+        <option value="">Select Font</option>
+        <option value="Arial">Arial</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Helvetica">Helvetica</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Verdana">Verdana</option>
+      </select>
+      <select (change)="setFontSizeValue($event)" [value]="editor?.getAttributes('textStyle')?.['fontSize']?.replace('px','') || ''">
+        <option value="">Select Size</option>
+        <option value="12">12</option>
+        <option value="14">14</option>
+        <option value="16">16</option>
+        <option value="18">18</option>
+        <option value="20">20</option>
+        <option value="24">24</option>
+      </select>
+      <button (click)="editor.chain().focus().setTextAlign('left').run()" [class.is-active]="editor.isActive({ textAlign: 'left' })" title="Align Left">
+        <lucide-icon name="align-left"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().setTextAlign('center').run()" [class.is-active]="editor.isActive({ textAlign: 'center' })" title="Align Center">
+        <lucide-icon name="align-center"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().setTextAlign('right').run()" [class.is-active]="editor.isActive({ textAlign: 'right' })" title="Align Right">
+        <lucide-icon name="align-right"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().setTextAlign('justify').run()" [class.is-active]="editor.isActive({ textAlign: 'justify' })" title="Align Justify">
+        <lucide-icon name="align-justify"></lucide-icon>
+      </button>
+      <button (click)="setLink()" [class.is-active]="editor.isActive('link')" title="Link">
+        <lucide-icon name="link"></lucide-icon>
+      </button>
+      <button (click)="addImage()" title="Add Image">
+        <lucide-icon name="image"></lucide-icon>
+      </button>
+      <button (click)="addYoutubeVideo()" title="Add YouTube Video">
+        <lucide-icon name="youtube"></lucide-icon>
+      </button>
       <button (click)="editor.chain().focus().toggleHeading({ level: 1 }).run()" [class.is-active]="editor.isActive('heading', { level: 1 })" title="Heading 1">
         <lucide-icon name="heading-1"></lucide-icon>
       </button>
