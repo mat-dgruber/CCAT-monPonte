@@ -4,11 +4,12 @@ import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-tiptap-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TiptapEditorDirective],
+  imports: [CommonModule, FormsModule, TiptapEditorDirective, LucideAngularModule],
   templateUrl: './tiptap-editor.component.html',
   styleUrls: ['./tiptap-editor.component.css'],
 })

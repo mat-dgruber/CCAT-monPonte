@@ -3,7 +3,6 @@
   border-bottom: none;
   border-radius: 0.5rem 0.5rem 0 0;
   padding: 0.5rem;
-  background-color: rgb(240, 240, 240);
 }
 
 .tiptap-editor-container .editor-header > .menu {
@@ -16,11 +15,13 @@
   background-color: transparent;
   border: none;
   border-radius: 0.25rem;
-  color: #0f172a;
+  color: #334155;
   cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.2s ease-in-out;
 }
 
@@ -29,7 +30,7 @@
 }
 
 .tiptap-editor-container .editor-header > .menu > button.is-active {
-  background-color: #0f172a;
+  background-color: #334155;
   color: #ffffff;
 }
 

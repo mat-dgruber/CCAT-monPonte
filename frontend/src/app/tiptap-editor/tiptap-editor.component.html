@@ -1,41 +1,38 @@
 <div class="tiptap-editor-container" *ngIf="editor">
   <div class="editor-header">
     <div class="menu">
-      <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')">
-        Bold
+      <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')" title="Bold">
+        <lucide-icon name="bold" ></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')">
-        Italic
+      <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')" title="Italic">
+        <lucide-icon name="italic"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')">
-        Strike
+      <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" title="Strike">
+        <lucide-icon name="strikethrough"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().setParagraph().run()" [class.is-active]="editor.isActive('paragraph')">
-        Paragraph
+      <button (click)="editor.chain().focus().toggleHeading({ level: 1 }).run()" [class.is-active]="editor.isActive('heading', { level: 1 })" title="Heading 1">
+        <lucide-icon name="heading-1"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleHeading({ level: 1 }).run()" [class.is-active]="editor.isActive('heading', { level: 1 })">
-        H1
+      <button (click)="editor.chain().focus().toggleHeading({ level: 2 }).run()" [class.is-active]="editor.isActive('heading', { level: 2 })" title="Heading 2">
+        <lucide-icon name="heading-2"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleHeading({ level: 2 }).run()" [class.is-active]="editor.isActive('heading', { level: 2 })">
-        H2
+      <button (click)="editor.chain().focus().toggleHeading({ level: 3 }).run()" [class.is-active]="editor.isActive('heading', { level: 3 })" title="Heading 3">
+        <lucide-icon name="heading-3"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleHeading({ level: 3 }).run()" [class.is-active]="editor.isActive('heading', { level: 3 })">
-        H3
+      <button (click)="editor.chain().focus().toggleBulletList().run()" [class.is-active]="editor.isActive('bulletList')" title="Bullet List">
+        <lucide-icon name="list"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleBulletList().run()" [class.is-active]="editor.isActive('bulletList')">
-        Bullet List
+      <button (click)="editor.chain().focus().toggleOrderedList().run()" [class.is-active]="editor.isActive('orderedList')" title="Ordered List">
+        <lucide-icon name="list-ordered"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleOrderedList().run()" [class.is-active]="editor.isActive('orderedList')">
-        Ordered List
+      <button (click)="editor.chain().focus().toggleCodeBlock().run()" [class.is-active]="editor.isActive('codeBlock')" title="Code Block">
+        <lucide-icon name="code"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleCodeBlock().run()" [class.is-active]="editor.isActive('codeBlock')">
-        Code Block
+      <button (click)="editor.chain().focus().toggleBlockquote().run()" [class.is-active]="editor.isActive('blockquote')" title="Blockquote">
+        <lucide-icon name="quote"></lucide-icon>
       </button>
-      <button (click)="editor.chain().focus().toggleBlockquote().run()" [class.is-active]="editor.isActive('blockquote')">
-        Blockquote
-      </button>
-      <button (click)="editor.chain().focus().setHorizontalRule().run()">
-        Horizontal Rule
+      <button (click)="editor.chain().focus().setHorizontalRule().run()" title="Horizontal Rule">
+        <lucide-icon name="minus"></lucide-icon>
       </button>
     </div>
   </div>
