@@ -1,0 +1,21 @@
+.tiptap-editor-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  min-height: 200px;
+}
+
+/* Basic Tiptap editor styles */
+.tiptap {
+  outline: none;
+}
+
+.tiptap p {
+  margin: 0 0 1em 0;
+}
+
+.tiptap:empty::before {
+  content: attr(data-placeholder);
+  color: #adb5bd;
+  pointer-events: none;
+}
