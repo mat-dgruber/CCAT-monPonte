@@ -51,7 +51,7 @@
       <button (click)="setLink()" [class.is-active]="editor.isActive('link')" title="Link">
         <lucide-icon name="link"></lucide-icon>
       </button>
-      <button (click)="addYoutubeVideo()" title="Add YouTube Video">
+      <button (click)="addYoutubeVideo()" title="Add YouTube Video" *ngIf="false">
         <lucide-icon name="youtube"></lucide-icon>
       </button>
 
