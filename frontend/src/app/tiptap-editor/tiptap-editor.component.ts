@@ -18,9 +18,13 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   editor: Editor | null = null;
 
+  constructor() {}
+
   ngOnInit(): void {
     this.editor = new Editor({
-      extensions: [StarterKit],
+      extensions: [
+        StarterKit,
+      ],
       content: this.content,
       onUpdate: ({ editor }) => {
         this.contentChange.emit(editor.getHTML());
