@@ -1,0 +1,86 @@
+<div class="tiptap-editor-container" *ngIf="editor">
+  <div class="editor-header">
+    <div class="menu">
+      <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')" title="Bold">
+        <lucide-icon name="bold" ></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')" title="Italic">
+        <lucide-icon name="italic"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" title="Strike">
+        <lucide-icon name="strikethrough"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().toggleUnderline().run()" [class.is-active]="editor.isActive('underline')" title="Underline">
+        <lucide-icon name="underline"></lucide-icon>
+      </button>
+
+      <!-- Novo Seletor de Cor de Realce -->
+      <div class="color-picker-wrapper">
+        <button (click)="showHighlightPalette = !showHighlightPalette" [class.is-active]="editor.isActive('highlight')" title="Highlight">
+          <lucide-icon name="highlighter"></lucide-icon>
+        </button>
+        <div *ngIf="showHighlightPalette" class="color-palette">
+          <button *ngFor="let color of predefinedHighlightColors"
+                  class="color-swatch"
+                  [style.backgroundColor]="color"
+                  (click)="setHighlightColorFromPalette(color)"></button>
+          <button (click)="unsetHighlight()" class="color-swatch-remove" title="Remover realce">
+            <lucide-icon name="x-circle" size="16"></lucide-icon>
+          </button>
+        </div>
+      </div>      <div class="dropdown-wrapper">
+        <button (click)="toggleAlignDropdown()" title="Align">
+          <lucide-icon name="align-left"></lucide-icon>
+        </button>
+        <div *ngIf="showAlignDropdown" class="dropdown-menu" (clickOutside)="closeAllDropdowns()">
+          <button (click)="editor.chain().focus().setTextAlign('left').run()" [class.is-active]="editor.isActive({ textAlign: 'left' })" title="Align Left">
+            <lucide-icon name="align-left"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().setTextAlign('center').run()" [class.is-active]="editor.isActive({ textAlign: 'center' })" title="Align Center">
+            <lucide-icon name="align-center"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().setTextAlign('right').run()" [class.is-active]="editor.isActive({ textAlign: 'right' })" title="Align Right">
+            <lucide-icon name="align-right"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().setTextAlign('justify').run()" [class.is-active]="editor.isActive({ textAlign: 'justify' })" title="Align Justify">
+            <lucide-icon name="align-justify"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <button (click)="setLink()" [class.is-active]="editor.isActive('link')" title="Link">
+        <lucide-icon name="link"></lucide-icon>
+      </button>
+      <button (click)="addYoutubeVideo()" title="Add YouTube Video" *ngIf="false">
+        <lucide-icon name="youtube"></lucide-icon>
+      </button>
+
+
+
+      <div class="dropdown-wrapper">
+        <button (click)="toggleListsDropdown()" title="Lists">
+          <lucide-icon name="list"></lucide-icon>
+        </button>
+        <div *ngIf="showListsDropdown" class="dropdown-menu" (clickOutside)="closeAllDropdowns()">
+          <button (click)="editor.chain().focus().toggleBulletList().run()" [class.is-active]="editor.isActive('bulletList')" title="Bullet List">
+            <lucide-icon name="list"></lucide-icon>
+          </button>
+          <button (click)="editor.chain().focus().toggleOrderedList().run()" [class.is-active]="editor.isActive('orderedList')" title="Ordered List">
+            <lucide-icon name="list-ordered"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <button (click)="editor.chain().focus().toggleCodeBlock().run()" [class.is-active]="editor.isActive('codeBlock')" title="Code Block">
+        <lucide-icon name="code"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().toggleBlockquote().run()" [class.is-active]="editor.isActive('blockquote')" title="Blockquote">
+        <lucide-icon name="quote"></lucide-icon>
+      </button>
+      <button (click)="editor.chain().focus().setHorizontalRule().run()" title="Horizontal Rule">
+        <lucide-icon name="minus"></lucide-icon>
+      </button>
+    </div>
+  </div>
+  <div tiptapEditor [editor]="editor"></div>
+</div>

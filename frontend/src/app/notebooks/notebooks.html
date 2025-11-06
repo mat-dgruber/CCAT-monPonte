@@ -132,16 +132,15 @@
   <main
     class="notes-column w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex min-w-0"
   >
-    @if (selectedNotebookId()) {
+    <div class="w-full h-full" [hidden]="!selectedNotebookId()">
       <app-note-column
         [notebookId]="selectedNotebookId()"
         (noteSelected)="onNoteSelected($event)"
       ></app-note-column>
-    } @else {
-      <div class="placeholder flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary">
-        Selecione um caderno para ver as notas.
-      </div>
-    }
+    </div>
+    <div class="placeholder w-full flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary" [hidden]="selectedNotebookId()">
+      Selecione um caderno para ver as notas.
+    </div>
   </main>
 
   <!-- Note Editor -->

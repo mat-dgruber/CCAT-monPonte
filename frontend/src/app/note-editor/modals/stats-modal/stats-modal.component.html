@@ -1,0 +1,27 @@
+<div *ngIf="isVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeModal()">
+  <div class="bg-white dark:bg-dark-secondary rounded-lg shadow-lg p-6 w-full max-w-sm" (click)="$event.stopPropagation()">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold dark:text-white">Estatísticas da Nota</h2>
+      <button (click)="closeModal()" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-dark-accent">
+        <lucide-icon name="x" size="20"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="space-y-3">
+      <div class="flex justify-between">
+        <span class="text-gray-600 dark:text-dark-text-secondary">Contagem de Palavras:</span>
+        <span class="font-semibold dark:text-white">{{ wordCount() }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600 dark:text-dark-text-secondary">Contagem de Caracteres:</span>
+        <span class="font-semibold dark:text-white">{{ characterCount() }}</span>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button (click)="closeModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>

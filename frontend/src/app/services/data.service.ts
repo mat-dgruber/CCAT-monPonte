@@ -1,10 +1,11 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import {
   collection,
   deleteDoc,
   doc,
   Firestore,
   onSnapshot,
+  collectionGroup,
   serverTimestamp,
   updateDoc, 
   addDoc,
@@ -17,7 +18,9 @@ import {
 } from '@angular/fire/firestore';
 import { from, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth';
+import { Note } from './note.service';
 
+export type { Note };
 export type SortBy = 'createdAt' | 'name';
 export type SortDirection = 'asc' | 'desc';
 
@@ -30,14 +33,6 @@ export interface Notebook {
   isFavorite?: boolean;
 }
 
-export interface Note {
-  id: string;
-  title: string;
-  content: string;
-  tags?: string[];
-  createdAt?: any;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -45,13 +40,14 @@ export class DataService {
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
   private userId: string | null = null;
+  private zone = inject(NgZone);
 
   constructor() {
     this.authService.authState$.subscribe(user => {
       if (user) {
         this.userId = user.uid;
       } else {
-        this.userId = null;
+        this.userId = null; 
       }
     });
   }
@@ -67,7 +63,9 @@ export class DataService {
     return new Observable<Notebook[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const notebooks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notebook));
-        subscriber.next(notebooks);
+        this.zone.run(() => {
+          subscriber.next(notebooks);
+        });
       });
       // Retorna a função de unsubscribe para ser chamada quando o Observable for cancelado
       return () => unsubscribe();
@@ -136,10 +134,14 @@ export class DataService {
     if (!this.userId) return of([]);
 
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
+    const q = query(notesCollection, orderBy('createdAt', 'desc'));
+
     return new Observable<Note[]>(subscriber => {
-      const unsubscribe = onSnapshot(notesCollection, (snapshot) => {
-        const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Note));
-        subscriber.next(notes);
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const notes = snapshot.docs.map(doc => ({ id: doc.id, notebookId: notebookId, ...doc.data() } as Note));
+        this.zone.run(() => {
+          subscriber.next(notes);
+        });
       });
       return () => unsubscribe();
     });
@@ -152,7 +154,9 @@ export class DataService {
     
     return new Observable<Note | null>(subscriber => {
       const unsubscribe = onSnapshot(noteDocRef, (docSnap) => {
-        subscriber.next(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Note : null);
+        this.zone.run(() => {
+          subscriber.next(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Note : null);
+        });
       });
       return () => unsubscribe();
     });
@@ -161,7 +165,7 @@ export class DataService {
   async createNote(notebookId: string, title: string, content: string): Promise<string> {
     if (!this.userId) throw new Error('Usuário não autenticado para criar nota.');
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
-    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags: [] });
+    const docRef = await addDoc(notesCollection, { title, content, createdAt: serverTimestamp(), tags: [], isPinned: false });
     return docRef.id;
   }
 
@@ -169,6 +173,12 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para atualizar as tags da nota.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return updateDoc(docRef, { tags });
+  }
+
+  updateNotePinnedStatus(notebookId: string, noteId: string, isPinned: boolean): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar o status de fixação da nota.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
+    return updateDoc(docRef, { isPinned });
   }
 
   updateNote(notebookId: string, noteId: string, data: { title?: string, content?: string }): Promise<void> {
@@ -183,33 +193,43 @@ export class DataService {
     return deleteDoc(docRef);
   }
 
-  async moveNote(noteId: string, fromNotebookId: string, toNotebookId: string): Promise<string> {
-    if (!this.userId) throw new Error('Usuário não autenticado.');
-    if (fromNotebookId === toNotebookId) return noteId;
+  // --- Métodos para Tags ---
 
-    const fromNoteRef = doc(this.firestore, `users/${this.userId}/notebooks/${fromNotebookId}/notes/${noteId}`);
-    const toNotesCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks/${toNotebookId}/notes`);
+  getAllUserTags(): Observable<string[]> {
+    if (!this.userId) return of([]);
 
-    const batch = writeBatch(this.firestore);
+    const userPath = `users/${this.userId}`;
+    const notesCollectionGroup = collectionGroup(this.firestore, 'notes');
 
-    // 1. Lê a nota original
-    const noteDoc = await getDoc(fromNoteRef);
-    if (!noteDoc.exists()) {
-      throw new Error("A nota que você está tentando mover não existe.");
-    }
-    const noteData = noteDoc.data();
+    // Precisamos garantir que a consulta seja feita dentro do caminho do usuário.
+    // Isso requer que o 'userId' esteja em algum campo dentro do documento da nota.
+    // Vamos assumir que não está, então teremos que buscar todos os cadernos primeiro.
 
-    // 2. Cria uma nova nota no caderno de destino com os mesmos dados
-    const newNoteRef = doc(toNotesCollectionRef); // Gera um novo ID
-    batch.set(newNoteRef, noteData);
+    return new Observable<string[]>(subscriber => {
+      const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
+      getDocs(notebooksCollectionRef).then(notebooksSnapshot => {
+        const allTags = new Set<string>();
+        const notePromises: Promise<any>[] = [];
 
-    // 3. Deleta a nota original
-    batch.delete(fromNoteRef);
+        notebooksSnapshot.forEach(notebookDoc => {
+          const notesCollectionRef = collection(notebookDoc.ref, 'notes');
+          notePromises.push(getDocs(notesCollectionRef));
+        });
 
-    // 4. Executa a operação
-    await batch.commit();
-
-    // 5. Retorna o ID da nova nota
-    return newNoteRef.id;
+        Promise.all(notePromises).then(notesSnapshots => {
+          notesSnapshots.forEach(notesSnapshot => {
+            notesSnapshot.forEach((noteDoc: { data: () => { (): any; new(): any; tags: any[]; }; }) => {
+              const noteData = noteDoc.data();
+              if (noteData.tags && Array.isArray(noteData.tags)) {
+                noteData.tags.forEach(tag => allTags.add(tag));
+              }
+            });
+          });
+          this.zone.run(() => {
+            subscriber.next(Array.from(allTags));
+          });
+        });
+      });
+    });
   }
 }

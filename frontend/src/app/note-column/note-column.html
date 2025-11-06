@@ -21,15 +21,11 @@
 
   <!-- Notes List Area -->
   <div class="flex-grow overflow-y-auto p-2">
-    @if (isLoading()) {
+    @if (notebookIdSignal() && notes().length === 0 && searchTerm() === '') {
       <div class="space-y-2">
         @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
           <div class="h-20 bg-gray-200 rounded-lg dark:bg-dark-accent animate-pulse"></div>
         }
-      </div>
-    } @else if (error()) {
-      <div class="p-4 text-center text-red-500 dark:text-red-400 transition-colors duration-300">
-        <p>{{ error() }}</p>
       </div>
     } @else if (filteredNotes().length === 0) {
       <div class="text-center py-10 px-4">
@@ -49,7 +45,15 @@
             [class.hover:bg-gray-100]="note.id !== activeNoteId()"
             [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()"
             (click)="selectNote(note.id)">
-            <h3 class="font-semibold text-md truncate text-gray-800 dark:text-white flex-shrink-0" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+            <div class="flex justify-between items-start">
+              <h3 class="font-semibold text-md line-clamp-1 text-gray-800 dark:text-white flex-1 min-w-0 truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
+              <button (click)="togglePin(note); $event.stopPropagation()"
+                    [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
+                    class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
+                <lucide-icon name="pin" size="16"
+                             [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+              </button>
+            </div>
             <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow" [innerHTML]="note.content | highlight: searchTerm()"></p>
           </div>
         }
@@ -69,6 +73,14 @@
     <div class="space-y-4">
       <input type="text" [(ngModel)]="currentNote().title" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Título da nota">
       <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Conteúdo da nota" rows="5"></textarea>
-    </div>
+    </div>    <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Tags (separadas por vírgula):</label>
+        <input type="text" [(ngModel)]="currentNote().tags" class="flex-grow p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="tag1, tag2">
+      </div>
+    <div class="flex items-center mt-4">
+        <input type="checkbox" id="pinNote" [(ngModel)]="currentNote().isPinned" class="mr-2">
+        <label for="pinNote" class="text-sm text-gray-700 dark:text-dark-text-secondary">Fixar esta nota</label>
+      </div>
+
   </app-modal>
 }

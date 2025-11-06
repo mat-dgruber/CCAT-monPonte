@@ -1,58 +1,54 @@
-import { Injectable, inject, signal, WritableSignal, effect, computed } from '@angular/core';
-import { DataService, Notebook, SortBy, SortDirection } from './data.service';
+import { Injectable, inject, signal, WritableSignal, computed, OnDestroy } from '@angular/core';
+import { DataService, Notebook } from './data.service';
 import { AuthService } from './auth';
-import { Subscription } from 'rxjs';
+import { of, Subject } from 'rxjs';
+import { switchMap, catchError, takeUntil, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NotebookService {
+export class NotebookService implements OnDestroy {
   private dataService = inject(DataService);
   private authService = inject(AuthService);
+  private destroy$ = new Subject<void>();
 
-  private notebooksSubscription: Subscription | null = null;
-
+  // State Signals
   notebooks: WritableSignal<Notebook[]> = signal([]);
   notebookIds = computed(() => this.notebooks().map(n => n.id));
-  isLoading: WritableSignal<boolean> = signal(false);
+  isLoading: WritableSignal<boolean> = signal(true);
   loadingError: WritableSignal<boolean> = signal(false);
   isSidebarCollapsed: WritableSignal<boolean> = signal(false);
 
   constructor() {
-    this.authService.authState$.subscribe(user => {
-      if (user) {
-        this.fetchNotebooks();
-      } else {
-        this.notebooks.set([]);
-        this.isLoading.set(false);
+    this.authService.authState$.pipe(
+      tap(() => {
+        this.isLoading.set(true);
         this.loadingError.set(false);
-      }
-    });
-  }
-
-  fetchNotebooks(sortBy: SortBy = 'createdAt', sortDirection: SortDirection = 'desc') {
-    if (!this.authService.getCurrentUserId()) {
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.loadingError.set(false);
-
-    this.notebooksSubscription = this.dataService.getNotebooks(sortBy, sortDirection).subscribe({
-      next: (notebooks) => {
-        this.notebooks.set(notebooks);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Erro ao buscar cadernos:', error);
-        this.isLoading.set(false);
-        this.loadingError.set(true);
-      }
+        this.notebooks.set([]);
+      }),
+      switchMap(user => {
+        if (user) {
+          return this.dataService.getNotebooks('createdAt', 'desc').pipe(
+            catchError(error => {
+              console.error('Erro ao buscar cadernos:', error);
+              this.loadingError.set(true);
+              return of([]); // Retorna um array vazio em caso de erro
+            })
+          );
+        } else {
+          return of([]); // Retorna um array vazio se não houver usuário
+        }
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe(notebooks => {
+      this.notebooks.set(notebooks);
+      this.isLoading.set(false);
     });
   }
 
   ngOnDestroy() {
-    this.notebooksSubscription?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleSidebar() {

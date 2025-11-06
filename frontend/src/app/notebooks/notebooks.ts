@@ -5,7 +5,8 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AuthService } from '../services/auth';
 import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
-import { DataService, Notebook, Note, SortBy, SortDirection } from '../services/data.service';
+import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
+import { Note } from '../services/note.service';
 import { NotebookService } from '../services/notebook.service';
 import { NotificationService } from '../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
@@ -155,25 +156,9 @@ export class Notebooks implements OnInit {
   });
 
   constructor() {
-    // Efeito para re-selecionar o primeiro caderno quando a lista é atualizada
-    // e nenhum caderno está selecionado.
-    effect(() => {
-      const notebooks = this.notebookService.notebooks();
-      const currentSelection = this.selectedNotebookId();
-      const isNoteOpen = this.currentNoteId();
-
-      // Condição para evitar a re-seleção automática:
-      // 1. A lista de cadernos não pode estar vazia.
-      // 2. Nenhum caderno deve estar selecionado (currentSelection é null).
-      // 3. Nenhuma nota deve estar aberta (isNoteOpen é null).
-      // 4. O ID do primeiro caderno da lista não pode ser o mesmo já selecionado.
-      if (notebooks.length > 0 && !currentSelection && !isNoteOpen) {
-         // Verifica se o primeiro caderno já não é o selecionado para evitar loops
-        if (currentSelection !== notebooks[0].id) {
-          this.selectNotebook(notebooks[0].id);
-        }
-      }
-    });
+    // O efeito que re-selecionava o primeiro caderno foi removido
+    // para evitar condições de corrida e comportamento inesperado.
+    // A seleção de um caderno agora é uma ação explícita do usuário.
   }
 
   ngOnInit() {
@@ -195,7 +180,13 @@ export class Notebooks implements OnInit {
         route = route.firstChild;
       }
       this.currentNoteId.set(foundNoteId);
-      this.selectedNotebookId.set(foundNotebookId);
+      
+      // Apenas atualiza o caderno selecionado se um ID for encontrado na rota.
+      // Isso evita que a seleção manual do usuário seja sobrescrita com 'null'
+      // ao navegar para uma rota que não contém um ID de caderno.
+      if (foundNotebookId) {
+        this.selectedNotebookId.set(foundNotebookId);
+      }
     });
 
     this.subscriptions.add(routeSub);
@@ -224,8 +215,6 @@ export class Notebooks implements OnInit {
 
   retryFetchNotebooks() {
     console.log('Tentando buscar cadernos novamente...');
-    const { by, direction } = this.sortOption();
-    this.notebookService.fetchNotebooks(by, direction);
   }
 
   changeSortOrder(event: Event) {
@@ -298,8 +287,6 @@ export class Notebooks implements OnInit {
     try {
       const newId = await this.dataService.createNotebook(name, color);
       this.notificationService.showSuccess(`Caderno "${name}" criado com sucesso.`);
-      // Re-busca os cadernos para atualizar a lista
-      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao criar o caderno:', error);
       this.notificationService.showError(`Erro ao criar o caderno "${name}".`);
@@ -315,8 +302,6 @@ export class Notebooks implements OnInit {
     try {
       await this.dataService.updateNotebook(id, newName);
       this.notificationService.showSuccess(`Caderno renomeado para "${newName}".`);
-      // Re-busca os cadernos para atualizar a lista
-      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao atualizar o caderno:', error);
       this.notificationService.showError(`Erro ao renomear o caderno.`);
@@ -347,8 +332,6 @@ export class Notebooks implements OnInit {
 
     try {
       await this.dataService.deleteNotebook(id);
-       // Re-busca os cadernos para atualizar a lista
-      this.notebookService.fetchNotebooks();
     } catch (error) {
       console.error('Erro ao deletar o caderno:', error);
     }

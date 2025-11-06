@@ -1,13 +1,14 @@
-import { Component, Input, OnChanges, SimpleChanges, inject, signal, WritableSignal, computed, Signal, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, Input, inject, signal, WritableSignal, computed, Signal, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { DataService, Note } from '../services/data.service';
-import { Subscription, debounceTime, Subject, filter } from 'rxjs';
+import { Subscription, debounceTime, Subject, filter, switchMap, of } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../services/notebook.service';
 import { Modal } from '../modal/modal';
+import { NotificationService } from '../services/notification.service'; 
+import { NoteService, Note } from '../services/note.service';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -30,37 +31,60 @@ import { LucideAngularModule } from 'lucide-angular';
     ])
   ]
 })
-export class NoteColumn implements OnChanges, OnInit, OnDestroy {
-  @Input() notebookId: string | null = null;
+export class NoteColumn implements OnInit, OnDestroy {
+  @Input({ required: true }) set notebookId(id: string | null) {
+    this.notebookIdSignal.set(id);
+    this.noteService.activeNotebookId.set(id);
+    this.searchTerm.set('');
+  }
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
 
-  private dataService = inject(DataService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  notebookService = inject(NotebookService); // Injetado para o template
-  private notesSubscription: Subscription | null = null;
+  notebookService = inject(NotebookService);
+  private notificationService = inject(NotificationService);
+  noteService = inject(NoteService);
   private searchSubject = new Subject<string>();
   private routerSubscription: Subscription | null = null;
 
-  notes: WritableSignal<Note[]> = signal([]);
-  isLoading: WritableSignal<boolean> = signal(false);
-  error: WritableSignal<string | null> = signal(null);
+  notebookIdSignal: WritableSignal<string | null> = signal(null);
   searchTerm: WritableSignal<string> = signal('');
   activeNoteId: WritableSignal<string | null> = signal(null);
-  
+
   isNoteModalVisible: WritableSignal<boolean> = signal(false);
   currentNote: WritableSignal<Partial<Note>> = signal({});
   isEditing: WritableSignal<boolean> = signal(false);
 
+  // As notas agora vêm do NoteService
+  notes: Signal<Note[]> = this.noteService.notes;
+  
+
   filteredNotes: Signal<Note[]> = computed(() => {
+    const notesToSort = this.notes();
     const term = this.searchTerm().toLowerCase();
+
+    // Ordena as notas: fixadas primeiro, depois por data de criação
+    const sortedNotes = [...notesToSort].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      const dateA = a.createdAt?.toMillis() || 0;
+      const dateB = b.createdAt?.toMillis() || 0;
+      return dateB - dateA;
+    });
+
     if (!term) {
-      return this.notes();
+      return sortedNotes;
     }
-    return this.notes().filter(note => note.title.toLowerCase().includes(term) || note.content.toLowerCase().includes(term));
+    return sortedNotes.filter(note => 
+      note.title.toLowerCase().includes(term) || 
+      note.content.toLowerCase().includes(term) ||
+      (note.tags && note.tags.some(tag => tag.toLowerCase().includes(term)))
+    );
   });
+
+  constructor() {}
 
   ngOnInit() {
     this.searchSubject.pipe(debounceTime(300)).subscribe(searchTerm => {
@@ -77,42 +101,16 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
     });
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['notebookId'] && this.notebookId) {
-      this.fetchNotes();
-    }
-  }
-
   ngOnDestroy() {
-    this.notesSubscription?.unsubscribe();
     this.searchSubject.unsubscribe();
     this.routerSubscription?.unsubscribe();
   }
-
-  fetchNotes() {
-    if (!this.notebookId) return;
-
-    this.isLoading.set(true);
-    this.error.set(null);
-    this.notesSubscription?.unsubscribe();
-
-    this.notesSubscription = this.dataService.getNotes(this.notebookId).subscribe({
-      next: (notes) => {
-        this.notes.set(notes);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Erro ao buscar notas:', err);
-        this.error.set('Não foi possível carregar as notas.');
-        this.isLoading.set(false);
-      }
-    });
-  }
   
   selectNote(noteId: string) {
+    const notebookId = this.notebookIdSignal();
     // Em vez de apenas emitir, agora navegamos para a rota do editor
-    if (this.notebookId) {
-      this.router.navigate(['/notebooks', this.notebookId, 'notes', noteId]);
+    if (notebookId) {
+      this.router.navigate(['/notebooks', notebookId, 'notes', noteId]);
     }
   }
 
@@ -131,15 +129,23 @@ export class NoteColumn implements OnChanges, OnInit, OnDestroy {
     this.isNoteModalVisible.set(false);
     this.currentNote.set({});
   }
+  
+  async togglePin(note: Note) {
+    try {
+      await this.noteService.updateNotePinnedStatus(note.id, !note.isPinned);
+      // A UI será atualizada automaticamente pelo onSnapshot do DataService
+    } catch (error) { 
+      console.error('Erro ao fixar/desafixar a nota:', error);
+      this.notificationService.showError('Erro ao atualizar a nota.');
+    }
+  }
 
   async saveNote(noteData: Partial<Note>) {
-    if (!this.notebookId) return;
-
     try {
       if (this.isEditing() && noteData.id) {
-        await this.dataService.updateNote(this.notebookId, noteData.id, { title: noteData.title!, content: noteData.content! });
+        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content! });
       } else {
-        await this.dataService.createNote(this.notebookId, noteData.title!, noteData.content!);
+        await this.noteService.createNote(noteData.title!, noteData.content!);
       }
       this.closeNoteModal();
     } catch (error) {
