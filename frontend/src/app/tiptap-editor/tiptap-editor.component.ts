@@ -15,6 +15,7 @@ import Document from '@tiptap/extension-document';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
+import { SearchHighlight } from './extensions/search-highlight.extension'; // Import the new extension
 
 @Component({
   selector: 'app-tiptap-editor',
@@ -25,6 +26,7 @@ import Highlight from '@tiptap/extension-highlight';
 })
 export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   @Input() content: string = '';
+  @Input() searchTerm: string = '';
   @Output() contentChange = new EventEmitter<string>();
 
   editor: Editor | null = null;
@@ -65,6 +67,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
           placeholder: 'Write something…',
         }),
         Highlight.configure({ multicolor: true }),
+        SearchHighlight, // Add the new extension here
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
@@ -74,14 +77,30 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.editor && changes['content']) {
-      if (changes['content'].currentValue !== this.editor.getHTML()) {
-        this.editor.commands.setContent(changes['content'].currentValue, { emitUpdate: false });
-      }
+    if (!this.editor) return;
+
+    // Always clear search highlights when content or search term changes
+    // to prevent highlights from previous notes or searches from persisting.
+    if (changes['content'] || changes['searchTerm']) {
+      this.editor.commands.clearSearchHighlights();
+    }
+
+    if (changes['content'] && changes['content'].currentValue !== this.editor.getHTML()) {
+      this.editor.commands.setContent(changes['content'].currentValue, { emitUpdate: false });
+    }
+
+    // Apply new highlights if a search term is present
+    if (changes['searchTerm'] && changes['searchTerm'].currentValue) {
+      this.applySearchHighlight(changes['searchTerm'].currentValue);
+    } else if (changes['searchTerm'] && !changes['searchTerm'].currentValue) {
+      // If searchTerm becomes empty, ensure highlights are cleared (already handled by clearSearchHighlights above)
+      // No need to call applySearchHighlight with an empty term, as it would just clear.
     }
   }
 
   ngOnDestroy(): void {
+    // Clear any active search highlights before destroying the editor
+    this.editor?.commands.clearSearchHighlights();
     this.editor?.destroy();
   }
 
@@ -135,5 +154,34 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   closeAllDropdowns() {
     this.showAlignDropdown = false;
     this.showListsDropdown = false;
+  }
+
+  private applySearchHighlight(term: string): void {
+    if (!this.editor) return;
+
+    if (!term) return;
+
+    const text = this.editor.getText();
+    const regex = new RegExp(term, 'gi');
+    let match;
+
+    // Create a new transaction
+    let tr = this.editor.state.tr;
+    const markType = this.editor.schema.marks['searchHighlight'];
+
+    if (!markType) {
+      console.warn('SearchHighlight mark type not found in schema.');
+      return;
+    }
+
+    while ((match = regex.exec(text)) !== null) {
+      const from = match.index;
+      const to = match.index + match[0].length;
+      tr.addMark(from, to, markType.create());
+    }
+
+    // Dispatch the transaction once after all marks have been added
+    tr.setMeta('addToHistory', false); // Don't add to history for search highlights
+    this.editor.view.dispatch(tr);
   }
 }
