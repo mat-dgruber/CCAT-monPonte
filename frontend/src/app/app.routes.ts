@@ -8,6 +8,8 @@ import { SignupComponent } from './signup/signup';
 export const routes: Routes = [
      {path: 'login', loadComponent: () => import('./login/login').then(m => m.LoginComponent), canActivate: [loggedInGuard]},
      {path: 'signup', loadComponent: () => import('./signup/signup').then(m => m.SignupComponent), canActivate: [loggedInGuard]},
+     {path: 'termos-de-uso', loadComponent: () => import('./terms-of-use/terms-of-use').then(m => m.TermsOfUseComponent)},
+     {path: 'politica-de-privacidade', loadComponent: () => import('./privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent)},
      {
           path: '',
           component: LayoutComponent,
