@@ -155,7 +155,12 @@ export class DataService {
     return new Observable<Note | null>(subscriber => {
       const unsubscribe = onSnapshot(noteDocRef, (docSnap) => {
         this.zone.run(() => {
-          subscriber.next(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Note : null);
+          subscriber.next(docSnap.exists() ? {
+            ...(docSnap.data() as any), // Spread existing properties first
+            id: docSnap.id, // Ensure id is correctly set from docSnap.id
+            title: (docSnap.data() as any).title ?? '', // Apply default if null/undefined
+            content: (docSnap.data() as any).content ?? '', // Apply default if null/undefined
+          } as Note : null);
         });
       });
       return () => unsubscribe();

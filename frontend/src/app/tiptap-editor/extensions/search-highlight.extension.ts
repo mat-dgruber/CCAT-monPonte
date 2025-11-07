@@ -65,13 +65,13 @@ export const SearchHighlight = Mark.create({
       clearSearchHighlights:
         () =>
         ({ state, dispatch }) => {
-          if (dispatch) {
-            const { tr, doc, schema } = state;
-            const markType = schema.marks[this.name];
+          const { tr, doc, schema } = state;
+          const markType = schema.marks[this.name];
 
-            if (markType) {
-              tr.removeMark(0, doc.content.size, markType);
-              tr.setMeta('addToHistory', false);
+          if (markType) {
+            tr.removeMark(0, doc.content.size, markType);
+            tr.setMeta('addToHistory', false);
+            if (dispatch) {
               dispatch(tr);
             }
           }

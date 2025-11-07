@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Editor } from '@tiptap/core';
+import { Node, Mark } from 'prosemirror-model';
 import StarterKit from '@tiptap/starter-kit';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +31,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   @Output() contentChange = new EventEmitter<string>();
 
   editor: Editor | null = null;
+  private _initialContent: string = ''; // Store initial content
 
   showHighlightPalette = false;
   predefinedHighlightColors = [
@@ -48,6 +50,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+    this._initialContent = this.content; // Set initial content
     this.editor = new Editor({
       extensions: [
         StarterKit.configure({
@@ -71,7 +74,9 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
-        this.contentChange.emit(editor.getHTML());
+        editor.commands.clearSearchHighlights();
+        const cleanHTML = editor.getHTML();
+        this.contentChange.emit(cleanHTML);
       },
     });
   }
@@ -79,40 +84,25 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.editor) return;
 
-    // Always clear search highlights when content or search term changes
-    // to prevent highlights from previous notes or searches from persisting.
-    if (changes['content'] || changes['searchTerm']) {
-      this.editor.commands.clearSearchHighlights();
-    }
-
     if (changes['content']) {
       const newContent = changes['content'].currentValue;
-      const oldContentInput = changes['content'].previousValue; // This is the content of the *previous* note as per input
-
-      // If it's not the first change and the editor's current content is different from the old input content,
-      // it means the user made changes to the previous note that haven't been saved yet.
-      if (oldContentInput !== undefined && this.editor.getHTML() !== oldContentInput) {
-        this.contentChange.emit(this.editor.getHTML());
-      }
-
-      // Only update the editor if the new content is different from what's currently in the editor
       if (this.editor.getHTML() !== newContent) {
         this.editor.commands.setContent(newContent, { emitUpdate: false });
+        this._initialContent = newContent; // Update initial content when input content changes
       }
     }
 
-    // Apply new highlights if a search term is present
-    if (changes['searchTerm'] && changes['searchTerm'].currentValue) {
-      this.applySearchHighlight(changes['searchTerm'].currentValue);
-    } else if (changes['searchTerm'] && !changes['searchTerm'].currentValue) {
-      // If searchTerm becomes empty, ensure highlights are cleared (already handled by clearSearchHighlights above)
-      // No need to call applySearchHighlight with an empty term, as it would just clear.
+    if (changes['searchTerm']) {
+      this.editor.commands.clearSearchHighlights();
+      if (this.searchTerm) {
+        this.applySearchHighlight(this.searchTerm);
+      }
     }
   }
 
   ngOnDestroy(): void {
-    // Emit any unsaved changes before destroying the editor
-    if (this.editor && this.editor.getHTML() !== this.content) {
+    // Emit any unsaved changes before destroying the editor, only if content has actually changed
+    if (this.editor && this.editor.getHTML() !== this._initialContent) {
       this.contentChange.emit(this.editor.getHTML());
     }
     this.editor?.commands.clearSearchHighlights();

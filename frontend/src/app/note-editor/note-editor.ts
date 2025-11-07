@@ -3,12 +3,12 @@ import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, A
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, debounceTime, switchMap, of } from 'rxjs';
+import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil } from 'rxjs';
+
 import { LucideAngularModule } from 'lucide-angular';
 
 // Componentes e Serviços
 import { Modal } from '../modal/modal';
-import { HighlightPipe } from '../pipes/highlight.pipe';
 
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
@@ -21,7 +21,7 @@ import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component'
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, HighlightPipe, StatsModalComponent, ClickOutsideDirective, TiptapEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, ClickOutsideDirective, TiptapEditorComponent],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
@@ -54,8 +54,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private notebookId: string | null = null;
   private noteId: string | null = null;
 
-  private contentChanges = new Subject<string>();
+  private contentChanges = new Subject<{ notebookId: string, noteId: string, content: string }>();
   private subscriptions = new Subscription();
+  private destroy$ = new Subject<void>();
+  private noteLoad$ = new Subject<void>(); // New Subject to signal new note loading
 
   constructor() {
     effect(() => {
@@ -83,23 +85,34 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
         this.noteId = params.get('noteId');
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
+          this.noteLoad$.next(); // Emit to signal a new note is loading
           return this.dataService.getNote(this.notebookId, this.noteId);
         }
         return of(null);
-      })
+      }),
+      takeUntil(this.destroy$)
     ).subscribe(note => {
       this.isLoading.set(false);
-      if (note) {
-        this.note.set(note); 
+      // Clear search term and hide search bar BEFORE setting the new note
+      this.searchTerm.set('');
+      this.showSearch.set(false);
+      if (note && note.id) { // Check for id, as it's always present if docSnap.exists() is true
+        const fullNote: Note = {
+          ...note, // Spread existing properties first
+          title: note.title ?? '', // Use nullish coalescing operator for cleaner default
+          content: note.content ?? '', // Use nullish coalescing operator for cleaner default
+        };
+        this.note.set(fullNote);
       } else {
         this.router.navigate(['/notebooks']);
       }
     });
 
     const autoSaveSub = this.contentChanges.pipe(
-      debounceTime(1500)
-    ).subscribe((content) => {
-      this.saveNote(content);
+      debounceTime(1500),
+      takeUntil(this.noteLoad$) // Use noteLoad$ here
+    ).subscribe((data: { notebookId: string, noteId: string, content: string }) => {
+      this.saveNote(data.notebookId, data.noteId, data.content);
     });
 
     this.subscriptions.add(routeSub);
@@ -112,28 +125,38 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe(); 
-  }
-
-  async saveNote(content: string) {
-    const currentNote = this.note();
-    if (!this.notebookId || !this.noteId || !currentNote) return;
-    this.isSaving.set(true);
-    const updatedNote = { ...currentNote, content };
-    this.note.set(updatedNote);
-    await this.dataService.updateNote(this.notebookId, this.noteId, { content });
-    this.isSaving.set(false);
+    this.destroy$.next(); // <--- Add this
+    this.destroy$.complete(); // <--- Add this
   }
 
   onContentChange(newContent: string): void {
-    this.contentChanges.next(newContent);
+    const currentNote = this.note();
+    if (this.notebookId && this.noteId && currentNote) {
+      // Capture the current notebookId and noteId to ensure the correct note is saved
+      const notebookIdToSave = this.notebookId;
+      const noteIdToSave = this.noteId;
+      this.note.set({ ...currentNote, content: newContent });
+      this.contentChanges.next({ notebookId: notebookIdToSave, noteId: noteIdToSave, content: newContent });
+    }
+  }
+
+  // Modify saveNote to accept notebookId and noteId as parameters
+  async saveNote(notebookId: string, noteId: string, content: string) {
+    if (!notebookId || !noteId) return;
+    this.isSaving.set(true);
+    await this.dataService.updateNote(notebookId, noteId, { content });
+    this.isSaving.set(false);
   }
 
   onTitleChange(): void {
     const currentNote = this.note();
     if (!this.notebookId || !this.noteId || !currentNote) return;
+    const notebookIdToSave = this.notebookId;
+    const noteIdToSave = this.noteId;
+    const titleToSave = currentNote.title;
     this.isSaving.set(true);
     setTimeout(() => {
-      this.dataService.updateNote(this.notebookId!, this.noteId!, { title: currentNote.title }).then(() => {
+      this.dataService.updateNote(notebookIdToSave, noteIdToSave, { title: titleToSave }).then(() => {
         this.isSaving.set(false);
       });
     }, 1000);
