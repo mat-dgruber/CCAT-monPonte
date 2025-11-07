@@ -59,6 +59,7 @@
     "@angular/build": "^20.1.0",
     "@angular/cli": "^20.1.0",
     "@angular/compiler-cli": "^20.1.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
     "autoprefixer": "^10.4.21",
