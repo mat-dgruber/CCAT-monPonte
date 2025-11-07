@@ -84,11 +84,10 @@
     <div class="note-content-wrapper flex-grow overflow-y-auto p-4">
       <app-tiptap-editor
         [content]="note()!.content"
+        [searchTerm]="searchTerm()"
         (contentChange)="onContentChange($event)"
       ></app-tiptap-editor>
-      @if (searchTerm()) {
-        <div class="highlighted-content" [innerHTML]="note()!.content | highlight:searchTerm()"></div>
-      }
+
     </div>
 
     <!-- Tags Footer -->
