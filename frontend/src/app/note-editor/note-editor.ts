@@ -3,7 +3,7 @@ import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, A
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil } from 'rxjs';
+import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map } from 'rxjs';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -57,7 +57,6 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private contentChanges = new Subject<{ notebookId: string, noteId: string, content: string }>();
   private subscriptions = new Subscription();
   private destroy$ = new Subject<void>();
-  private noteLoad$ = new Subject<void>(); // New Subject to signal new note loading
 
   constructor() {
     effect(() => {
@@ -79,44 +78,48 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const routeSub = this.route.paramMap.pipe(
+    this.subscriptions.add(this.route.paramMap.pipe(
       switchMap(params => {
         this.notebookId = params.get('notebookId');
         this.noteId = params.get('noteId');
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
-          this.noteLoad$.next(); // Emit to signal a new note is loading
-          return this.dataService.getNote(this.notebookId, this.noteId);
+          return this.dataService.getNote(this.notebookId, this.noteId).pipe(
+            switchMap(note => {
+              this.isLoading.set(false);
+              this.searchTerm.set('');
+              this.showSearch.set(false);
+
+              if (note && note.id) {
+                const fullNote: Note = {
+                  ...note,
+                  title: note.title ?? '',
+                  content: note.content ?? '',
+                };
+                this.note.set(fullNote);
+
+                // Return an observable that listens for content changes for this specific note
+                return this.contentChanges.pipe(
+                  debounceTime(300),
+                  map(data => ({ ...data, notebookId: this.notebookId!, noteId: this.noteId! }))
+                );
+              } else {
+                this.router.navigate(['/notebooks']);
+                return of(null); // Return an observable that immediately completes
+              }
+            })
+          );
         }
-        return of(null);
+        return of(null); // No notebookId or noteId, so return an observable that immediately completes
       }),
       takeUntil(this.destroy$)
-    ).subscribe(note => {
-      this.isLoading.set(false);
-      // Clear search term and hide search bar BEFORE setting the new note
-      this.searchTerm.set('');
-      this.showSearch.set(false);
-      if (note && note.id) { // Check for id, as it's always present if docSnap.exists() is true
-        const fullNote: Note = {
-          ...note, // Spread existing properties first
-          title: note.title ?? '', // Use nullish coalescing operator for cleaner default
-          content: note.content ?? '', // Use nullish coalescing operator for cleaner default
-        };
-        this.note.set(fullNote);
-      } else {
-        this.router.navigate(['/notebooks']);
+    ).subscribe(data => {
+      // This subscribe block will now receive the debounced content changes
+      // or null if a note wasn't found/navigated away.
+      if (data && data.notebookId && data.noteId && data.content) {
+        this.saveNote(data.notebookId, data.noteId, data.content);
       }
-    });
-
-    const autoSaveSub = this.contentChanges.pipe(
-      debounceTime(1500),
-      takeUntil(this.noteLoad$) // Use noteLoad$ here
-    ).subscribe((data: { notebookId: string, noteId: string, content: string }) => {
-      this.saveNote(data.notebookId, data.noteId, data.content);
-    });
-
-    this.subscriptions.add(routeSub);
-    this.subscriptions.add(autoSaveSub);
+    }));
   }
 
   ngAfterViewInit(): void {}
