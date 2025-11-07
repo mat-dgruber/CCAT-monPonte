@@ -4,9 +4,9 @@
       <p>&copy; 2025 CapyCro AvecTech. Todos os direitos reservados.</p>
     </div>
     <div class="flex space-x-4">
-      <a href="#" class="hover:text-gray-400">Termos de Uso</a>
-      <a href="#" class="hover:text-gray-400">Política de Privacidade</a>
-      <a href="#" class="hover:text-gray-400">Relatar Problemas</a>
+      <a routerLink="/terms-of-use" class="hover:text-gray-400">Termos de Uso</a>
+      <a [routerLink]="['/privacy-policy']" class="hover:text-gray-400">Política de Privacidade</a>
+      <a routerLink="/bug-report" class="hover:text-gray-400">Relatar Problemas</a>
       <!-- <a href="#" class="hover:text-gray-400">Contato</a>
       <a href="#" class="hover:text-gray-400">Sobre Nós</a>-->
     </div>

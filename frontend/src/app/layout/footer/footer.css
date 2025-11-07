@@ -1,1 +1,4 @@
 /* Adicione estilos específicos do footer aqui */
+a[routerLink] {
+     cursor: pointer;
+}
