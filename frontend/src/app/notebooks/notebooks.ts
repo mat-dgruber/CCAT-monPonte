@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes, state } from '@angular/animations';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -155,7 +155,7 @@ export class Notebooks implements OnInit {
     });
   });
 
-  constructor() {
+  constructor(private cdr: ChangeDetectorRef) {
     // O efeito que re-selecionava o primeiro caderno foi removido
     // para evitar condições de corrida e comportamento inesperado.
     // A seleção de um caderno agora é uma ação explícita do usuário.
@@ -187,6 +187,7 @@ export class Notebooks implements OnInit {
       if (foundNotebookId) {
         this.selectedNotebookId.set(foundNotebookId);
       }
+      this.cdr.detectChanges();
     });
 
     this.subscriptions.add(routeSub);
