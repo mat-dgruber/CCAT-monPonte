@@ -1,1 +1,40 @@
 /* Adicione estilos específicos do header aqui */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .nav-link {
+    @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+    position: relative;
+    text-decoration: none;
+  }
+
+  .nav-link:hover {
+    @apply text-indigo-600 dark:text-indigo-400;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    @apply bg-indigo-600 dark:bg-indigo-400;
+    transition: width 0.3s ease-in-out;
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
+  }
+
+  .active-link {
+    @apply text-indigo-600 dark:text-indigo-400 font-bold;
+  }
+
+  .active-link::after {
+    width: 100%;
+  }
+}

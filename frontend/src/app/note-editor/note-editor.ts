@@ -11,7 +11,6 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Modal } from '../modal/modal';
 
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
-import { ClickOutsideDirective } from '../directives/click-outside.directive';
 import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
 import { ThemeService } from '../services/theme';
@@ -21,7 +20,7 @@ import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component'
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, ClickOutsideDirective, TiptapEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })
