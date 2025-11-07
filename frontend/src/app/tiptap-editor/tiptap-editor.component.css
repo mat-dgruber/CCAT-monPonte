@@ -122,3 +122,8 @@
 .dropdown-menu button:hover {
   background-color: #f1f5f9;
 }
+
+.search-selection {
+  border: 2px solid blue;
+  border-radius: 0.5rem;  
+}

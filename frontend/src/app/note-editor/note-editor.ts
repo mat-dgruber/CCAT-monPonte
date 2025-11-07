@@ -48,6 +48,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   showSearch: WritableSignal<boolean> = signal(false);
   searchTerm: WritableSignal<string> = signal('');
   searchResultCount: WritableSignal<number> = signal(0);
+  currentMatchIndex: WritableSignal<number> = signal(0);
 
   showStatsModal: WritableSignal<boolean> = signal(false);
 
@@ -55,6 +56,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private noteId: string | null = null;
 
   private contentChanges = new Subject<{ notebookId: string, noteId: string, content: string }>();
+  private searchTermChanges = new Subject<string>();
   private subscriptions = new Subscription();
   private destroy$ = new Subject<void>();
 
@@ -68,13 +70,22 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
         const textContent = tempDiv.textContent || tempDiv.innerText || '';
         const matches = textContent.match(new RegExp(term, 'gi'));
         this.searchResultCount.set(matches ? matches.length : 0);
+        this.currentMatchIndex.set(0);
       } else {
         this.searchResultCount.set(0);
+        this.currentMatchIndex.set(0);
       }
     });
 
     // Carregar todas as tags do usuário
     this.dataService.getAllUserTags().subscribe((tags: string[]) => this.allTags.set(tags));
+
+    this.subscriptions.add(this.searchTermChanges.pipe(
+      debounceTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.searchTerm.set(term);
+    }));
   }
 
   ngOnInit(): void {
@@ -216,6 +227,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  onSearchTermChange(term: string): void {
+    this.searchTermChanges.next(term);
+  }
+
   toggleMoreOptions(): void { this.showMoreOptions.set(!this.showMoreOptions()); }
   toggleSearch(): void { this.showSearch.set(!this.showSearch()); if (!this.showSearch()) this.searchTerm.set(''); }
 
@@ -233,6 +248,18 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       this.showDeleteConfirmationModal.set(false);
     } catch (error) {
       this.notificationService.showError('Erro ao deletar a nota.');
+    }
+  }
+
+  goToNextMatch(): void {
+    if (this.searchResultCount() > 0) {
+      this.currentMatchIndex.set((this.currentMatchIndex() + 1) % this.searchResultCount());
+    }
+  }
+
+  goToPreviousMatch(): void {
+    if (this.searchResultCount() > 0) {
+      this.currentMatchIndex.set((this.currentMatchIndex() - 1 + this.searchResultCount()) % this.searchResultCount());
     }
   }
 }

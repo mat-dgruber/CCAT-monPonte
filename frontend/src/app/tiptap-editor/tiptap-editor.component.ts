@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Editor } from '@tiptap/core';
-import { Node, Mark } from 'prosemirror-model';
+
 import StarterKit from '@tiptap/starter-kit';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,7 @@ import Document from '@tiptap/extension-document';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
-import { SearchHighlight } from './extensions/search-highlight.extension'; // Import the new extension
+import { SearchSelection } from './extensions/search-selection.extension';
 
 @Component({
   selector: 'app-tiptap-editor',
@@ -24,10 +24,12 @@ import { SearchHighlight } from './extensions/search-highlight.extension'; // Im
   imports: [CommonModule, FormsModule, TiptapEditorDirective, LucideAngularModule, ClickOutsideDirective],
   templateUrl: './tiptap-editor.component.html',
   styleUrls: ['./tiptap-editor.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   @Input() content: string = '';
   @Input() searchTerm: string = '';
+  @Input() matchIndex: number = 0;
   @Output() contentChange = new EventEmitter<string>();
 
   editor: Editor | null = null;
@@ -56,25 +58,21 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
         StarterKit.configure({
           heading: false,
         }),
-        TextAlign.configure({
-          types: ['heading', 'paragraph'],
-        }),
-        Underline,
-        Link,
-        YouTube,
+            TextAlign.configure({
+              types: ['heading', 'paragraph'],
+            }),
         YouTube.configure({
           controls: false,
         }),
-        Document,
         Placeholder.configure({
           placeholder: 'Write something…',
         }),
         Highlight.configure({ multicolor: true }),
-        SearchHighlight, // Add the new extension here
+        SearchSelection,
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
-        editor.commands.clearSearchHighlights();
+        editor.commands.clearSearchSelection();
         const cleanHTML = editor.getHTML();
         this.contentChange.emit(cleanHTML);
       },
@@ -92,10 +90,10 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
       }
     }
 
-    if (changes['searchTerm']) {
-      this.editor.commands.clearSearchHighlights();
+    if (changes['searchTerm'] || changes['matchIndex']) {
+      this.editor.commands.clearSearchSelection();
       if (this.searchTerm) {
-        this.applySearchHighlight(this.searchTerm);
+        this.applySearchSelection(this.searchTerm, this.matchIndex);
       }
     }
   }
@@ -105,7 +103,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     if (this.editor && this.editor.getHTML() !== this._initialContent) {
       this.contentChange.emit(this.editor.getHTML());
     }
-    this.editor?.commands.clearSearchHighlights();
+    this.editor?.commands.clearSearchSelection();
     this.editor?.destroy();
   }
 
@@ -161,32 +159,20 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.showListsDropdown = false;
   }
 
-  private applySearchHighlight(term: string): void {
+  private applySearchSelection(term: string, matchIndex: number): void {
     if (!this.editor) return;
 
     if (!term) return;
 
     const text = this.editor.getText();
     const regex = new RegExp(term, 'gi');
-    let match;
+    const matches = [...text.matchAll(regex)];
 
-    // Create a new transaction
-    let tr = this.editor.state.tr;
-    const markType = this.editor.schema.marks['searchHighlight'];
-
-    if (!markType) {
-      console.warn('SearchHighlight mark type not found in schema.');
-      return;
+    if (matches.length > 0 && matchIndex < matches.length) {
+      const match = matches[matchIndex];
+      const from = match.index! + 1;
+      const to = from + match[0].length;
+      this.editor.commands.setSearchSelection({ from, to });
     }
-
-    while ((match = regex.exec(text)) !== null) {
-      const from = match.index;
-      const to = match.index + match[0].length;
-      tr.addMark(from, to, markType.create());
-    }
-
-    // Dispatch the transaction once after all marks have been added
-    tr.setMeta('addToHistory', false); // Don't add to history for search highlights
-    this.editor.view.dispatch(tr);
   }
 }

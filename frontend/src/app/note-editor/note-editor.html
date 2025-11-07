@@ -70,9 +70,15 @@
           placeholder="Buscar no texto..."
           class="flex-grow bg-gray-100 dark:bg-dark-accent rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           [ngModel]="searchTerm()"
-          (ngModelChange)="searchTerm.set($event)"
+          (ngModelChange)="onSearchTermChange($event)"
         />
         <span class="text-sm text-gray-500 dark:text-dark-text-secondary">{{ searchResultCount() }} resultados</span>
+        <button (click)="goToPreviousMatch()" [disabled]="searchResultCount() <= 1" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-dark-primary disabled:opacity-50">
+          <lucide-icon name="chevron-up" size="16"></lucide-icon>
+        </button>
+        <button (click)="goToNextMatch()" [disabled]="searchResultCount() <= 1" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-dark-primary disabled:opacity-50">
+          <lucide-icon name="chevron-down" size="16"></lucide-icon>
+        </button>
         <button (click)="toggleSearch()" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-dark-primary">
           <lucide-icon name="x" size="16"></lucide-icon>
         </button>
@@ -85,6 +91,7 @@
       <app-tiptap-editor
         [content]="note()!.content"
         [searchTerm]="searchTerm()"
+        [matchIndex]="currentMatchIndex()"
         (contentChange)="onContentChange($event)"
       ></app-tiptap-editor>
 
