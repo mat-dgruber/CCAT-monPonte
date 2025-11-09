@@ -66,25 +66,23 @@ export class DashboardComponent {
   
 
     constructor() {
-
       const authSub = this.authService.authState$.subscribe(user => {
-
         this.currentUser.set(user);
-
-        if (user) {
-
-          this.loadRecentNotes();
-
-        } else {
-
+        if (!user) {
           this.allRecentNotes.set([]);
-
         }
-
       });
-
       this.subscriptions.add(authSub);
-
+  
+      effect(() => {
+        // Reage a mudanças nos cadernos ou no usuário
+        const user = this.currentUser();
+        const notebooks = this.notebookService.notebooks(); // A dependência reativa
+  
+        if (user) {
+          this.loadRecentNotes();
+        }
+      });
     }
 
   
