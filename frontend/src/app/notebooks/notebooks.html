@@ -147,7 +147,7 @@
   <section
     class="note-editor-column flex-grow relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex"
   >
-    <div class="absolute inset-0 overflow-y-auto" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
+    <div class="absolute inset-0 overflow-y-auto" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute.snapshot.url.join('/') : ''">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>
   </section>
