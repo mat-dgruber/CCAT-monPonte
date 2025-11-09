@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "monPonte": {
+    "monClip": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,13 +13,8 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "src/main.ts",
-            "tsConfig": "tsconfig.app.json",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              },
+              "src/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "src/assets",
@@ -32,6 +27,8 @@
           },
           "configurations": {
             "production": {
+              "browser": "src/main.ts",
+              "tsConfig": "tsconfig.app.json",
               "budgets": [
                 {
                   "type": "initial",
@@ -47,6 +44,8 @@
               "outputHashing": "all"
             },
             "development": {
+              "browser": "src/main.ts",
+              "tsConfig": "tsconfig.app.json",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
@@ -58,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "monPonte:build:production"
+              "buildTarget": "monClip:build:production"
             },
             "development": {
-              "buildTarget": "monPonte:build:development"
+              "buildTarget": "monClip:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -74,10 +73,7 @@
           "options": {
             "tsConfig": "tsconfig.spec.json",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              },
+              "src/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "src/assets",
