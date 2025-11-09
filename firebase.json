@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "frontend/dist/monPonte/browser",
+    "public": "frontend/dist/monClip/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
