@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./modal.css'] // Você pode criar um modal.css se precisar de estilos específicos não-Tailwind
 })
 export class Modal {
+  @Input() isOpen: boolean = false;
   @Input() title: string = '';
   @Input() message: string = '';
   @Input() confirmText: string = 'Confirmar';

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth as FirebaseAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, authState, signOut, updateProfile, browserLocalPersistence, browserSessionPersistence, setPersistence, AuthError, updateEmail, updatePassword, sendPasswordResetEmail } from '@angular/fire/auth';
+import { Auth as FirebaseAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, authState, signOut, updateProfile, browserLocalPersistence, browserSessionPersistence, setPersistence, AuthError, updateEmail, updatePassword, sendPasswordResetEmail, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from '@angular/fire/auth';
  
 @Injectable({
   providedIn: 'root'
@@ -61,5 +61,21 @@ export class AuthService {
   sendPasswordResetEmail(email: string) {
     return sendPasswordResetEmail(this.auth, email);
   }
+
+  async reauthenticate(password: string) {
+    const user = this.auth.currentUser;
+    if (!user || !user.email) {
+      throw new Error("User not logged in or email not available.");
+    }
+    const credential = EmailAuthProvider.credential(user.email, password);
+    return reauthenticateWithCredential(user, credential);
+  }
+
+  async deleteAccount() {
+    const user = this.auth.currentUser;
+    if (!user) {
+      throw new Error("User not logged in");
+    }
+    return deleteUser(user);
+  }
 }
-  
