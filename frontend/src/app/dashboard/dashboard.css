@@ -1,0 +1,10 @@
+.dashboard-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.dashboard-card {
+  flex: 1 1 0;
+  min-width: 300px;
+}

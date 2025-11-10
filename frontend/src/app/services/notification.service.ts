@@ -23,6 +23,10 @@ export class NotificationService {
     this.addToast(message, 'error', duration);
   }
 
+  showInfo(message: string, duration = 3000) {
+    this.addToast(message, 'info', duration);
+  }
+
   private addToast(message: string, type: ToastType, duration: number) {
     const id = Math.random().toString(36).substring(2, 9);
     this.toasts.update(currentToasts => [

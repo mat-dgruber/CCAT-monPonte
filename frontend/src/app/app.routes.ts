@@ -18,7 +18,8 @@ export const routes: Routes = [
           component: LayoutComponent,
           canActivate: [authGuard],
           children: [
-               { path: '', redirectTo: 'notebooks', pathMatch: 'full' },
+               { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+               {path: 'dashboard', loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent)},
                {path: 'clip', loadComponent: () => import('./clip/clip').then(m => m.Clip)},
                {
                  path: 'notebooks',

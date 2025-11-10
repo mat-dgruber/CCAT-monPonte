@@ -14,6 +14,7 @@ export class NotebookService implements OnDestroy {
 
   // State Signals
   notebooks: WritableSignal<Notebook[]> = signal([]);
+  notebooks$ = this.notebooks.asReadonly();
   notebookIds = computed(() => this.notebooks().map(n => n.id));
   isLoading: WritableSignal<boolean> = signal(true);
   loadingError: WritableSignal<boolean> = signal(false);
