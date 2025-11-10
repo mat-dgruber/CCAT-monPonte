@@ -13,12 +13,13 @@ import { LucideAngularModule, Copy, Ellipsis } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { NotificationService } from '../services/notification.service';
+import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective],
+  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective, HtmlToTextPipe],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
   animations: [

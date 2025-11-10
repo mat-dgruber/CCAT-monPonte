@@ -96,7 +96,7 @@
                 <li class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                   <a [routerLink]="['/notebooks', note.notebookId, 'notes', note.id]" class="block">
                     <h4 class="font-semibold text-gray-800 dark:text-white truncate">{{ note.title || 'Nota sem título' }}</h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ (note.content | slice:0:100) || 'Sem conteúdo adicional' }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ (note.content | htmlToText | slice:0:100) || 'Sem conteúdo adicional' }}</p>
                   </a>
                 </li>
               }
