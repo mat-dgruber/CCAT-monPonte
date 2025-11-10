@@ -19,7 +19,7 @@ import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective],
+  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective, HtmlToTextPipe],
   providers: [HtmlToTextPipe],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
