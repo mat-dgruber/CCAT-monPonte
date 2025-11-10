@@ -6,6 +6,9 @@ import { AuthError } from '@angular/fire/auth';
 import { LoggingService } from '../services/logging';
 import { AuthService } from '../services/auth';
 
+// Helper function for delay
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -45,9 +48,11 @@ export class LoginComponent implements OnInit {
     this.errorMessage = null;
     this.isLoading = true;
     const { email, password, rememberMe } = this.loginForm.value;
+    const minLoadingTime = delay(1000); // Minimum 1 second loading time
 
     try {
       await this.authService.login(email, password, rememberMe);
+      await minLoadingTime; // Ensure spinner is shown for at least minLoadingTime
       this.loginAttempts = 0; // Reset on success
       this.router.navigate(['/']);
     } catch (e) {
@@ -58,6 +63,7 @@ export class LoginComponent implements OnInit {
         this.lockForm();
       }
       this.loggingService.error('Login failed', error);
+      await minLoadingTime; // Ensure spinner is shown for at least minLoadingTime even on error
     } finally {
       this.isLoading = false;
     }
