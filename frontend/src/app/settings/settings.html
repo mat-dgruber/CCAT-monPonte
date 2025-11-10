@@ -1,95 +1,135 @@
-<div class="container mx-auto p-4 md:p-6">
+<div class="container mx-auto p-4 md:p-6 max-w-4xl">
   <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-white">Configurações</h2>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Coluna da Esquerda: Aparência e Clip -->
-    <div class="space-y-8">
-      <!-- Seção de Aparência -->
-      <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
-        <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Aparência</h3>
-        <div class="space-y-4">
-          <div role="radiogroup" aria-labelledby="theme-label">
-            <span id="theme-label" class="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
-            <div class="mt-2 space-y-2">
-              <div class="flex items-center">
-                <input type="radio" id="light-theme" name="theme" value="Normal" [checked]="themeService.theme() === 'Normal'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                <label for="light-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Claro</label>
-              </div>
-              <div class="flex items-center">
-                <input type="radio" id="dark-theme" name="theme" value="Escuro" [checked]="themeService.theme() === 'Escuro'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                <label for="dark-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Escuro</label>
-              </div>
-              <!--<div class="flex items-center">
-                <input type="radio" id="high-contrast-theme" name="theme" value="Alto Contraste" [checked]="themeService.theme() === 'Alto Contraste'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                <label for="high-contrast-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Alto Contraste</label>
-              </div>-->
+  <div class="space-y-8">
+    <!-- Seção de Aparência -->
+    <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Aparência</h3>
+      <div class="space-y-4">
+        <div role="radiogroup" aria-labelledby="theme-label">
+          <span id="theme-label" class="text-gray-700 dark:text-gray-300 font-medium">Tema</span>
+          <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="flex items-center">
+              <input type="radio" id="light-theme" name="theme" value="Normal" [checked]="themeService.theme() === 'Normal'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+              <label for="light-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Claro</label>
             </div>
-          </div>
-          <!--<div class="flex items-center justify-between">
-            <label for="notebook-style-toggle" class="text-sm text-gray-700 dark:text-gray-300">Estilo de caderno no editor</label>
-            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-              <input type="checkbox" name="notebook-style-toggle" id="notebook-style-toggle" (change)="toggleNotebookStyle()" [checked]="themeService.notebookStyle()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-              <label for="notebook-style-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+            <div class="flex items-center">
+              <input type="radio" id="dark-theme" name="theme" value="Escuro" [checked]="themeService.theme() === 'Escuro'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+              <label for="dark-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Escuro</label>
             </div>
-          </div>-->
-        </div>
-      </div>
-
-      <!-- Seção de Clip -->
-      <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
-        <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Clip</h3>
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <label for="clip-options-toggle" class="text-sm text-gray-700 dark:text-gray-300">Mostrar opções avançadas</label>
-            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-              <input type="checkbox" name="clip-options-toggle" id="clip-options-toggle" (change)="toggleAdvancedClipOptions()" [checked]="clipService.showAdvancedClipOptions()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-              <label for="clip-options-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+            <div class="flex items-center">
+              <input type="radio" id="high-contrast-theme" name="theme" value="Alto Contraste" [checked]="themeService.theme() === 'Alto Contraste'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+              <label for="high-contrast-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Alto Contraste</label>
             </div>
-          </div>
-          <div class="flex items-center justify-between">
-            <label for="disappearance-time" class="text-sm text-gray-700 dark:text-gray-300">Tempo para expirar (horas)</label>
-            <input type="number" id="disappearance-time" (change)="onDisappearanceTimeChange($event)" [value]="clipService.clipDisappearanceHours()" min="1" class="px-2 py-1 border border-gray-300 rounded-md text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"/>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Coluna da Direita: Conta e Logout -->
-    <div class="space-y-8">
-      <!-- Seção da Conta -->
-      <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
-        <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Conta</h3>
-        <div class="space-y-4">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
-            <div class="flex gap-2 mt-1">
-              <input type="text" id="name" [(ngModel)]="displayName" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
-              <button (click)="updateName()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">Salvar</button>
-            </div>
+    <!-- Seção do Editor -->
+    <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Editor</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <label for="notebook-style-toggle" class="text-sm text-gray-700 dark:text-gray-300">Estilo de caderno no editor</label>
+          <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+            <input type="checkbox" name="notebook-style-toggle" id="notebook-style-toggle" (change)="toggleNotebookStyle()" [checked]="themeService.notebookStyle()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+            <label for="notebook-style-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
           </div>
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-             <div class="flex gap-2 mt-1">
-              <input type="email" id="email" [(ngModel)]="email" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
-              <button (click)="updateEmail()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">Salvar</button>
-            </div>
-          </div>
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova Senha</label>
-            <div class="flex gap-2 mt-1">
-              <input type="password" id="password" [(ngModel)]="password" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
-              <button (click)="updatePassword()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">Salvar</button>
-            </div>
+        </div>
+        <div class="flex items-center justify-between">
+            <label for="font-family" class="text-sm text-gray-700 dark:text-gray-300">Fonte</label>
+            <select id="font-family" (change)="onFontFamilyChange($event)" [value]="themeService.fontFamily()" class="px-2 py-1 border border-gray-300 rounded-md text-sm w-40 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white">
+                <option value="sans">Sans-serif</option>
+                <option value="serif">Serif</option>
+                <option value="mono">Mono</option>
+            </select>
+        </div>
+        <div class="flex items-center justify-between">
+            <label for="font-size" class="text-sm text-gray-700 dark:text-gray-300">Tamanho da Fonte (px)</label>
+            <input type="number" id="font-size" (change)="onFontSizeChange($event)" [value]="themeService.fontSize()" min="12" max="24" class="px-2 py-1 border border-gray-300 rounded-md text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção de Conta -->
+    <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Conta</h3>
+      <div class="space-y-4">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
+          <div class="flex gap-2 mt-1">
+            <input type="text" id="name" [(ngModel)]="displayName" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
+            <button (click)="updateName()" [disabled]="isUpdating" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50">
+              <span *ngIf="!isUpdating">Salvar</span>
+              <span *ngIf="isUpdating">Salvando...</span>
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Botão de Logout -->
-      <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
-        <button (click)="logout()" class="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors duration-200">
-          Sair da Conta
-        </button>
-      </div>
+    <!-- Seção de Segurança -->
+    <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow border border-yellow-500">
+        <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-yellow-600 dark:text-yellow-400">Segurança</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Para alterar seu e-mail ou senha, por favor, insira sua senha atual primeiro.</p>
+        <div class="space-y-4">
+            <div>
+              <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha Atual</label>
+              <input type="password" id="current-password" [(ngModel)]="currentPassword" class="block w-full px-3 py-2 mt-1 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Novo Email</label>
+              <div class="flex gap-2 mt-1">
+                <input type="email" id="email" [(ngModel)]="email" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
+                <button (click)="updateEmail()" [disabled]="isUpdating" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50">
+                  <span *ngIf="!isUpdating">Salvar</span>
+                  <span *ngIf="isUpdating">Salvando...</span>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova Senha</label>
+              <input type="password" id="password" [(ngModel)]="password" class="block w-full px-3 py-2 mt-1 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
+            </div>
+             <div>
+              <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nova Senha</label>
+              <div class="flex gap-2 mt-1">
+                 <input type="password" id="confirm-password" [(ngModel)]="confirmPassword" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-dark-primary dark:border-dark-border dark:text-white">
+                <button (click)="updatePassword()" [disabled]="isUpdating" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50">
+                  <span *ngIf="!isUpdating">Salvar</span>
+                  <span *ngIf="isUpdating">Salvando...</span>
+                </button>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Ações -->
+    <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
+       <div class="flex flex-col sm:flex-row gap-4">
+          <button (click)="logout()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium transition-colors duration-200">
+            Sair da Conta
+          </button>
+          <button (click)="openDeleteModal()" class="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors duration-200">
+            Excluir Conta
+          </button>
+       </div>
     </div>
   </div>
 </div>
+
+<!-- Modal de Exclusão -->
+<app-modal [isOpen]="isDeleteModalOpen" (close)="closeDeleteModal()">
+  <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Confirmar Exclusão</h3>
+  <p class="text-gray-600 dark:text-gray-300 mb-6">
+    Tem certeza de que deseja excluir sua conta? Esta ação é irreversível e todos os seus dados serão perdidos permanentemente.
+  </p>
+  <div class="flex justify-end gap-4">
+    <button (click)="closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
+    <button (click)="deleteAccount()" [disabled]="isDeleting" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50">
+      <span *ngIf="!isDeleting">Excluir</span>
+      <span *ngIf="isDeleting">Excluindo...</span>
+    </button>
+  </div>
+</app-modal>

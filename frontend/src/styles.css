@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Font variables */
+    --font-sans: 'Inter', sans-serif;
+    --font-serif: 'Lora', serif;
+    --font-mono: 'Inconsolata', monospace;
+
+    /* Default font settings, controlled by ThemeService */
+    --font-family: var(--font-sans);
+    --font-size: 16px;
+  }
+
   .high-contrast {
     --color-primary: #000000;
     --color-secondary: #000000;
@@ -10,6 +21,11 @@
     --color-text-primary: #ffffff;
     --color-text-secondary: #bbbbbb;
     --color-border: #ffffff;
+  }
+
+  body {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
   }
 }
 
