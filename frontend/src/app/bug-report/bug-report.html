@@ -1,27 +1,29 @@
-<app-header></app-header>
-<div class="min-h-screen bg-gray-100 dark:bg-dark-secondary flex items-center justify-center p-4">
-  <div class="w-full max-w-2xl bg-white dark:bg-dark-primary shadow-lg rounded-lg p-8">
-    <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-800 dark:text-white">Relatar um Problema</h1>
-      <p class="text-gray-600 dark:text-dark-text-secondary mt-2">
-        Ajude-nos a melhorar! Descreva o bug ou sugestão em detalhes.
-      </p>
+<div class="flex flex-col min-h-screen rounded-xl bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+  <app-header></app-header>
+  <div class="flex-grow flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-xl rounded-3xl p-10 transform transition-all duration-300 hover:shadow-2xl">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Relatar um Problema</h1>
+        <p class="text-gray-600 dark:text-gray-300 mt-2 text-lg">
+          Ajude-nos a melhorar! Descreva o bug ou sugestão em detalhes.
+        </p>
+      </div>
+      <form action="https://formspree.io/f/xzzknnwz" method="POST" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seu Email (Opcional)</label>
+          <input type="email" name="email" id="email" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-purple-600 focus:border-transparent sm:text-sm transition-all duration-200 text-gray-900 dark:text-white">
+        </div>
+        <div>
+          <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição do Problema</label>
+          <textarea id="message" name="message" rows="8" required placeholder="Obrigado por sua colaboração! Envie sua sugestão ou o erro encontrado o mais descritivo possível para podermos ajudar." class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-purple-600 focus:border-transparent sm:text-sm transition-all duration-200 text-gray-900 dark:text-white"></textarea>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-lg text-base font-bold rounded-xl text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300">
+            Enviar Relatório
+          </button>
+        </div>
+      </form>
     </div>
-    <form action="https://formspree.io/f/xzzknnwz" method="POST" class="space-y-6">
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Seu Email (Opcional)</label>
-        <input type="email" name="email" id="email" class="mt-1 block w-full px-4 py-2 bg-gray-50 dark:bg-dark-secondary border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-      </div>
-      <div>
-        <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição do Problema</label>
-        <textarea id="message" name="message" rows="8" required placeholder="Obrigado por sua colaboarção! Envie sua sugestão ou o erro encontrado o mais descritivo possível para podermos ajudar." class="mt-1 block w-full px-4 py-2 bg-gray-50 dark:bg-dark-secondary border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
-      </div>
-      <div class="flex justify-end">
-        <button type="submit" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-          Enviar Relatório
-        </button>
-      </div>
-    </form>
   </div>
+  <app-footer></app-footer>
 </div>
-<app-footer></app-footer>
