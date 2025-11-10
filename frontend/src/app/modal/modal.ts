@@ -17,13 +17,14 @@ export class Modal {
   @Input() showCancelButton: boolean = true; // Permite esconder o botão de cancelar
 
   @Output() onConfirm = new EventEmitter<void>();
-  @Output() onCancel = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>(); // Changed from onCancel to close
 
   // Métodos para emitir eventos
   confirm(): void {
     this.onConfirm.emit();
   }
+  // Renamed cancel to close and emit the close event
   cancel(): void {
-    this.onCancel.emit();
+    this.close.emit();
   }
 }

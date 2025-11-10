@@ -17,17 +17,17 @@
               <input type="radio" id="dark-theme" name="theme" value="Escuro" [checked]="themeService.theme() === 'Escuro'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
               <label for="dark-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Escuro</label>
             </div>
-            <div class="flex items-center">
+            <!--<div class="flex items-center">
               <input type="radio" id="high-contrast-theme" name="theme" value="Alto Contraste" [checked]="themeService.theme() === 'Alto Contraste'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
               <label for="high-contrast-theme" class="ml-3 block text-sm text-gray-700 dark:text-gray-300">Alto Contraste</label>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
     </div>
 
     <!-- Seção do Editor -->
-    <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
+    <!--<div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">
       <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300">Editor</h3>
       <div class="space-y-4">
         <div class="flex items-center justify-between">
@@ -50,7 +50,7 @@
             <input type="number" id="font-size" (change)="onFontSizeChange($event)" [value]="themeService.fontSize()" min="12" max="24" class="px-2 py-1 border border-gray-300 rounded-md text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"/>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Seção de Conta -->
     <div class="bg-white dark:bg-dark-secondary p-6 rounded-lg shadow">

@@ -153,10 +153,12 @@ export class SettingsComponent implements OnInit {
   // --- Delete Account ---
   openDeleteModal() {
     this.isDeleteModalOpen = true;
+    console.log('openDeleteModal called, isDeleteModalOpen:', this.isDeleteModalOpen);
   }
 
   closeDeleteModal() {
     this.isDeleteModalOpen = false;
+    console.log('closeDeleteModal called, isDeleteModalOpen:', this.isDeleteModalOpen);
   }
 
 
