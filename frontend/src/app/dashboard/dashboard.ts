@@ -7,7 +7,7 @@ import { NotebookService } from '../services/notebook.service';
 import { User } from '@angular/fire/auth';
 import { Note } from '../services/note.service';
 import { Subscription, forkJoin, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Copy, Ellipsis } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
@@ -47,87 +47,71 @@ export class DashboardComponent {
   isFilterMenuOpen = signal(false);
   selectedNotebook: WritableSignal<Notebook | null> = signal(null);
 
-    filteredNotes = computed(() => {
-
-      const notes = this.allRecentNotes();
-
-      const selected = this.selectedNotebook();
-
-      if (!selected) {
-
-        return notes.slice(0, 5); // Retorna as 5 mais recentes de todos os cadernos
-
-      }
-
-      return notes.filter(note => note.notebookId === selected.id);
-
-    });
-
-  
-
-    constructor() {
-      const authSub = this.authService.authState$.subscribe(user => {
-        this.currentUser.set(user);
-        if (!user) {
-          this.allRecentNotes.set([]);
-        }
-      });
-      this.subscriptions.add(authSub);
-  
-      effect(() => {
-        // Reage a mudanças nos cadernos ou no usuário
-        const user = this.currentUser();
-        const notebooks = this.notebookService.notebooks(); // A dependência reativa
-  
-        if (user) {
-          this.loadRecentNotes();
-        }
-      });
+  filteredNotes = computed(() => {
+    const notes = this.allRecentNotes();
+    const selected = this.selectedNotebook();
+    if (!selected) {
+      return notes.slice(0, 5); // Retorna as 5 mais recentes de todos os cadernos
     }
+    return notes.filter(note => note.notebookId === selected.id).slice(0, 5);
+  });
 
   
 
-    loadRecentNotes() {
-
-      this.isLoadingNotes.set(true);
-
-      const notebooks = this.notebookService.notebooks();
-
-      if (!notebooks || notebooks.length === 0) {
-
+  
+  constructor() {
+    const authSub = this.authService.authState$.subscribe(user => {
+      this.currentUser.set(user);
+      if (!user) {
         this.allRecentNotes.set([]);
+      }
+    });
+    this.subscriptions.add(authSub);
 
-        this.isLoadingNotes.set(false);
+    effect(() => {
+      const notebooks = this.notebookService.notebooks();
+      const user = this.currentUser();
+      const isLoadingNotebooks = this.notebookService.isLoading();
 
-        return;
-
+      if (isLoadingNotebooks) {
+        this.isLoadingNotes.set(true);
+        return; 
       }
 
-  
+      if (user && notebooks.length > 0) {
+        this.isLoadingNotes.set(true); 
+        const noteObservables = notebooks.map(notebook =>
+          this.dataService.getNotes(notebook.id, false).pipe( // Alterado de true para false
+            map(notes => notes.map(note => ({ ...note, notebookId: notebook.id, notebookName: notebook.name })))
+          )
+        );
 
-      const noteObservables = notebooks.map(notebook =>
-
-        this.dataService.getNotes(notebook.id).pipe(
-
-          map(notes => notes.map(note => ({ ...note, notebookId: notebook.id, notebookName: notebook.name }))))
-
-      );
-
-  
-
-      forkJoin(noteObservables).subscribe(notesFromNotebooks => {
-
-        const allNotes = notesFromNotebooks.flat();
-
-        allNotes.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-
-        this.allRecentNotes.set(allNotes);
-
+        forkJoin(noteObservables).pipe(
+          map(notesFromNotebooks => {
+            const allNotes = notesFromNotebooks.flat();
+            allNotes.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+            return allNotes;
+          }),
+          catchError(error => {
+            console.error('Error fetching recent notes.', error); // Mensagem de erro genérica
+            this.isLoadingNotes.set(false);
+            return of([]); // Return an empty array on error
+          })
+        ).subscribe(notes => {
+          this.allRecentNotes.set(notes);
+          this.isLoadingNotes.set(false);
+        });
+      } else if (user) {
+        
+        this.allRecentNotes.set([]);
         this.isLoadingNotes.set(false);
-
-      });
-
-    }
+      } else {
+        
+        this.allRecentNotes.set([]);
+        this.isLoadingNotes.set(false);
+      }
+    });
+  }
 
   
 
@@ -138,7 +122,6 @@ export class DashboardComponent {
       this.closeFilterMenu();
 
     }
-
   toggleFilterMenu() {
     this.isFilterMenuOpen.set(!this.isFilterMenuOpen());
   }

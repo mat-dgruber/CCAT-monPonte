@@ -130,11 +130,15 @@ export class DataService {
 
   // --- Métodos para Notas (Notes) ---
 
-  getNotes(notebookId: string): Observable<Note[]> {
+  getNotes(notebookId: string, onlyPinned: boolean = false): Observable<Note[]> {
     if (!this.userId) return of([]);
 
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
-    const q = query(notesCollection, orderBy('createdAt', 'desc'));
+    let q = query(notesCollection, orderBy('createdAt', 'desc'));
+
+    if (onlyPinned) {
+      q = query(q, where('isPinned', '==', true));
+    }
 
     return new Observable<Note[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
