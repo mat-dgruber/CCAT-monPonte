@@ -1,42 +1,64 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthError } from '@angular/fire/auth';
-
+import { LoggingService } from '../services/logging';
 import { AuthService } from '../services/auth';
+
+// Custom validator to check if passwords match
+export function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const password = control.get('password');
+  const confirmPassword = control.get('confirmPassword');
+  return password && confirmPassword && password.value !== confirmPassword.value ? { passwordsMismatch: true } : null;
+}
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './signup.html',
 })
-export class SignupComponent {
-  name = '';
-  email = '';
-  password = '';
+export class SignupComponent implements OnInit {
+  signupForm!: FormGroup;
   errorMessage: string | null = null;
   isLoading = false;
 
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private loggingService = inject(LoggingService);
+
+  ngOnInit(): void {
+    this.signupForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern('(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}')
+      ]],
+      confirmPassword: ['', Validators.required],
+      termsAccepted: [false, Validators.requiredTrue]
+    }, { validators: passwordsMatchValidator });
+  }
 
   async onSignup() {
-    // Safeguard against submission with empty fields
-    if (!this.name || !this.email || !this.password) {
+    if (this.signupForm.invalid) {
       return;
     }
 
     this.errorMessage = null;
     this.isLoading = true;
+    const { name, email, password } = this.signupForm.value;
+
     try {
-      await this.authService.signup(this.name, this.email, this.password);
-      this.router.navigate(['/']); // Navigate to the main app upon successful signup
+      await this.authService.signup(name, email, password);
+      this.router.navigate(['/']);
     } catch (e) {
       const error = e as AuthError;
       this.errorMessage = this.getFriendlyErrorMessage(error);
-      console.error(error);
+      this.loggingService.error('Signup failed', error);
     } finally {
       this.isLoading = false;
     }
@@ -47,11 +69,17 @@ export class SignupComponent {
       case 'auth/email-already-in-use':
         return 'Este endereço de e-mail já está em uso por outra conta.';
       case 'auth/weak-password':
-        return 'A senha é muito fraca. Por favor, use uma senha com pelo menos 6 caracteres.';
+        return 'A senha fornecida é muito fraca.';
       case 'auth/invalid-email':
         return 'O endereço de e-mail fornecido não é válido.';
       default:
         return 'Ocorreu um erro inesperado ao criar a conta. Tente novamente.';
     }
   }
+
+  get name() { return this.signupForm.get('name'); }
+  get email() { return this.signupForm.get('email'); }
+  get password() { return this.signupForm.get('password'); }
+  get confirmPassword() { return this.signupForm.get('confirmPassword'); }
+  get termsAccepted() { return this.signupForm.get('termsAccepted'); }
 }

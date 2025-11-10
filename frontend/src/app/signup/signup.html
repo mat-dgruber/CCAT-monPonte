@@ -14,22 +14,19 @@
         </div>
       }
 
-      <form #signupForm="ngForm" class="space-y-7" (ngSubmit)="onSignup()">
+      <form [formGroup]="signupForm" class="space-y-7" (ngSubmit)="onSignup()">
         <div role="form" aria-labelledby="nameLabel">
           <label id="nameLabel" for="name" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nome</label>
           <input
             id="name"
-            name="name"
             type="text"
-            autocomplete="name" aria-labelledby="nameLabel"
-            required
-            [(ngModel)]="name"
-            #nameInput="ngModel"
-            [class.border-red-500]="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
+            formControlName="name"
+            autocomplete="name"
+            [class.border-red-500]="name?.invalid && (name?.dirty || name?.touched)"
             class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
-          @if (nameInput.invalid && (nameInput.dirty || nameInput.touched)) {
+          @if (name?.invalid && (name?.dirty || name?.touched)) {
             <p class="mt-1 text-sm text-red-600">
-              @if (nameInput.errors?.['required']) { O nome é obrigatório. }
+              @if (name?.errors?.['required']) { O nome é obrigatório. }
             </p>
           }
         </div>
@@ -37,19 +34,15 @@
           <label id="emailLabel" for="email" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Endereço de E-mail</label>
           <input
             id="email"
-            name="email"
             type="email"
-            autocomplete="email" aria-labelledby="emailLabel"
-            required
-            [(ngModel)]="email"
-            #emailInput="ngModel"
-            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-            [class.border-red-500]="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
+            formControlName="email"
+            autocomplete="email"
+            [class.border-red-500]="email?.invalid && (email?.dirty || email?.touched)"
             class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
-          @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
+          @if (email?.invalid && (email?.dirty || email?.touched)) {
             <p class="mt-1 text-sm text-red-600">
-              @if (emailInput.errors?.['required']) { O e-mail é obrigatório. }
-              @if (emailInput.errors?.['pattern']) { Por favor, insira um e-mail válido. }
+              @if (email?.errors?.['required']) { O e-mail é obrigatório. }
+              @if (email?.errors?.['email']) { Por favor, insira um e-mail válido. }
             </p>
           }
         </div>
@@ -57,32 +50,56 @@
           <label id="passwordLabel" for="password" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Senha</label>
           <input
             id="password"
-            name="password"
             type="password"
-            autocomplete="new-password" aria-labelledby="passwordLabel"
-            required
-            [(ngModel)]="password"
-            #passwordInput="ngModel"
-            minlength="6"
-            [class.border-red-500]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)"
+            formControlName="password"
+            autocomplete="new-password"
+            [class.border-red-500]="password?.invalid && (password?.dirty || password?.touched)"
             class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
-          @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
+          @if (password?.invalid && (password?.dirty || password?.touched)) {
             <p class="mt-1 text-sm text-red-600">
-              @if (passwordInput.errors?.['required']) { A senha é obrigatória. }
-              @if (passwordInput.errors?.['minlength']) { A senha deve ter no mínimo 6 caracteres. }
+              @if (password?.errors?.['required']) { A senha é obrigatória. }
+              @if (password?.errors?.['minlength']) { A senha deve ter no mínimo 8 caracteres. }
+              @if (password?.errors?.['pattern']) { A senha deve conter uma letra maiúscula, minúscula, número e caractere especial. }
             </p>
           }
         </div>
+        <div role="form" aria-labelledby="confirmPasswordLabel">
+          <label id="confirmPasswordLabel" for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Confirmar Senha</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+            [class.border-red-500]="(confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)) || (signupForm.errors?.['passwordsMismatch'] && (confirmPassword?.dirty || confirmPassword?.touched))"
+            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
+          @if (confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (confirmPassword?.errors?.['required']) { A confirmação de senha é obrigatória. }
+            </p>
+          }
+          @if (signupForm.errors?.['passwordsMismatch'] && (confirmPassword?.dirty || confirmPassword?.touched)) {
+            <p class="mt-1 text-sm text-red-600">
+              As senhas não coincidem.
+            </p>
+          }
+        </div>
+        <div class="flex items-center">
+          <input
+            id="terms"
+            type="checkbox"
+            formControlName="termsAccepted"
+            class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-dark-border rounded">
+          <label for="terms" class="ml-2 block text-sm text-gray-900 dark:text-dark-text-secondary">
+            Eu li e aceito os <a routerLink="/terms-of-use" class="underline">Termos de Serviço</a> e a <a routerLink="/privacy-policy" class="underline">Política de Privacidade</a>.
+          </label>
+        </div>
         <div>
           <button
-            type="submit" aria-label="Registrar nova conta"
-            [disabled]="!signupForm.form.valid || isLoading"
+            type="submit"
+            [disabled]="signupForm.invalid || isLoading"
             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300">
             @if (isLoading) {
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             }
             <span>{{ isLoading ? 'Registrando...' : 'Registrar' }}</span>
           </button>
