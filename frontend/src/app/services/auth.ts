@@ -12,7 +12,7 @@ export class AuthService {
   async login(email: string, password: string, rememberMe: boolean) {
     try {
       const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-      await setPersistence(this.auth, browserSessionPersistence);
+      await setPersistence(this.auth, persistence);
       return await signInWithEmailAndPassword(this.auth, email, password);
     } catch (e) {
       throw e as AuthError;

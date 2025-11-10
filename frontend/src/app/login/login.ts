@@ -18,9 +18,14 @@ export class LoginComponent {
   rememberMe = false;
   errorMessage: string | null = null;
   isLoading = false;
+  showPassword = false; // New property
 
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  toggleShowPassword() { // New method
+    this.showPassword = !this.showPassword;
+  }
 
   async onLogin() {
     // Safeguard against submission with empty fields
