@@ -1,60 +1,91 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthError } from '@angular/fire/auth';
-
+import { LoggingService } from '../services/logging';
 import { AuthService } from '../services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
 })
-export class LoginComponent {
-  email = '';
-  password = '';
-  rememberMe = false;
+export class LoginComponent implements OnInit {
+  loginForm!: FormGroup;
   errorMessage: string | null = null;
   isLoading = false;
-  showPassword = false; // New property
+  showPassword = false;
+  loginAttempts = 0;
+  isLocked = false;
 
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private loggingService = inject(LoggingService);
 
-  toggleShowPassword() { // New method
+  ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+      rememberMe: [false]
+    });
+  }
+
+  toggleShowPassword() {
     this.showPassword = !this.showPassword;
   }
 
   async onLogin() {
-    // Safeguard against submission with empty fields
-    if (!this.email || !this.password) {
+    if (this.isLocked || this.loginForm.invalid) {
       return;
     }
 
     this.errorMessage = null;
     this.isLoading = true;
+    const { email, password, rememberMe } = this.loginForm.value;
+
     try {
-      await this.authService.login(this.email, this.password, this.rememberMe);
+      await this.authService.login(email, password, rememberMe);
+      this.loginAttempts = 0; // Reset on success
       this.router.navigate(['/']);
     } catch (e) {
       const error = e as AuthError;
       this.errorMessage = this.getFriendlyErrorMessage(error);
-      console.error(error);
+      this.loginAttempts++;
+      if (this.loginAttempts >= 5) {
+        this.lockForm();
+      }
+      this.loggingService.error('Login failed', error);
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private lockForm() {
+    this.isLocked = true;
+    this.errorMessage = 'Muitas tentativas de login. Tente novamente em 30 segundos.';
+    this.loginForm.disable();
+    setTimeout(() => {
+      this.isLocked = false;
+      this.loginAttempts = 0;
+      this.errorMessage = null;
+      this.loginForm.enable();
+    }, 30000); // 30 seconds
   }
 
   private getFriendlyErrorMessage(error: AuthError): string {
     switch (error.code) {
       case 'auth/invalid-credential':
         return 'E-mail ou senha inválidos. Por favor, tente novamente.';
-      case 'auth/user-not-found': // This is often covered by invalid-credential
+      case 'auth/user-not-found':
         return 'Nenhum usuário encontrado com este e-mail.';
       default:
         return 'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.';
     }
   }
+
+  get email() { return this.loginForm.get('email'); }
+  get password() { return this.loginForm.get('password'); }
 }
