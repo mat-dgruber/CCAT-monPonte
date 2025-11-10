@@ -7,7 +7,7 @@ import { NotebookService } from '../services/notebook.service';
 import { User } from '@angular/fire/auth';
 import { Note } from '../services/note.service';
 import { Subscription, forkJoin, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, timeout, take, finalize } from 'rxjs/operators';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Copy, Ellipsis } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
@@ -19,7 +19,8 @@ import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective, HtmlToTextPipe],
+  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective],
+  providers: [HtmlToTextPipe],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
   animations: [
@@ -41,6 +42,7 @@ export class DashboardComponent {
   clipService = inject(ClipService); // Public for template access
   private notificationService = inject(NotificationService);
   private subscriptions: Subscription = new Subscription();
+  private htmlToTextPipe = inject(HtmlToTextPipe);
 
   currentUser: WritableSignal<User | null> = signal(null);
   allRecentNotes: WritableSignal<Note[]> = signal([]);
@@ -57,9 +59,6 @@ export class DashboardComponent {
     return notes.filter(note => note.notebookId === selected.id).slice(0, 5);
   });
 
-  
-
-  
   constructor() {
     const authSub = this.authService.authState$.subscribe(user => {
       this.currentUser.set(user);
@@ -82,46 +81,45 @@ export class DashboardComponent {
       if (user && notebooks.length > 0) {
         this.isLoadingNotes.set(true); 
         const noteObservables = notebooks.map(notebook =>
-          this.dataService.getNotes(notebook.id, false).pipe( // Alterado de true para false
-            map(notes => notes.map(note => ({ ...note, notebookId: notebook.id, notebookName: notebook.name })))
+          this.dataService.getNotes(notebook.id, false).pipe(
+            timeout(10000), // 10 second timeout
+            map(notes => notes.map(note => ({ ...note, notebookId: notebook.id, notebookName: notebook.name }))),
+            take(1), // Adicionado take(1) para garantir que o observable complete
+            catchError(error => {
+              console.error(`Error fetching notes for notebook ${notebook.name}:`, error);
+              // Return an empty array for this notebook, allowing others to load
+              return of([]); 
+            })
           )
         );
 
-        forkJoin(noteObservables).pipe(
+        forkJoin(noteObservables.map(obs => obs.pipe(
+          timeout(5000), // Adiciona um timeout de 5 segundos para cada observable
+          catchError(error => {
+            console.error('Error fetching notes for notebook:', error);
+            this.notificationService.showError(`Error fetching notes for notebook: ${error.message}`);
+            return of([]); // Retorna um array vazio em caso de erro
+          })
+        ))).pipe(
           map(notesFromNotebooks => {
             const allNotes = notesFromNotebooks.flat();
             allNotes.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
             return allNotes;
           }),
-          catchError(error => {
-            console.error('Error fetching recent notes.', error); // Mensagem de erro genérica
-            this.isLoadingNotes.set(false);
-            return of([]); // Return an empty array on error
-          })
+          finalize(() => this.isLoadingNotes.set(false)) // Garante que isLoadingNotes seja false no final
         ).subscribe(notes => {
           this.allRecentNotes.set(notes);
-          this.isLoadingNotes.set(false);
         });
-      } else if (user) {
-        
-        this.allRecentNotes.set([]);
-        this.isLoadingNotes.set(false);
       } else {
-        
         this.allRecentNotes.set([]);
         this.isLoadingNotes.set(false);
       }
     });
   }
 
-  
-
     selectNotebook(notebook: Notebook | null) {
-
       this.selectedNotebook.set(notebook);
-
       this.closeFilterMenu();
-
     }
   toggleFilterMenu() {
     this.isFilterMenuOpen.set(!this.isFilterMenuOpen());
