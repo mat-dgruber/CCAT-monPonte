@@ -79,28 +79,26 @@
         </p>
         <div>
           @if (isLoadingNotes()) {
-            <div class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <!-- Skeleton Loader -->
-              <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 animate-pulse">
-                <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-                <div class="h-3 w-1/2 bg-gray-200 dark:bg-gray-600 rounded mt-2"></div>
-              </div>
-              <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 animate-pulse">
-                <div class="h-4 w-5/6 bg-gray-200 dark:bg-gray-600 rounded"></div>
-                <div class="h-3 w-2/3 bg-gray-200 dark:bg-gray-600 rounded mt-2"></div>
-              </div>
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 animate-pulse">
+                  <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                  <div class="h-3 w-1/2 bg-gray-200 dark:bg-gray-600 rounded mt-2"></div>
+                </div>
+              }
             </div>
           } @else if (filteredNotes().length > 0) {
-            <ul class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (note of filteredNotes(); track note.id) {
-                <li class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                   <a [routerLink]="['/notebooks', note.notebookId, 'notes', note.id]" class="block">
                     <h4 class="font-semibold text-gray-800 dark:text-white truncate">{{ note.title || 'Nota sem título' }}</h4>
                     <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ (note.content | slice:0:100) || 'Sem conteúdo adicional' }}</p>
                   </a>
-                </li>
+                </div>
               }
-            </ul>
+            </div>
           } @else {
             <p class="text-gray-500 dark:text-gray-400">Nenhuma nota recente encontrada.</p>
           }

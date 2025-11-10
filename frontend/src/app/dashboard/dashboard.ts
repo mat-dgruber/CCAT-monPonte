@@ -54,9 +54,9 @@ export class DashboardComponent {
     const notes = this.allRecentNotes();
     const selected = this.selectedNotebook();
     if (!selected) {
-      return notes.slice(0, 5); // Retorna as 5 mais recentes de todos os cadernos
+      return notes.slice(0, 6); // Retorna as 6 mais recentes de todos os cadernos
     }
-    return notes.filter(note => note.notebookId === selected.id).slice(0, 5);
+    return notes.filter(note => note.notebookId === selected.id).slice(0, 6);
   });
 
   constructor() {
