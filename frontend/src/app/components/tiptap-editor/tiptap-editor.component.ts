@@ -13,6 +13,8 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import YouTube from '@tiptap/extension-youtube';
 import Document from '@tiptap/extension-document';
+import ListItem from '@tiptap/extension-list-item';
+import Blockquote from '@tiptap/extension-blockquote';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
@@ -57,6 +59,22 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
       extensions: [
         StarterKit.configure({
           heading: false,
+          bulletList: {
+            keepMarks: true,
+            keepAttributes: false,
+          },
+          orderedList: {
+            keepMarks: true,
+            keepAttributes: false,
+          },
+          listItem: {
+            keepMarks: true,
+            keepAttributes: false,
+          },
+          blockquote: {
+            keepMarks: true,
+            keepAttributes: false,
+          },
         }),
             TextAlign.configure({
               types: ['heading', 'paragraph'],

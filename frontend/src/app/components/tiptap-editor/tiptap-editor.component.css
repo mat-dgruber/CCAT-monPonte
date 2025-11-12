@@ -84,6 +84,23 @@
   outline: none; /* Remove default focus outline */
 }
 
+/* Temporary visual overrides for debugging lists and blockquotes */
+.tiptap-editor-container > [tiptapEditor] > .ProseMirror ul,
+.tiptap-editor-container > [tiptapEditor] > .ProseMirror ol {
+  background-color: rgba(255, 255, 0, 0.2); /* Light yellow background for lists */
+  padding-left: 1.5rem;
+}
+
+.tiptap-editor-container > [tiptapEditor] > .ProseMirror li {
+  background-color: rgba(0, 255, 255, 0.2); /* Light cyan background for list items */
+}
+
+.tiptap-editor-container > [tiptapEditor] > .ProseMirror blockquote {
+  background-color: rgba(255, 0, 255, 0.2); /* Light magenta background for blockquotes */
+  border-left: 4px solid magenta;
+  padding-left: 1rem;
+}
+
 /* Estilos para o novo seletor de cor */
 .color-picker-wrapper {
   position: relative;
