@@ -7,7 +7,7 @@
 }
 
 .dark .notebook-bg {
-  background-color: #2d3748;
-  background-image: linear-gradient(to bottom, transparent 24px, #4a5568 25px);
-  color: #f7fafc;
+  background-color: #27272A; /* Cor de fundo do painel */
+  background-image: linear-gradient(to bottom, transparent 24px, #3F3F46 25px); /* Cor das linhas */
+  color: #F4F4F5; /* Cor do texto principal */
 }

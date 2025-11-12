@@ -51,7 +51,7 @@
                     [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
                     class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
                 <lucide-icon name="pin" size="16"
-                             [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+                             [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-600 dark:text-gray-500'"></lucide-icon>
               </button>
             </div>
             <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow" [innerHTML]="note.content | highlight: searchTerm()"></p>
@@ -65,6 +65,7 @@
 <!-- Modal de Criar/Editar Nota -->
 @if (isNoteModalVisible()) {
   <app-modal
+    [isOpen]="isNoteModalVisible()"
     [title]="isEditing() ? 'Editar Nota' : 'Criar Nova Nota'"
     confirmText="Salvar"
     (onConfirm)="saveNote(currentNote())"

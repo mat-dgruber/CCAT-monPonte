@@ -3,7 +3,7 @@
     <div class="flex items-center gap-4">
       <img src="assets/logo-ccat.png" alt="monNote Logo" class="h-10 w-10">
       <h1 class="text-2xl font-bold">
-        <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-indigo-600 dark:hover:text-dark-text flex items-center">
+        <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-indigo-600 dark:hover:text-indigo-600 flex items-center">
           monClip
         </a>
       </h1>
@@ -34,7 +34,7 @@
               <div class="w-8 h-8 rounded-full bg-indigo-500 dark:bg-dark-accent flex items-center justify-center text-white font-bold text-sm">
                 {{ getInitials(user) }}
               </div>
-              <span class="hidden sm:inline text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Olá, {{ getGreetingName(user) }}</span>
+              <span class="hidden sm:inline text-sm font-medium text-gray-700 dark:text-dark-text">Olá, {{ getGreetingName(user) }}</span>
                         </button>
 
             @if (isUserMenuOpen()) {

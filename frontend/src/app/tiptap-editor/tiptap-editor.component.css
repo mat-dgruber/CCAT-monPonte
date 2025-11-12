@@ -1,5 +1,26 @@
+:root {
+  --tiptap-editor-bg: #ffffff;
+  --tiptap-editor-text: #334155;
+  --tiptap-icon-color: #334155;
+  --tiptap-icon-hover-bg: #f1f5f9;
+  --tiptap-icon-active-bg: #334155;
+  --tiptap-icon-active-color: #ffffff;
+  --tiptap-border-color: #e2e8f0;
+}
+
+.dark {
+  --tiptap-editor-bg: #27272A;
+  --tiptap-editor-text: #F4F4F5;
+  --tiptap-icon-color: #ffffff; /* Changed to white for better visibility */
+  --tiptap-icon-hover-bg: #3F3F46;
+  --tiptap-icon-active-bg: #3B82F6;
+  --tiptap-icon-active-color: #ffffff; /* Changed to white for better visibility */
+  --tiptap-border-color: #3F3F46;
+}
+
 .tiptap-editor-container .editor-header {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--tiptap-border-color);
+  background-color: var(--tiptap-editor-bg);
   border-bottom: none;
   border-radius: 0.5rem 0.5rem 0 0;
   padding: 0.5rem;
@@ -11,11 +32,15 @@
   gap: 0.5rem;
 }
 
+.tiptap-editor-container .editor-header > .menu > button lucide-icon svg {
+  stroke: currentColor;
+}
+
 .tiptap-editor-container .editor-header > .menu > button {
   background-color: transparent;
   border: none;
   border-radius: 0.25rem;
-  color: #334155;
+  color: var(--tiptap-icon-color);
   cursor: pointer;
   font-size: 1.25rem;
   padding: 0.5rem;
@@ -26,24 +51,29 @@
 }
 
 .tiptap-editor-container .editor-header > .menu > button:hover {
-  background-color: #f1f5f9;
+  background-color: var(--tiptap-icon-hover-bg);
 }
 
 .tiptap-editor-container .editor-header > .menu > button.is-active {
-  background-color: #334155;
-  color: #ffffff;
+  background-color: var(--tiptap-icon-active-bg);
+  color: var(--tiptap-icon-active-color);
 }
+
 .tiptap-editor-container .editor-header > .menu > select {
   padding: 0.25rem 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.25rem;
+  background-color: var(--tiptap-editor-bg);
+  color: var(--tiptap-editor-text);
 }
 
 .tiptap-editor-container > [tiptapEditor] {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--tiptap-border-color);
   border-radius: 0 0 0.5rem 0.5rem;
   padding: 1rem;
   min-height: 15rem;
+  background-color: var(--tiptap-editor-bg);
+  color: var(--tiptap-editor-text);
 }
 
 /* Estilos para o novo seletor de cor */
@@ -57,8 +87,8 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: var(--tiptap-editor-bg);
+  border: 1px solid var(--tiptap-border-color);
   border-radius: 4px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   display: grid;
@@ -72,7 +102,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1px solid #ddd;
+  border: 1px solid var(--tiptap-border-color);
   cursor: pointer;
   transition: transform 0.1s ease-in-out;
 }
@@ -85,12 +115,12 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1px solid #ddd;
+  border: 1px solid var(--tiptap-border-color);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
+  background-color: var(--tiptap-icon-hover-bg);
 }
 
 .dropdown-wrapper {
@@ -102,9 +132,8 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white;
-  border: 2px solid blue;
-  border: 1px solid #e2e8f0;
+  background-color: var(--tiptap-editor-bg);
+  border: 1px solid var(--tiptap-border-color);
   border-radius: 0.25rem;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -117,13 +146,14 @@
   width: 100%;
   justify-content: flex-start;
   padding: 0.5rem 0.75rem;
+  color: var(--tiptap-icon-color);
 }
 
 .dropdown-menu button:hover {
-  background-color: #f1f5f9;
+  background-color: var(--tiptap-icon-hover-bg);
 }
 
 .search-selection {
-  border: 2px solid blue;
+  border: 2px solid var(--tiptap-icon-active-bg);
   border-radius: 0.5rem;  
 }

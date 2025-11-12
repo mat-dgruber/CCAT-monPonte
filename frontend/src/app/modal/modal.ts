@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./modal.css'] // Você pode criar um modal.css se precisar de estilos específicos não-Tailwind
 })
 export class Modal {
+  @Input() isOpen: boolean = false;
   @Input() title: string = '';
   @Input() message: string = '';
   @Input() confirmText: string = 'Confirmar';
@@ -16,12 +17,13 @@ export class Modal {
   @Input() showCancelButton: boolean = true; // Permite esconder o botão de cancelar
 
   @Output() onConfirm = new EventEmitter<void>();
-  @Output() onCancel = new EventEmitter<void>();
+  @Output() onCancel = new EventEmitter<void>(); // Changed from close to onCancel
 
   // Métodos para emitir eventos
   confirm(): void {
     this.onConfirm.emit();
   }
+  // Renamed cancel to onCancel and emit the onCancel event
   cancel(): void {
     this.onCancel.emit();
   }
