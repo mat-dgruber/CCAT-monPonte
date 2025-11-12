@@ -156,6 +156,7 @@
 <!-- Modals -->
 @if (showDeleteModal()) {
   <app-modal
+    [isOpen]="showDeleteModal()"
     title="Confirmar Deleção"
     [message]="'Tem certeza que deseja deletar o caderno &quot;' + notebookToDelete()?.name + '&quot;? Todas as notas contidas nele serão perdidas. Esta ação não pode ser desfeita.'"
     confirmText="Deletar"
@@ -166,6 +167,7 @@
 
 @if (showCreateRenameModal()) {
   <app-modal
+    [isOpen]="showCreateRenameModal()"
     [title]="modalMode() === 'create' ? 'Criar Novo Caderno' : 'Renomear Caderno'"
     confirmText="Salvar"
     (onConfirm)="handleSaveNotebook()"

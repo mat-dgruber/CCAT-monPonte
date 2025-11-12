@@ -247,6 +247,7 @@ export class Notebooks implements OnInit {
   }
 
   openCreateModal() {
+    console.log('openCreateModal called');
     this.modalMode.set('create');
     this.newNotebookName.set('');
     this.newNotebookColor.set('#FFFFFF');
