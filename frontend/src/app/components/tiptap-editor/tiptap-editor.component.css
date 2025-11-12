@@ -71,9 +71,17 @@
   border: 1px solid var(--tiptap-border-color);
   border-radius: 0 0 0.5rem 0.5rem;
   padding: 1rem;
-  min-height: 200rem;
+  min-height: 20rem;
   background-color: var(--tiptap-editor-bg);
   color: var(--tiptap-editor-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.tiptap-editor-container > [tiptapEditor] > .ProseMirror {
+  min-height: 15rem; /* A reasonable minimum height for the editable area */
+  height: 100%; /* Take full height of its parent */
+  outline: none; /* Remove default focus outline */
 }
 
 /* Estilos para o novo seletor de cor */
