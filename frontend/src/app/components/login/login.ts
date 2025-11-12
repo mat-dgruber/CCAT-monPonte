@@ -2,9 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthError } from '@angular/fire/auth';
-import { LoggingService } from '../services/logging';
-import { AuthService } from '../services/auth';
+import { AuthError } from '@angular/fire/auth'; 
+import { LoggingService } from '../../services/logging'; 
+import { AuthService } from '../../services/auth';
 
 // Helper function for delay
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));

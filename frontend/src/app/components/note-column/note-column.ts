@@ -5,10 +5,10 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Subscription, debounceTime, Subject, filter, switchMap, of } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
-import { NotebookService } from '../services/notebook.service';
+import { NotebookService } from '../../services/notebook.service';
 import { Modal } from '../modal/modal';
-import { NotificationService } from '../services/notification.service'; 
-import { NoteService, Note } from '../services/note.service';
+import { NotificationService } from '../../services/notification.service'; 
+import { NoteService, Note } from '../../services/note.service';
 
 import { LucideAngularModule } from 'lucide-angular';
 
