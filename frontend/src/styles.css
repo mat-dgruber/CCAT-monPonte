@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'prosemirror-view/style/prosemirror.css';
+@import '@tiptap/starter-kit/dist/starter-kit.css';
+
 @layer base {
   :root {
     /* Font variables */
