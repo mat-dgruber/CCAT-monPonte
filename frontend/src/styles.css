@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '@tiptap/core/dist/tiptap.css';
+
 @layer base {
   :root {
     /* Font variables */
