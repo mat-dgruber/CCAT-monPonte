@@ -13,6 +13,9 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import YouTube from '@tiptap/extension-youtube';
 import Document from '@tiptap/extension-document';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import Blockquote from '@tiptap/extension-blockquote';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
@@ -69,6 +72,9 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
         }),
         Highlight.configure({ multicolor: true }),
         SearchSelection,
+        BulletList,
+        OrderedList,
+        Blockquote,
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
