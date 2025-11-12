@@ -15,6 +15,7 @@ import YouTube from '@tiptap/extension-youtube';
 import Document from '@tiptap/extension-document';
 import ListItem from '@tiptap/extension-list-item';
 import Blockquote from '@tiptap/extension-blockquote';
+import Paragraph from '@tiptap/extension-paragraph';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
@@ -67,14 +68,8 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
             keepMarks: true,
             keepAttributes: false,
           },
-          listItem: {
-            keepMarks: true,
-            keepAttributes: false,
-          },
-          blockquote: {
-            keepMarks: true,
-            keepAttributes: false,
-          },
+
+
         }),
             TextAlign.configure({
               types: ['heading', 'paragraph'],
@@ -87,6 +82,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
         }),
         Highlight.configure({ multicolor: true }),
         SearchSelection,
+        Paragraph,
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
