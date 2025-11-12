@@ -71,7 +71,7 @@
   border: 1px solid var(--tiptap-border-color);
   border-radius: 0 0 0.5rem 0.5rem;
   padding: 1rem;
-  min-height: 20rem;
+  min-height: 200rem;
   background-color: var(--tiptap-editor-bg);
   color: var(--tiptap-editor-text);
 }
