@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, computed, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Note } from '../../../services/data.service';
+import { Note } from '../../../../services/data.service';
 import { LucideAngularModule } from 'lucide-angular';
 
 @Component({

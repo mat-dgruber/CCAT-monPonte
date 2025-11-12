@@ -1,13 +1,13 @@
 import { Component, inject, OnInit, OnDestroy, HostListener, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DataService, Notebook } from '../services/data.service';
-import { NotificationService } from '../services/notification.service';
-import { ClipService } from '../services/clip.service';
+import { DataService, Notebook } from '../../services/data.service';
+import { NotificationService } from '../../services/notification.service';
+import { ClipService } from '../../services/clip.service';
 import { Subscription } from 'rxjs';
-import { AuthService } from '../services/auth';
+import { AuthService } from '../../services/auth';
 import { Modal } from '../modal/modal';
-import { ThemeService } from '../services/theme';
+import { ThemeService } from '../../services/theme';
 
 @Component({
   selector: 'app-clip',

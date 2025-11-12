@@ -1,8 +1,8 @@
 import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth';
-import { Observable } from 'rxjs';
+import { AuthService } from '../../../services/auth';
+import { Observable } from 'rxjs'; 
 import { User } from 'firebase/auth';
 import { LucideAngularModule } from 'lucide-angular';
 

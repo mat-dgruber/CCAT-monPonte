@@ -2,19 +2,19 @@ import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed,
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes, state } from '@angular/animations';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { AuthService } from '../services/auth';
+import { AuthService } from '../../services/auth';
 import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
-import { DataService, Notebook, SortBy, SortDirection } from '../services/data.service';
-import { Note } from '../services/note.service';
-import { NotebookService } from '../services/notebook.service';
-import { NotificationService } from '../services/notification.service';
+import { DataService, Notebook, SortBy, SortDirection } from '../../services/data.service';
+import { Note } from '../../services/note.service';
+import { NotebookService } from '../../services/notebook.service';
+import { NotificationService } from '../../services/notification.service'; 
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, Subject } from 'rxjs';
 import { filter, debounceTime } from 'rxjs/operators';
-import { ResponsiveService } from '../services/responsive';
+import { ResponsiveService } from '../../services/responsive';
 
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';

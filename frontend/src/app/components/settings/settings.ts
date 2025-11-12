@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../services/auth';
-import { ClipService } from '../services/clip.service';
-import { ThemeService, Theme, FontFamily } from '../services/theme';
+import { AuthService } from '../../services/auth';
+import { ClipService } from '../../services/clip.service';
+import { ThemeService, Theme, FontFamily } from '../../services/theme';
 import { FormsModule } from '@angular/forms';
 import { User } from 'firebase/auth';
-import { NotificationService } from '../services/notification.service';
+import { NotificationService } from '../../services/notification.service';
 import { Modal } from '../modal/modal';
 
 @Component({

@@ -1,18 +1,18 @@
 import { Component, inject, signal, WritableSignal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../services/auth';
-import { DataService, Notebook } from '../services/data.service';
-import { ClipService } from '../services/clip.service';
-import { NotebookService } from '../services/notebook.service';
+import { AuthService } from '../../services/auth';
+import { DataService, Notebook } from '../../services/data.service';
+import { ClipService } from '../../services/clip.service';
+import { NotebookService } from '../../services/notebook.service';
 import { User } from '@angular/fire/auth';
-import { Note } from '../services/note.service';
+import { Note } from '../../services/note.service';
 import { Subscription, forkJoin, of } from 'rxjs';
 import { map, catchError, timeout, take, finalize } from 'rxjs/operators';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Copy, Ellipsis } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { NotificationService } from '../services/notification.service';
+import { NotificationService } from '../../services/notification.service';
 import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 
 

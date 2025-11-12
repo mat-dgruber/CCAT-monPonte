@@ -3,8 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthError } from '@angular/fire/auth';
-import { LoggingService } from '../services/logging';
-import { AuthService } from '../services/auth';
+import { LoggingService } from '../../services/logging';
+import { AuthService } from '../../services/auth';
 
 // Custom validator to check if passwords match
 export function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {

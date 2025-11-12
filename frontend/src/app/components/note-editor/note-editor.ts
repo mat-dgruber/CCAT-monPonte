@@ -11,9 +11,9 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Modal } from '../modal/modal';
 
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
-import { DataService, Note } from '../services/data.service';
-import { NotificationService } from '../services/notification.service';
-import { ThemeService } from '../services/theme';
+import { DataService, Note } from '../../services/data.service';
+import { NotificationService } from '../../services/notification.service';
+import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
 
 
