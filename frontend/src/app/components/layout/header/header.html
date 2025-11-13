@@ -29,7 +29,7 @@
 
         <!-- User Menu -->
         <div class="hidden md:flex items-center gap-4">
-          <div class="relative" (clickout)="closeUserMenu()">
+          <div class="relative" (clickOutside)="closeUserMenu()">
             <button (click)="toggleUserMenu()" class="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent focus:outline-none transition-all duration-200">
               <div class="w-8 h-8 rounded-full bg-indigo-500 dark:bg-dark-accent flex items-center justify-center text-white font-bold text-sm">
                 {{ getInitials(user) }}
@@ -62,7 +62,7 @@
   </div>
   <!-- Mobile Menu -->
   @if (isMobileMenuOpen()) {
-    <div class="md:hidden bg-white dark:bg-dark-primary" (clickout)="closeMobileMenu()">
+    <div class="md:hidden bg-white dark:bg-dark-primary" (clickOutside)="closeMobileMenu()">
       <a routerLink="/clip"
          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-secondary">Clip</a>
       <a routerLink="/notebooks"

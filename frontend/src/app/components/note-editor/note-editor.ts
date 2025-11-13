@@ -15,12 +15,13 @@ import { DataService, Note } from '../../services/data.service';
 import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
+import { ClickOutsideDirective } from '../directives/click-outside.directive';
 
 
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent, ClickOutsideDirective],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css']
 })

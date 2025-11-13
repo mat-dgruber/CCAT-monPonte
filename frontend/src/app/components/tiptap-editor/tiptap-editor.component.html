@@ -19,7 +19,7 @@
         <button (click)="showHighlightPalette = !showHighlightPalette" [class.is-active]="editor.isActive('highlight')" title="Highlight">
           <lucide-icon name="highlighter" class="stroke-current dark:text-dark-text"></lucide-icon>
         </button>
-        <div *ngIf="showHighlightPalette" class="color-palette">
+        <div *ngIf="showHighlightPalette" class="color-palette" (clickOutside)="closeHighlightPalette()">
           <button *ngFor="let color of predefinedHighlightColors"
                   class="color-swatch"
                   [style.backgroundColor]="color"
