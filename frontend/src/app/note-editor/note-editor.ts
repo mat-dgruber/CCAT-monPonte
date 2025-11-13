@@ -15,6 +15,7 @@ import { DataService, Note } from '../services/data.service';
 import { NotificationService } from '../services/notification.service';
 import { ThemeService } from '../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
+import { ResponsiveService } from '../services/responsive';
 
 
 @Component({
@@ -30,7 +31,8 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
-  themeService = inject(ThemeService); 
+  themeService = inject(ThemeService);
+  responsiveService = inject(ResponsiveService);
 
    
 
@@ -259,6 +261,14 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   goToPreviousMatch(): void {
     if (this.searchResultCount() > 0) {
       this.currentMatchIndex.set((this.currentMatchIndex() - 1 + this.searchResultCount()) % this.searchResultCount());
+    }
+  }
+
+  navigateBack(): void {
+    if (this.notebookId) {
+      this.router.navigate(['/notebooks', this.notebookId]);
+    } else {
+      this.router.navigate(['/notebooks']);
     }
   }
 }
