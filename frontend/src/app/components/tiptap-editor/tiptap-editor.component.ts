@@ -9,14 +9,38 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
 
 import TextAlign from '@tiptap/extension-text-align';
-import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
 import YouTube from '@tiptap/extension-youtube';
-import Document from '@tiptap/extension-document';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
 import { SearchSelection } from './extensions/search-selection.extension';
+import Underline from '@tiptap/extension-underline';
+import { Extension } from '@tiptap/core';
+
+const AllShortcuts = Extension.create({
+    name: 'allShortcuts',
+    addKeyboardShortcuts() {
+        return {
+            'Mod-u': () => this.editor.commands.toggleUnderline(),
+            'Mod-Shift-x': () => this.editor.commands.toggleStrike(),
+            'Mod-Shift-h': () => this.editor.commands.toggleHighlight(),
+            'Mod-k': () => {
+                if (this.editor.isActive('link')) {
+                    return this.editor.chain().focus().unsetLink().run()
+                }
+                const url = window.prompt('URL');
+                if (url === null) {
+                    return false
+                }
+                return this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+            },
+            'Mod-Shift-8': () => this.editor.commands.toggleBulletList(),
+            'Mod-Shift-7': () => this.editor.commands.toggleOrderedList(),
+            'Mod-Alt-c': () => this.editor.commands.toggleCodeBlock(),
+            'Mod-Shift-b': () => this.editor.commands.toggleBlockquote(),
+        }
+    }
+})
 
 @Component({
   selector: 'app-tiptap-editor',
@@ -57,7 +81,17 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
       extensions: [
         StarterKit.configure({
           heading: false,
+          bulletList: {
+            keepMarks: true,
+            keepAttributes: true,
+          },
+          orderedList: {
+            keepMarks: true,
+            keepAttributes: true,
+          },
         }),
+        Underline,
+        AllShortcuts,
             TextAlign.configure({
               types: ['heading', 'paragraph'],
             }),
@@ -107,10 +141,18 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.editor?.destroy();
   }
 
-  setLink() {
-    const url = window.prompt('URL');
-    if (this.editor && url) {
-      this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  toggleLink() {
+    if (!this.editor) {
+      return;
+    }
+
+    if (this.editor.isActive('link')) {
+      this.editor.chain().focus().unsetLink().run();
+    } else {
+      const url = window.prompt('URL');
+      if (url) {
+        this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+      }
     }
   }
 

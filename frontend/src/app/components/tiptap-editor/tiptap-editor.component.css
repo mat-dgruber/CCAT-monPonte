@@ -71,9 +71,17 @@
   border: 1px solid var(--tiptap-border-color);
   border-radius: 0 0 0.5rem 0.5rem;
   padding: 1rem;
-  min-height: 15rem;
+  min-height: 20rem;
   background-color: var(--tiptap-editor-bg);
   color: var(--tiptap-editor-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.tiptap-editor-container > [tiptapEditor] > .ProseMirror {
+  min-height: 15rem; /* A reasonable minimum height for the editable area */
+  height: 100%; /* Take full height of its parent */
+  outline: none; /* Remove default focus outline */
 }
 
 /* Estilos para o novo seletor de cor */
@@ -156,4 +164,31 @@
 .search-selection {
   border: 2px solid var(--tiptap-icon-active-bg);
   border-radius: 0.5rem;  
+}
+
+.tiptap-editor-container > [tiptapEditor] a {
+  color: #3b82f6; /* Tailwind blue-500 */
+  text-decoration: underline;
+}
+
+/* Blockquote styling */
+.tiptap-editor-container > [tiptapEditor] blockquote {
+  border-left: 3px solid var(--tiptap-icon-active-bg);
+  margin-left: 1rem;
+  padding-left: 1rem;
+  font-style: italic;
+}
+
+/* List styling */
+.tiptap-editor-container > [tiptapEditor] ul,
+.tiptap-editor-container > [tiptapEditor] ol {
+  padding-left: 2rem;
+}
+
+.tiptap-editor-container > [tiptapEditor] ul {
+  list-style-type: disc;
+}
+
+.tiptap-editor-container > [tiptapEditor] ol {
+  list-style-type: decimal;
 }

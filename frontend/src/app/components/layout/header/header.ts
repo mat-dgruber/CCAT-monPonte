@@ -5,11 +5,12 @@ import { AuthService } from '../../../services/auth';
 import { Observable } from 'rxjs'; 
 import { User } from 'firebase/auth';
 import { LucideAngularModule } from 'lucide-angular';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, RouterModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule, RouterModule, ClickOutsideDirective],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })

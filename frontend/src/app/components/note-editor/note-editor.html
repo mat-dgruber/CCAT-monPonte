@@ -32,7 +32,7 @@
             <lucide-icon name="more-vertical" class="stroke-current dark:text-dark-text" size="20"></lucide-icon>
           </button>
           @if (showMoreOptions()) {
-            <div @flyInOut class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-primary rounded-md shadow-lg z-10 border border-gray-200 dark:border-dark-border" (appClickOutside)="closeMoreOptions()">
+            <div @flyInOut class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-primary rounded-md shadow-lg z-10 border border-gray-200 dark:border-dark-border" (clickOutside)="closeMoreOptions()">
               <ul>
                 <li>
                   <a (click)="togglePin()" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-accent cursor-pointer">
