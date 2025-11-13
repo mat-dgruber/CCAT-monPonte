@@ -53,7 +53,7 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button (click)="toggleMobileMenu()" class="md:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
+        <button (click)="toggleMobileMenu(); $event.stopPropagation()" class="md:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
           <lucide-icon name="menu" size="22"></lucide-icon>
         </button>
       </nav>
@@ -61,12 +61,27 @@
     
   </div>
   <!-- Mobile Menu -->
-  @if (isMobileMenuOpen()) {
-    <div class="md:hidden bg-white dark:bg-dark-primary" (clickOutside)="closeMobileMenu()">
-      <a routerLink="/clip"
-         class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-secondary">Clip</a>
-      <a routerLink="/notebooks"
-         class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-secondary">Cadernos</a>
+  <div 
+    class="md:hidden bg-white dark:bg-dark-primary border-t border-gray-200 dark:border-dark-border overflow-hidden transition-all duration-300 ease-in-out"
+    [class.max-h-0]="!isMobileMenuOpen()"
+    [class.max-h-96]="isMobileMenuOpen()"
+    (clickOutside)="closeMobileMenu()"
+  >
+      <a routerLink="/clip" (click)="closeMobileMenu()"
+         class="block px-4 py-3 text-base text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-secondary border-b border-gray-100 dark:border-dark-border-light">Clip</a>
+      <a routerLink="/notebooks" (click)="closeMobileMenu()"
+         class="block px-4 py-3 text-base text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-secondary border-b border-gray-100 dark:border-dark-border-light">Cadernos</a>
+      <a routerLink="/settings" (click)="closeMobileMenu()" class="block px-4 py-3 text-base text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-secondary border-b border-gray-100 dark:border-dark-border-light">
+        <div class="flex items-center gap-2">
+            <lucide-icon name="settings" size="16"></lucide-icon>
+            <span>Configurações</span>
+        </div>
+      </a>
+      <button (click)="logout()" class="w-full block px-4 py-3 text-base text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-secondary text-left">
+        <div class="flex items-center gap-2">
+            <lucide-icon name="log-out" size="16"></lucide-icon>
+            <span>Sair</span>
+        </div>
+      </button>
     </div>
-  }
 </header>

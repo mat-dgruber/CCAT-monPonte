@@ -5,7 +5,8 @@
       class="max-w-sm w-full shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
       [ngClass]="{
         'toast-success': toast.type === 'success',
-        'toast-error': toast.type === 'error'
+        'toast-error': toast.type === 'error',
+        'toast-info': toast.type === 'info'
       }"
     >
       <div class="p-4">
@@ -19,7 +20,7 @@
             }
           </div>
           <div class="ml-3 flex-1 pt-0.5 toast-message">
-            <p class="text-sm font-medium text-gray-900">{{ toast.message }}</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ toast.message }}</p>
           </div>
         </div>
       </div>

@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, AfterViewInit, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, AfterViewInit, ViewContainerRef, ComponentFactoryResolver, Output, EventEmitter } from '@angular/core';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map } from 'rxjs';
+import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map, filter } from 'rxjs';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -15,15 +16,26 @@ import { DataService, Note } from '../../services/data.service';
 import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
-import { ClickOutsideDirective } from '../directives/click-outside.directive';
+import { ResponsiveService } from '../../services/responsive';
 
 
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent],
   templateUrl: './note-editor.html',
-  styleUrls: ['./note-editor.css']
+  styleUrls: ['./note-editor.css'],
+  animations: [
+    trigger('flyInOut', [
+      state('void', style({ transform: 'translateY(-10%)', opacity: 0 })),
+      transition('void => *', [
+        animate('150ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ]),
+      transition('* => void', [
+        animate('150ms ease-in', style({ transform: 'translateY(-10%)', opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
@@ -31,7 +43,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private dataService = inject(DataService);
   private notificationService = inject(NotificationService);
-  themeService = inject(ThemeService); 
+  private location = inject(Location);
+  themeService = inject(ThemeService);
+  responsiveService = inject(ResponsiveService);
 
    
 
@@ -95,39 +109,36 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
         this.noteId = params.get('noteId');
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
-          return this.dataService.getNote(this.notebookId, this.noteId).pipe(
-            switchMap(note => {
-              this.isLoading.set(false);
-              this.searchTerm.set('');
-              this.showSearch.set(false);
-
-              if (note && note.id) {
-                const fullNote: Note = {
-                  ...note,
-                  title: note.title ?? '',
-                  content: note.content ?? '',
-                };
-                this.note.set(fullNote);
-
-                // Return an observable that listens for content changes for this specific note
-                return this.contentChanges.pipe(
-                  debounceTime(300),
-                  map(data => ({ ...data, notebookId: this.notebookId!, noteId: this.noteId! }))
-                );
-              } else {
-                this.router.navigate(['/notebooks']);
-                return of(null); // Return an observable that immediately completes
-              }
-            })
-          );
+          return this.dataService.getNote(this.notebookId, this.noteId);
         }
-        return of(null); // No notebookId or noteId, so return an observable that immediately completes
+        return of(null);
       }),
       takeUntil(this.destroy$)
+    ).subscribe(note => {
+      this.isLoading.set(false);
+      this.searchTerm.set('');
+      this.showSearch.set(false);
+
+      if (note && note.id) {
+        const fullNote: Note = {
+          ...note,
+          title: note.title ?? '',
+          content: note.content ?? '',
+        };
+        this.note.set(fullNote);
+      } else {
+        // If note is not found, clear the current note and let the parent handle the display
+        this.note.set(null);
+      }
+    }));
+
+    // Handle content changes separately
+    this.subscriptions.add(this.contentChanges.pipe(
+      debounceTime(300),
+      filter(() => !!this.notebookId && !!this.noteId), // Only save if notebookId and noteId are present
+      takeUntil(this.destroy$)
     ).subscribe(data => {
-      // This subscribe block will now receive the debounced content changes
-      // or null if a note wasn't found/navigated away.
-      if (data && data.notebookId && data.noteId && data.content) {
+      if (data.notebookId === this.notebookId && data.noteId === this.noteId) {
         this.saveNote(data.notebookId, data.noteId, data.content);
       }
     }));
@@ -246,6 +257,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       await this.dataService.deleteNote(this.notebookId, this.noteId);
       this.notificationService.showSuccess(`Nota "${this.note()?.title}" deletada com sucesso.`);
       this.showDeleteConfirmationModal.set(false);
+      this.location.back();
     } catch (error) {
       this.notificationService.showError('Erro ao deletar a nota.');
     }
@@ -261,5 +273,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
     if (this.searchResultCount() > 0) {
       this.currentMatchIndex.set((this.currentMatchIndex() - 1 + this.searchResultCount()) % this.searchResultCount());
     }
+  }
+
+  navigateBack(): void {
+    this.router.navigate(['/notebooks']);
   }
 }

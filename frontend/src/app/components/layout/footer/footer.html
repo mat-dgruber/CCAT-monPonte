@@ -1,16 +1,15 @@
 <footer class="bg-white dark:bg-dark-primary text-gray-800 dark:text-white shadow-md p-4 mt-auto rounded-t-3xl">
-  <div class="container mx-auto flex justify-between items-center">
+  <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
     <div>
-      <p>&copy; 2025 CapyCro AvecTech. Todos os direitos reservados.</p>
+      <p>&copy; 2025 CapyCro AvecTech. <br> Todos os direitos reservados.</p>
     </div>
-    <div class="flex space-x-4">
+    <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
       <a routerLink="/terms-of-use" class="hover:text-gray-400">Termos de Uso</a>
       <a [routerLink]="['/privacy-policy']" class="hover:text-gray-400">Política de Privacidade</a>
-      <a routerLink="/bug-report" class="hover:text-gray-400">
-        Relatar Problemas</a>
+      <a routerLink="/bug-report" class="flex items-center gap-2 hover:text-gray-400">
+        <span>Relatar Problemas</span>
         <lucide-icon name="bug" class="stroke-current dark:text-dark-text" size="20"></lucide-icon>
-        <!-- <a href="#" class="hover:text-gray-400">Contato</a>
-      <a href="#" class="hover:text-gray-400">Sobre Nós</a>-->
+      </a>
     </div>
   </div>
 </footer>

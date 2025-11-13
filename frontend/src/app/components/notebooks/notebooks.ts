@@ -96,6 +96,7 @@ export class Notebooks implements OnInit {
   searchTerm: WritableSignal<string> = signal('');
   isNoteOpen: WritableSignal<boolean> = signal(false);
   isNavigating: WritableSignal<boolean> = signal(false); // Novo signal para o estado de navegação
+  routeAnimationState: WritableSignal<string> = signal(''); // New signal for route animation state
 
   availableColors: string[] = [
     '#FFFFFF', '#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'
@@ -166,28 +167,36 @@ export class Notebooks implements OnInit {
     const routeSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      let route = this.route.firstChild;
-      let foundNotebookId = null;
-      let foundNoteId = null;
+      let notebookIdFromRoute: string | null = null;
+      let noteIdFromRoute: string | null = null;
 
-      while (route) {
-        if (route.snapshot.paramMap.has('noteId')) {
-          foundNoteId = route.snapshot.paramMap.get('noteId');
-        }
-        if (route.snapshot.paramMap.has('notebookId')) {
-          foundNotebookId = route.snapshot.paramMap.get('notebookId');
-        }
-        route = route.firstChild;
+      // Check current route for parameters
+      if (this.route.snapshot.paramMap.has('notebookId')) {
+        notebookIdFromRoute = this.route.snapshot.paramMap.get('notebookId');
       }
-      this.currentNoteId.set(foundNoteId);
+      if (this.route.snapshot.paramMap.has('noteId')) {
+        noteIdFromRoute = this.route.snapshot.paramMap.get('noteId');
+      }
+
+      // Check firstChild route for parameters (for nested routes like /notebooks/:notebookId/notes/:noteId)
+      if (this.route.firstChild) {
+        if (this.route.firstChild.snapshot.paramMap.has('notebookId')) {
+          notebookIdFromRoute = this.route.firstChild.snapshot.paramMap.get('notebookId');
+        }
+        if (this.route.firstChild.snapshot.paramMap.has('noteId')) {
+          noteIdFromRoute = this.route.firstChild.snapshot.paramMap.get('noteId');
+        }
+      }
       
-      // Apenas atualiza o caderno selecionado se um ID for encontrado na rota.
-      // Isso evita que a seleção manual do usuário seja sobrescrita com 'null'
-      // ao navegar para uma rota que não contém um ID de caderno.
-      if (foundNotebookId) {
-        this.selectedNotebookId.set(foundNotebookId);
+      this.currentNoteId.set(noteIdFromRoute);
+      if (notebookIdFromRoute) {
+        this.selectedNotebookId.set(notebookIdFromRoute);
+      } else {
+        // If no notebookId in route, clear selectedNotebookId
+        this.selectedNotebookId.set(null);
       }
-      this.cdr.detectChanges();
+      // Update the animation state after all other signals are set
+      this.routeAnimationState.set(this.router.url);
     });
 
     this.subscriptions.add(routeSub);
@@ -430,10 +439,11 @@ export class Notebooks implements OnInit {
 
   navigateBack() {
     if (this.currentNoteId() && this.responsiveService.isMobile()) {
-      this.router.navigate(['/notebooks', this.selectedNotebookId()]);
+      this.router.navigateByUrl('/notebooks');
     } else if (this.selectedNotebookId() && this.responsiveService.isMobile()) {
       this.selectedNotebookId.set(null);
-      this.router.navigate(['/notebooks']);
+      this.router.navigateByUrl('/notebooks');
     }
   }
+
 }

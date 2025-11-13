@@ -9,6 +9,8 @@ import { NotebookService } from '../../services/notebook.service';
 import { Modal } from '../modal/modal';
 import { NotificationService } from '../../services/notification.service'; 
 import { NoteService, Note } from '../../services/note.service';
+import { ResponsiveService } from '../../services/responsive';
+import { Notebook } from '../../services/data.service';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -46,6 +48,7 @@ export class NoteColumn implements OnInit, OnDestroy {
   notebookService = inject(NotebookService);
   private notificationService = inject(NotificationService);
   noteService = inject(NoteService);
+  responsiveService = inject(ResponsiveService);
   private searchSubject = new Subject<string>();
   private routerSubscription: Subscription | null = null;
 
@@ -59,6 +62,12 @@ export class NoteColumn implements OnInit, OnDestroy {
 
   modalTags: WritableSignal<string> = signal('');
   modalIsPinned: WritableSignal<boolean> = signal(false);
+
+  currentNotebook: Signal<Notebook | undefined> = computed(() => {
+    const notebookId = this.notebookIdSignal();
+    if (!notebookId) return undefined;
+    return this.notebookService.notebooks().find(n => n.id === notebookId);
+  });
 
   // As notas agora vêm do NoteService
   notes: Signal<Note[]> = this.noteService.notes;

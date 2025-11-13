@@ -21,7 +21,6 @@ const AllShortcuts = Extension.create({
     name: 'allShortcuts',
     addKeyboardShortcuts() {
         return {
-            'Mod-u': () => this.editor.commands.toggleUnderline(),
             'Mod-Shift-x': () => this.editor.commands.toggleStrike(),
             'Mod-Shift-h': () => this.editor.commands.toggleHighlight(),
             'Mod-k': () => {
