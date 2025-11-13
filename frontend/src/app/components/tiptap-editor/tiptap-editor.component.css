@@ -165,3 +165,30 @@
   border: 2px solid var(--tiptap-icon-active-bg);
   border-radius: 0.5rem;  
 }
+
+.tiptap-editor-container > [tiptapEditor] a {
+  color: #3b82f6; /* Tailwind blue-500 */
+  text-decoration: underline;
+}
+
+/* Blockquote styling */
+.tiptap-editor-container > [tiptapEditor] blockquote {
+  border-left: 3px solid var(--tiptap-icon-active-bg);
+  margin-left: 1rem;
+  padding-left: 1rem;
+  font-style: italic;
+}
+
+/* List styling */
+.tiptap-editor-container > [tiptapEditor] ul,
+.tiptap-editor-container > [tiptapEditor] ol {
+  padding-left: 2rem;
+}
+
+.tiptap-editor-container > [tiptapEditor] ul {
+  list-style-type: disc;
+}
+
+.tiptap-editor-container > [tiptapEditor] ol {
+  list-style-type: decimal;
+}

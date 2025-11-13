@@ -9,13 +9,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
 
 import TextAlign from '@tiptap/extension-text-align';
-import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
 import YouTube from '@tiptap/extension-youtube';
-import Document from '@tiptap/extension-document';
-import ListItem from '@tiptap/extension-list-item';
-import Blockquote from '@tiptap/extension-blockquote';
-import Paragraph from '@tiptap/extension-paragraph';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
@@ -62,14 +56,12 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
           heading: false,
           bulletList: {
             keepMarks: true,
-            keepAttributes: false,
+            keepAttributes: true,
           },
           orderedList: {
             keepMarks: true,
-            keepAttributes: false,
+            keepAttributes: true,
           },
-
-
         }),
             TextAlign.configure({
               types: ['heading', 'paragraph'],
@@ -82,7 +74,6 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
         }),
         Highlight.configure({ multicolor: true }),
         SearchSelection,
-        Paragraph,
       ],
       content: this.content,
       onUpdate: ({ editor }) => {
@@ -121,10 +112,18 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.editor?.destroy();
   }
 
-  setLink() {
-    const url = window.prompt('URL');
-    if (this.editor && url) {
-      this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  toggleLink() {
+    if (!this.editor) {
+      return;
+    }
+
+    if (this.editor.isActive('link')) {
+      this.editor.chain().focus().unsetLink().run();
+    } else {
+      const url = window.prompt('URL');
+      if (url) {
+        this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+      }
     }
   }
 

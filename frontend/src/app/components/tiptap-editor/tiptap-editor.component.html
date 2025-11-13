@@ -49,14 +49,13 @@
         </div>
       </div>
 
-      <button (click)="setLink()" [class.is-active]="editor.isActive('link')" title="Link">
+      <button (click)="toggleLink()" [class.is-active]="editor.isActive('link')" title="Link">
         <lucide-icon name="link" class="stroke-current dark:text-dark-text"></lucide-icon>
       </button>
-      <button (click)="addYoutubeVideo()" title="Add YouTube Video" *ngIf="false">
+
+      <!-- <button (click)="addYoutubeVideo()" title="Add YouTube Video" *ngIf="false">
         <lucide-icon name="youtube" class="stroke-current dark:text-dark-text"></lucide-icon>
-      </button>
-
-
+      </button> -->
 
       <div class="dropdown-wrapper">
         <button (click)="toggleListsDropdown()" title="Lists">
@@ -72,12 +71,18 @@
         </div>
       </div>
 
+
+
+
+      
+
       <button (click)="editor.chain().focus().toggleCodeBlock().run()" [class.is-active]="editor.isActive('codeBlock')" title="Code Block">
         <lucide-icon name="code"></lucide-icon>
       </button>
       <button (click)="editor.chain().focus().toggleBlockquote().run()" [class.is-active]="editor.isActive('blockquote')" title="Blockquote">
         <lucide-icon name="quote"></lucide-icon>
       </button>
+      
       <button (click)="editor.chain().focus().setHorizontalRule().run()" title="Horizontal Rule">
         <lucide-icon name="minus"></lucide-icon>
       </button>
