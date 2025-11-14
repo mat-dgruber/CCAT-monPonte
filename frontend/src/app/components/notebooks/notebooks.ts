@@ -165,32 +165,33 @@ export class Notebooks implements OnInit {
   ngOnInit() {
     // Assinatura para sincronizar o estado da rota com os signals
     const routeSub = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => {
+      const navigation = this.router.getCurrentNavigation();
+      const keepNotebookSelectedId = navigation?.extras.state?.['keepNotebookSelected'];
+
       let notebookIdFromRoute: string | null = null;
       let noteIdFromRoute: string | null = null;
 
-      // Check current route for parameters
-      if (this.route.snapshot.paramMap.has('notebookId')) {
-        notebookIdFromRoute = this.route.snapshot.paramMap.get('notebookId');
-      }
-      if (this.route.snapshot.paramMap.has('noteId')) {
-        noteIdFromRoute = this.route.snapshot.paramMap.get('noteId');
+      // Traverse the router state to find the params in the leaf route, which is more reliable
+      let route = this.router.routerState.snapshot.root;
+      while (route.firstChild) {
+        route = route.firstChild;
       }
 
-      // Check firstChild route for parameters (for nested routes like /notebooks/:notebookId/notes/:noteId)
-      if (this.route.firstChild) {
-        if (this.route.firstChild.snapshot.paramMap.has('notebookId')) {
-          notebookIdFromRoute = this.route.firstChild.snapshot.paramMap.get('notebookId');
-        }
-        if (this.route.firstChild.snapshot.paramMap.has('noteId')) {
-          noteIdFromRoute = this.route.firstChild.snapshot.paramMap.get('noteId');
-        }
+      if (route.paramMap.has('notebookId')) {
+        notebookIdFromRoute = route.paramMap.get('notebookId');
+      }
+      if (route.paramMap.has('noteId')) {
+        noteIdFromRoute = route.paramMap.get('noteId');
       }
       
       this.currentNoteId.set(noteIdFromRoute);
+
       if (notebookIdFromRoute) {
         this.selectedNotebookId.set(notebookIdFromRoute);
+      } else if (keepNotebookSelectedId) {
+        this.selectedNotebookId.set(keepNotebookSelectedId);
       } else {
         // If no notebookId in route, clear selectedNotebookId
         this.selectedNotebookId.set(null);

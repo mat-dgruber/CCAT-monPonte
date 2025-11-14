@@ -4,7 +4,7 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DataService } from './data.service';
 import { AuthService } from './auth';
 import { of, Subject, combineLatest, Subscription } from 'rxjs';
-import { switchMap, catchError, takeUntil, tap, filter, map } from 'rxjs/operators';
+import { switchMap, catchError, takeUntil, tap, filter, map, distinctUntilChanged } from 'rxjs/operators';
 
 export interface Note {
   id: string;
@@ -66,6 +66,23 @@ export class NoteService implements OnDestroy {
         this.notes.set(notes);
         this.isLoading.set(false);
       });
+    });
+
+    // Makes the service URL-aware to handle deep-linking
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(() => {
+        let route = this.route.root;
+        while (route.firstChild) {
+          route = route.firstChild;
+        }
+        return route.snapshot.paramMap.get('notebookId');
+      }),
+      filter((id): id is string => !!id),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(notebookId => {
+      this.activeNotebookId.set(notebookId);
     });
 
     // Efeito para limpar o estado no logout
