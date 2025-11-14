@@ -173,17 +173,13 @@ export class Notebooks implements OnInit {
       let notebookIdFromRoute: string | null = null;
       let noteIdFromRoute: string | null = null;
 
-      // Traverse the router state to find the params in the leaf route, which is more reliable
-      let route = this.router.routerState.snapshot.root;
-      while (route.firstChild) {
-        route = route.firstChild;
-      }
-
-      if (route.paramMap.has('notebookId')) {
-        notebookIdFromRoute = route.paramMap.get('notebookId');
-      }
-      if (route.paramMap.has('noteId')) {
-        noteIdFromRoute = route.paramMap.get('noteId');
+      // Acessa o primeiro filho da rota ativa. Para a URL '/notebooks/:notebookId/notes/:noteId',
+      // o componente Notebooks é o pai e o NoteEditor é o filho.
+      // O snapshot do filho (`firstChild`) contém os parâmetros que precisamos.
+      const childRoute = this.route.firstChild;
+      if (childRoute) {
+          notebookIdFromRoute = childRoute.snapshot.paramMap.get('notebookId');
+          noteIdFromRoute = childRoute.snapshot.paramMap.get('noteId');
       }
       
       this.currentNoteId.set(noteIdFromRoute);
