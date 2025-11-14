@@ -167,37 +167,48 @@ export class Notebooks implements OnInit {
     const routeSub = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => {
-      const navigation = this.router.getCurrentNavigation();
-      const keepNotebookSelectedId = navigation?.extras.state?.['keepNotebookSelected'];
+      // Deferring execution to the next change detection cycle with setTimeout(..., 0)
+      // This is a robust way to ensure that we are reading the router state *after*
+      // it has been fully updated, preventing race conditions during component initialization,
+      // especially on "cold" navigations from outside this component's route tree.
+      setTimeout(() => {
+        const navigation = this.router.getCurrentNavigation();
+        const keepNotebookSelectedId = navigation?.extras.state?.['keepNotebookSelected'];
 
-      let notebookIdFromRoute: string | null = null;
-      let noteIdFromRoute: string | null = null;
+        let notebookIdFromRoute: string | null = null;
+        let noteIdFromRoute: string | null = null;
 
-      // Traverse the router state to find the params in the leaf route, which is more reliable
-      let route = this.router.routerState.snapshot.root;
-      while (route.firstChild) {
-        route = route.firstChild;
-      }
+        // We start traversal from this component's own route (`this.route`) instead of the global
+        // root. This makes the logic more resilient as it's guaranteed to be the correct
+        // and resolved part of the route tree for this component.
+        let leafRoute = this.route;
+        while (leafRoute.firstChild) {
+          leafRoute = leafRoute.firstChild;
+        }
 
-      if (route.paramMap.has('notebookId')) {
-        notebookIdFromRoute = route.paramMap.get('notebookId');
-      }
-      if (route.paramMap.has('noteId')) {
-        noteIdFromRoute = route.paramMap.get('noteId');
-      }
-      
-      this.currentNoteId.set(noteIdFromRoute);
+        // The paramMap on a child route contains the parameters from all its parent routes,
+        // so we can reliably get both 'notebookId' and 'noteId' from the leaf.
+        const params = leafRoute.snapshot.paramMap;
+        notebookIdFromRoute = params.get('notebookId');
+        noteIdFromRoute = params.get('noteId');
 
-      if (notebookIdFromRoute) {
-        this.selectedNotebookId.set(notebookIdFromRoute);
-      } else if (keepNotebookSelectedId) {
-        this.selectedNotebookId.set(keepNotebookSelectedId);
-      } else {
-        // If no notebookId in route, clear selectedNotebookId
-        this.selectedNotebookId.set(null);
-      }
-      // Update the animation state after all other signals are set
-      this.routeAnimationState.set(this.router.url);
+        this.currentNoteId.set(noteIdFromRoute);
+
+        if (notebookIdFromRoute) {
+          this.selectedNotebookId.set(notebookIdFromRoute);
+        } else if (keepNotebookSelectedId) {
+          this.selectedNotebookId.set(keepNotebookSelectedId);
+        } else {
+          // If no notebookId is found in the route, and we aren't explicitly told to keep
+          // the selection, we clear it. This correctly handles navigation back to the
+          // base '/notebooks' view.
+          this.selectedNotebookId.set(null);
+        }
+
+        // The animation state must also be updated within the timeout to ensure it reflects
+        // the final, correct URL.
+        this.routeAnimationState.set(this.router.url);
+      }, 0);
     });
 
     this.subscriptions.add(routeSub);
