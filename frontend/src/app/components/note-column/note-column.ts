@@ -39,6 +39,9 @@ export class NoteColumn implements OnInit, OnDestroy {
     this.noteService.activeNotebookId.set(id);
     this.searchTerm.set('');
   }
+  @Input() set currentNoteId(id: string | null) {
+    this.activeNoteId.set(id);
+  }
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();

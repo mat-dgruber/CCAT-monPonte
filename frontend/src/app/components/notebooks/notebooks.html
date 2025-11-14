@@ -138,12 +138,12 @@
     [class.absolute]="responsiveService.isMobile()"
     [class.inset-0]="responsiveService.isMobile()"
     [class.translate-x-full]="responsiveService.isMobile() && !selectedNotebookId()"
-    [class.translate-x-0]="responsiveService.isMobile() && selectedNotebookId() && !currentNoteId()"
-    [class.-translate-x-full]="responsiveService.isMobile() && selectedNotebookId() && currentNoteId()"
+    [class.-translate-x-full]="responsiveService.isMobile() && selectedNotebookId()"
   >
     <div class="w-full h-full">
       <app-note-column
         [notebookId]="selectedNotebookId()"
+        [currentNoteId]="currentNoteId()"
         (noteSelected)="onNoteSelected($event)"
         (back)="navigateBack()"
       ></app-note-column>
