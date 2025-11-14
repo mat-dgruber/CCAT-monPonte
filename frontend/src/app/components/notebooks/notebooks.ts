@@ -167,9 +167,6 @@ export class Notebooks implements OnInit {
     const routeSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      const navigation = this.router.getCurrentNavigation();
-      const keepNotebookSelectedId = navigation?.extras.state?.['keepNotebookSelected'];
-
       let notebookIdFromRoute: string | null = null;
       let noteIdFromRoute: string | null = null;
 
@@ -192,11 +189,8 @@ export class Notebooks implements OnInit {
       }
       
       this.currentNoteId.set(noteIdFromRoute);
-
       if (notebookIdFromRoute) {
         this.selectedNotebookId.set(notebookIdFromRoute);
-      } else if (keepNotebookSelectedId) {
-        this.selectedNotebookId.set(keepNotebookSelectedId);
       } else {
         // If no notebookId in route, clear selectedNotebookId
         this.selectedNotebookId.set(null);

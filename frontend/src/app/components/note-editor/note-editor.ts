@@ -4,7 +4,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map, filter } from 'rxjs';
+import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map, filter, catchError } from 'rxjs';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -105,11 +105,22 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.subscriptions.add(this.route.paramMap.pipe(
       switchMap(params => {
+        // Reset state on each new navigation to prevent race conditions and data corruption
+        this.note.set(null);
+        this.isLoading.set(true);
+
         this.notebookId = params.get('notebookId');
         this.noteId = params.get('noteId');
+
         if (this.notebookId && this.noteId) {
-          this.isLoading.set(true);
-          return this.dataService.getNote(this.notebookId, this.noteId);
+          return this.dataService.getNote(this.notebookId, this.noteId).pipe(
+            // Gracefully handle errors if a note fails to load
+            catchError(err => {
+              console.error("Failed to load note:", err);
+              this.notificationService.showError('Falha ao carregar a nota.');
+              return of(null); // Proceed with a null note
+            })
+          );
         }
         return of(null);
       }),
@@ -127,7 +138,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
         };
         this.note.set(fullNote);
       } else {
-        // If note is not found, clear the current note and let the parent handle the display
+        // If note is not found or failed to load, ensure it's null
         this.note.set(null);
       }
     }));
@@ -257,7 +268,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       await this.dataService.deleteNote(this.notebookId, this.noteId);
       this.notificationService.showSuccess(`Nota "${this.note()?.title}" deletada com sucesso.`);
       this.showDeleteConfirmationModal.set(false);
-      this.router.navigate(['/notebooks'], { state: { keepNotebookSelected: this.notebookId } });
+      this.location.back();
     } catch (error) {
       this.notificationService.showError('Erro ao deletar a nota.');
     }
@@ -276,6 +287,6 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   navigateBack(): void {
-    this.router.navigate(['/notebooks'], { state: { keepNotebookSelected: this.notebookId } });
+    this.location.back();
   }
 }
