@@ -257,7 +257,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       await this.dataService.deleteNote(this.notebookId, this.noteId);
       this.notificationService.showSuccess(`Nota "${this.note()?.title}" deletada com sucesso.`);
       this.showDeleteConfirmationModal.set(false);
-      this.location.back();
+      this.router.navigate(['/notebooks'], { state: { keepNotebookSelected: this.notebookId } });
     } catch (error) {
       this.notificationService.showError('Erro ao deletar a nota.');
     }
@@ -276,6 +276,6 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   navigateBack(): void {
-    this.router.navigate(['/notebooks']);
+    this.router.navigate(['/notebooks'], { state: { keepNotebookSelected: this.notebookId } });
   }
 }
