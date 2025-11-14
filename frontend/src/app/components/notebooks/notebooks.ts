@@ -173,18 +173,15 @@ export class Notebooks implements OnInit {
       let notebookIdFromRoute: string | null = null;
       let noteIdFromRoute: string | null = null;
 
-      // Traverse the router state to find the params in the leaf route, which is more reliable
-      let route = this.router.routerState.snapshot.root;
-      while (route.firstChild) {
-        route = route.firstChild;
+      // Acessa a rota folha de forma mais estável após a conclusão da navegação
+      let leafRoute = this.route;
+      while (leafRoute.firstChild) {
+        leafRoute = leafRoute.firstChild;
       }
 
-      if (route.paramMap.has('notebookId')) {
-        notebookIdFromRoute = route.paramMap.get('notebookId');
-      }
-      if (route.paramMap.has('noteId')) {
-        noteIdFromRoute = route.paramMap.get('noteId');
-      }
+      // Agora lê os parâmetros da rota folha, que já está ativada.
+      notebookIdFromRoute = leafRoute.snapshot.paramMap.get('notebookId');
+      noteIdFromRoute = leafRoute.snapshot.paramMap.get('noteId');
       
       this.currentNoteId.set(noteIdFromRoute);
 
