@@ -56,6 +56,8 @@ export class NoteColumn implements OnInit, OnDestroy {
   notebookIdSignal: WritableSignal<string | null> = signal(null);
   searchTerm: WritableSignal<string> = signal('');
   activeNoteId: WritableSignal<string | null> = signal(null);
+  showDeleteNoteModal: WritableSignal<boolean> = signal(false);
+  noteToDelete: WritableSignal<Note | null> = signal(null);
 
   currentNotebook: Signal<Notebook | undefined> = computed(() => {
     const notebookId = this.notebookIdSignal();
@@ -136,6 +138,37 @@ export class NoteColumn implements OnInit, OnDestroy {
     } catch (error) { 
       console.error('Erro ao fixar/desafixar a nota:', error);
       this.notificationService.showError('Erro ao atualizar a nota.');
+    }
+  }
+
+  // Métodos para o modal de deleção de nota
+  openDeleteNoteModal(note: Note) {
+    this.noteToDelete.set(note);
+    this.showDeleteNoteModal.set(true);
+  }
+
+  closeDeleteNoteModal() {
+    this.showDeleteNoteModal.set(false);
+    this.noteToDelete.set(null);
+  }
+
+  async confirmDeleteNote() {
+    const note = this.noteToDelete();
+    if (!note || !note.id) return;
+
+    try {
+      // Verifica se a nota a ser deletada é a que está ativa
+      if (this.activeNoteId() === note.id) {
+        // Navega para a raiz do caderno antes de deletar
+        this.router.navigate(['/notebooks', this.notebookIdSignal()]);
+      }
+      await this.noteService.deleteNote(note.id);
+      this.notificationService.showSuccess(`Nota "${note.title}" deletada com sucesso.`);
+    } catch (error) {
+      console.error('Erro ao deletar a nota:', error);
+      this.notificationService.showError('Erro ao deletar a nota.');
+    } finally {
+      this.closeDeleteNoteModal();
     }
   }
 }
