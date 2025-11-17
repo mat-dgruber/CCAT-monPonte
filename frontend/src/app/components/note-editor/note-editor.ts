@@ -13,6 +13,7 @@ import { Modal } from '../modal/modal';
 
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 import { DataService, Note } from '../../services/data.service';
+import { NoteService } from '../../services/note.service';
 import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
@@ -42,17 +43,15 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private dataService = inject(DataService);
+  private noteService = inject(NoteService);
   private notificationService = inject(NotificationService);
   private location = inject(Location);
   themeService = inject(ThemeService);
   responsiveService = inject(ResponsiveService);
 
-   
-
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);
   isSaving: WritableSignal<boolean> = signal(false);
-  showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
   showMoreOptions: WritableSignal<boolean> = signal(false);
   tagInput: WritableSignal<string> = signal('');
   allTags: WritableSignal<string[]> = signal([]);
@@ -248,19 +247,13 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   openStatsModal(): void { this.showStatsModal.set(true); this.closeMoreOptions(); }
   closeStatsModal(): void { this.showStatsModal.set(false); }
   closeMoreOptions(): void { this.showMoreOptions.set(false); }
-  deleteNote(): void { this.closeMoreOptions(); this.showDeleteConfirmationModal.set(true); }
-  cancelDeleteNote(): void { this.showDeleteConfirmationModal.set(false); }
 
-  async confirmDeleteNote(): Promise<void> {
-    if (!this.notebookId || !this.noteId) return;
-    try {
-      await this.dataService.deleteNote(this.notebookId, this.noteId);
-      this.notificationService.showSuccess(`Nota "${this.note()?.title}" deletada com sucesso.`);
-      this.showDeleteConfirmationModal.set(false);
-      this.location.back();
-    } catch (error) {
-      this.notificationService.showError('Erro ao deletar a nota.');
+  deleteNote(): void {
+    const noteToDelete = this.note();
+    if (noteToDelete) {
+      this.noteService.requestDeleteNote(noteToDelete);
     }
+    this.closeMoreOptions();
   }
 
   goToNextMatch(): void {
