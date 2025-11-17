@@ -35,6 +35,10 @@ export class NoteService implements OnDestroy {
   loadingError: WritableSignal<boolean> = signal(false);
   activeNotebookId: WritableSignal<string | null> = signal(null);
 
+  // Subject for delete requests
+  private deleteNoteRequest = new Subject<Note>();
+  deleteNoteRequest$ = this.deleteNoteRequest.asObservable();
+
   constructor() {
     // Combina o estado de autenticação e a seleção do caderno
     const notebookChanges$ = combineLatest([
@@ -111,5 +115,18 @@ export class NoteService implements OnDestroy {
       return Promise.resolve(null);
     }
     return this.dataService.updateNotePinnedStatus(notebookId, noteId, isPinned);
+  }
+
+  deleteNote(noteId: string): Promise<void | null> {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) {
+      console.error('Nenhum caderno ativo para deletar a nota.');
+      return Promise.resolve(null);
+    }
+    return this.dataService.deleteNote(notebookId, noteId);
+  }
+
+  requestDeleteNote(note: Note) {
+    this.deleteNoteRequest.next(note);
   }
 }

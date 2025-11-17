@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { Subscription, debounceTime, Subject, filter, switchMap, of } from 'rxjs';
+import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../../services/notebook.service';
 import { Modal } from '../modal/modal';
@@ -42,6 +42,7 @@ export class NoteColumn implements OnInit, OnDestroy {
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
+  @Output() createNoteClicked = new EventEmitter<void>();
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -55,13 +56,6 @@ export class NoteColumn implements OnInit, OnDestroy {
   notebookIdSignal: WritableSignal<string | null> = signal(null);
   searchTerm: WritableSignal<string> = signal('');
   activeNoteId: WritableSignal<string | null> = signal(null);
-
-  isNoteModalVisible: WritableSignal<boolean> = signal(false);
-  currentNote: WritableSignal<Partial<Note>> = signal({});
-  isEditing: WritableSignal<boolean> = signal(false);
-
-  modalTags: WritableSignal<string> = signal('');
-  modalIsPinned: WritableSignal<boolean> = signal(false);
 
   currentNotebook: Signal<Notebook | undefined> = computed(() => {
     const notebookId = this.notebookIdSignal();
@@ -132,18 +126,9 @@ export class NoteColumn implements OnInit, OnDestroy {
   }
 
   openCreateNoteModal() {
-    this.isEditing.set(false);
-    this.currentNote.set({ title: '', content: '' });
-    this.modalTags.set('');
-    this.modalIsPinned.set(false);
-    this.isNoteModalVisible.set(true);
+    this.createNoteClicked.emit();
   }
 
-  closeNoteModal() {
-    this.isNoteModalVisible.set(false);
-    this.currentNote.set({});
-  }
-  
   async togglePin(note: Note) {
     try {
       await this.noteService.updateNotePinnedStatus(note.id, !note.isPinned);
@@ -151,22 +136,6 @@ export class NoteColumn implements OnInit, OnDestroy {
     } catch (error) { 
       console.error('Erro ao fixar/desafixar a nota:', error);
       this.notificationService.showError('Erro ao atualizar a nota.');
-    }
-  }
-
-  async saveNote(noteData: Partial<Note>) {
-    try {
-      const tagsArray = this.modalTags().split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-      const isPinned = this.modalIsPinned();
-
-      if (this.isEditing() && noteData.id) {
-        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content!, tags: tagsArray, isPinned: isPinned });
-      } else {
-        await this.noteService.createNote(noteData.title!, noteData.content!, tagsArray, isPinned);
-      }
-      this.closeNoteModal();
-    } catch (error) {
-      console.error('Erro ao salvar nota:', error);
     }
   }
 }
