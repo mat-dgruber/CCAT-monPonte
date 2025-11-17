@@ -6,7 +6,7 @@ import { AuthService } from '../../services/auth';
 import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
 import { DataService, Notebook, SortBy, SortDirection } from '../../services/data.service';
-import { Note } from '../../services/note.service';
+import { NoteService, Note } from '../../services/note.service';
 import { NotebookService } from '../../services/notebook.service';
 import { NotificationService } from '../../services/notification.service'; 
 import { HighlightPipe } from '../pipes/highlight.pipe';
@@ -72,6 +72,7 @@ export class Notebooks implements OnInit {
   private authService = inject(AuthService);
   private dataService = inject(DataService);
   notebookService = inject(NotebookService);
+  noteService = inject(NoteService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -92,6 +93,17 @@ export class Notebooks implements OnInit {
   modalMode: WritableSignal<'create' | 'rename'> = signal('create');
   newNotebookName: WritableSignal<string> = signal('');
   newNotebookColor: WritableSignal<string> = signal('#FFFFFF');
+
+  // Signals for the Note modal
+  isNoteModalVisible: WritableSignal<boolean> = signal(false);
+  currentNote: WritableSignal<Partial<Note>> = signal({});
+  isEditing: WritableSignal<boolean> = signal(false);
+  modalTags: WritableSignal<string> = signal('');
+  modalIsPinned: WritableSignal<boolean> = signal(false);
+
+  // Signals for the Note Delete Confirmation modal
+  showDeleteNoteModal: WritableSignal<boolean> = signal(false);
+  noteToDelete: WritableSignal<Note | null> = signal(null);
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
   isNoteOpen: WritableSignal<boolean> = signal(false);
@@ -163,6 +175,12 @@ export class Notebooks implements OnInit {
   }
 
   ngOnInit() {
+    // Subscription to handle delete requests from the note editor
+    const deleteRequestSub = this.noteService.deleteNoteRequest$.subscribe(note => {
+      this.openDeleteNoteModal(note);
+    });
+    this.subscriptions.add(deleteRequestSub);
+
     // Assinatura para sincronizar o estado da rota com os signals
     const routeSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -431,6 +449,69 @@ export class Notebooks implements OnInit {
 
   onNoteSelected(noteId: string) {
     this.selectedNoteId.set(noteId);
+  }
+
+  // Methods for Note Modal
+  openCreateNoteModal() {
+    this.isEditing.set(false);
+    this.currentNote.set({ title: '', content: '' });
+    this.modalTags.set('');
+    this.modalIsPinned.set(false);
+    this.isNoteModalVisible.set(true);
+  }
+
+  closeNoteModal() {
+    this.isNoteModalVisible.set(false);
+    this.currentNote.set({});
+  }
+
+  async saveNote(noteData: Partial<Note>) {
+    try {
+      const tagsArray = this.modalTags().split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      const isPinned = this.modalIsPinned();
+
+      if (this.isEditing() && noteData.id) {
+        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content!, tags: tagsArray, isPinned: isPinned });
+        this.notificationService.showSuccess('Nota atualizada com sucesso.');
+      } else {
+        await this.noteService.createNote(noteData.title!, noteData.content!, tagsArray, isPinned);
+        this.notificationService.showSuccess('Nota criada com sucesso.');
+      }
+      this.closeNoteModal();
+    } catch (error) {
+      console.error('Erro ao salvar nota:', error);
+      this.notificationService.showError('Erro ao salvar a nota.');
+    }
+  }
+
+  // Methods for Note Delete Modal
+  openDeleteNoteModal(note: Note) {
+    this.noteToDelete.set(note);
+    this.showDeleteNoteModal.set(true);
+  }
+
+  closeDeleteNoteModal() {
+    this.showDeleteNoteModal.set(false);
+    this.noteToDelete.set(null);
+  }
+
+  async confirmDeleteNote() {
+    const note = this.noteToDelete();
+    if (!note || !note.id) return;
+
+    try {
+      await this.noteService.deleteNote(note.id);
+      this.notificationService.showSuccess(`Nota "${note.title}" deletada com sucesso.`);
+      // Navigate away if the deleted note was the active one
+      if (this.currentNoteId() === note.id) {
+        this.router.navigate(['/notebooks', this.selectedNotebookId()]);
+      }
+    } catch (error) {
+      console.error('Erro ao deletar a nota:', error);
+      this.notificationService.showError('Erro ao deletar a nota.');
+    } finally {
+      this.closeDeleteNoteModal();
+    }
   }
 
   ngOnDestroy() {

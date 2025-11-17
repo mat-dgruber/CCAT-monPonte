@@ -26,6 +26,11 @@
     --color-border: #ffffff;
   }
 
+  body, html {
+    position: static !important;
+    transform: none !important;
+  }
+
   body {
     font-family: var(--font-family);
     font-size: var(--font-size);
