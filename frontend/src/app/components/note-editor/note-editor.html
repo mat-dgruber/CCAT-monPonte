@@ -130,18 +130,6 @@
   }
 </div>
 
-<!-- Modal de Confirmação de Deleção -->
-@if (showDeleteConfirmationModal()) {
-  <app-modal
-    [isOpen]="showDeleteConfirmationModal()"
-    title="Confirmar Deleção"
-    [message]="'Tem certeza que deseja deletar a nota &quot;' + note()?.title + '&quot;? Esta ação não pode ser desfeita.'"
-    confirmText="Deletar"
-    (onConfirm)="confirmDeleteNote()"
-    (onCancel)="cancelDeleteNote()"
-  ></app-modal>
-}
-
 <!-- Modal de Estatísticas -->
 <app-stats-modal
   [isVisible]="showStatsModal()"
