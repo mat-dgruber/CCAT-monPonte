@@ -14,7 +14,8 @@ import {
   getDoc,
   query,
   orderBy,
-  where
+  where,
+  limit
 } from '@angular/fire/firestore';
 import { from, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth';
@@ -200,6 +201,39 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para deletar nota.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return deleteDoc(docRef);
+  }
+
+  // NOVO: Método otimizado para buscar as notas mais recentes de todos os cadernos
+  getAllRecentNotes(count: number): Observable<Note[]> {
+    if (!this.userId) return of([]);
+
+    const notesGroup = collectionGroup(this.firestore, 'notes');
+    const q = query(
+      notesGroup,
+      where('__name__', '>=', `users/${this.userId}/`),
+      where('__name__', '<', `users/${this.userId}0`),
+      orderBy('createdAt', 'desc'),
+      limit(count)
+    );
+
+    return new Observable<Note[]>(subscriber => {
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const notes = snapshot.docs.map(doc => {
+          const data = doc.data();
+          const pathParts = doc.ref.path.split('/');
+          const notebookId = pathParts[pathParts.length - 3];
+          return { id: doc.id, notebookId, ...data } as Note;
+        });
+        this.zone.run(() => {
+          subscriber.next(notes);
+        });
+      }, (error) => {
+        console.error("Error fetching recent notes:", error);
+        subscriber.error(error);
+      });
+
+      return () => unsubscribe();
+    });
   }
 
   // --- Métodos para Tags ---

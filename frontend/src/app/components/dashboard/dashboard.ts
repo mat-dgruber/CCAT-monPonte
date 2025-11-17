@@ -6,15 +6,14 @@ import { ClipService } from '../../services/clip.service';
 import { NotebookService } from '../../services/notebook.service';
 import { User } from '@angular/fire/auth';
 import { Note } from '../../services/note.service';
-import { Subscription, forkJoin, of } from 'rxjs';
-import { map, catchError, timeout, take, finalize } from 'rxjs/operators';
-import { RouterLink } from '@angular/router';
-import { LucideAngularModule, Copy, Ellipsis } from 'lucide-angular';
+import { Subscription, of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
+import { Router, RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { NotificationService } from '../../services/notification.service';
 import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
-
 
 @Component({
   selector: 'app-dashboard',
@@ -38,6 +37,7 @@ import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 export class DashboardComponent {
   private authService = inject(AuthService);
   private dataService = inject(DataService);
+  private router = inject(Router);
   notebookService = inject(NotebookService); // Public for template access
   clipService = inject(ClipService); // Public for template access
   private notificationService = inject(NotificationService);
@@ -69,58 +69,40 @@ export class DashboardComponent {
     this.subscriptions.add(authSub);
 
     effect(() => {
-      const notebooks = this.notebookService.notebooks();
       const user = this.currentUser();
-      const isLoadingNotebooks = this.notebookService.isLoading();
-
-      if (isLoadingNotebooks) {
-        this.isLoadingNotes.set(true);
-        return; 
-      }
-
-      if (user && notebooks.length > 0) {
-        this.isLoadingNotes.set(true); 
-        const noteObservables = notebooks.map(notebook =>
-          this.dataService.getNotes(notebook.id, false).pipe(
-            timeout(10000), // 10 second timeout
-            map(notes => notes.map(note => ({ ...note, notebookId: notebook.id, notebookName: notebook.name }))),
-            take(1), // Adicionado take(1) para garantir que o observable complete
-            catchError(error => {
-              console.error(`Error fetching notes for notebook ${notebook.name}:`, error);
-              // Return an empty array for this notebook, allowing others to load
-              return of([]); 
-            })
-          )
-        );
-
-        forkJoin(noteObservables.map(obs => obs.pipe(
-          timeout(5000), // Adiciona um timeout de 5 segundos para cada observable
-          catchError(error => {
-            console.error('Error fetching notes for notebook:', error);
-            this.notificationService.showError(`Error fetching notes for notebook: ${error.message}`);
-            return of([]); // Retorna um array vazio em caso de erro
-          })
-        ))).pipe(
-          map(notesFromNotebooks => {
-            const allNotes = notesFromNotebooks.flat();
-            allNotes.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-            return allNotes;
-          }),
-          finalize(() => this.isLoadingNotes.set(false)) // Garante que isLoadingNotes seja false no final
-        ).subscribe(notes => {
-          this.allRecentNotes.set(notes);
-        });
+      if (user) {
+        this.loadRecentNotes();
       } else {
         this.allRecentNotes.set([]);
-        this.isLoadingNotes.set(false);
       }
     });
   }
 
-    selectNotebook(notebook: Notebook | null) {
-      this.selectedNotebook.set(notebook);
-      this.closeFilterMenu();
+  loadRecentNotes() {
+    this.isLoadingNotes.set(true);
+    const notesSub = this.dataService.getAllRecentNotes(12).pipe( // Pega as 12 notas mais recentes
+      catchError(error => {
+        console.error('Erro ao buscar notas recentes:', error);
+        this.notificationService.showError('Não foi possível carregar as notas recentes.');
+        return of([]);
+      }),
+      finalize(() => this.isLoadingNotes.set(false))
+    ).subscribe(notes => {
+      this.allRecentNotes.set(notes);
+    });
+    this.subscriptions.add(notesSub);
+  }
+
+  selectNotebook(notebook: Notebook | null) {
+    this.closeFilterMenu();
+    if (notebook) {
+      // Navega para a página principal de cadernos com o ID selecionado
+      this.router.navigate(['/notebooks', notebook.id]);
+    } else {
+      // Se 'Todos' for selecionado, apenas atualiza o filtro local
+      this.selectedNotebook.set(null);
     }
+  }
   toggleFilterMenu() {
     this.isFilterMenuOpen.set(!this.isFilterMenuOpen());
   }

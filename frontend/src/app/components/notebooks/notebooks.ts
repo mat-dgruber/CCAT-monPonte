@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes, state } from '@angular/animations';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -168,11 +168,19 @@ export class Notebooks implements OnInit {
     });
   });
 
-  constructor(private cdr: ChangeDetectorRef) {
-    // O efeito que re-selecionava o primeiro caderno foi removido
-    // para evitar condições de corrida e comportamento inesperado.
-    // A seleção de um caderno agora é uma ação explícita do usuário.
-  }
+  constructor() {
+    // Efeito para sincronizar o ID do caderno com o serviço de notas.
+    // Isso garante que o serviço de notas sempre saiba qual caderno está ativo.
+    effect(() => {
+      const selectedId = this.selectedNotebookId();
+      this.noteService.activeNotebookId.set(selectedId);
+    });
+
+    // Efeito para atualizar a animação da rota com base na URL
+    effect(() => {
+      this.routeAnimationState.set(this.router.url);
+    });
+   }
 
   ngOnInit() {
     // Subscription to handle delete requests from the note editor
@@ -181,43 +189,8 @@ export class Notebooks implements OnInit {
     });
     this.subscriptions.add(deleteRequestSub);
 
-    // Assinatura para sincronizar o estado da rota com os signals
-    const routeSub = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      let notebookIdFromRoute: string | null = null;
-      let noteIdFromRoute: string | null = null;
-
-      // Check current route for parameters
-      if (this.route.snapshot.paramMap.has('notebookId')) {
-        notebookIdFromRoute = this.route.snapshot.paramMap.get('notebookId');
-      }
-      if (this.route.snapshot.paramMap.has('noteId')) {
-        noteIdFromRoute = this.route.snapshot.paramMap.get('noteId');
-      }
-
-      // Check firstChild route for parameters (for nested routes like /notebooks/:notebookId/notes/:noteId)
-      if (this.route.firstChild) {
-        if (this.route.firstChild.snapshot.paramMap.has('notebookId')) {
-          notebookIdFromRoute = this.route.firstChild.snapshot.paramMap.get('notebookId');
-        }
-        if (this.route.firstChild.snapshot.paramMap.has('noteId')) {
-          noteIdFromRoute = this.route.firstChild.snapshot.paramMap.get('noteId');
-        }
-      }
-      
-      this.currentNoteId.set(noteIdFromRoute);
-      if (notebookIdFromRoute) {
-        this.selectedNotebookId.set(notebookIdFromRoute);
-      } else {
-        // If no notebookId in route, clear selectedNotebookId
-        this.selectedNotebookId.set(null);
-      }
-      // Update the animation state after all other signals are set
-      this.routeAnimationState.set(this.router.url);
-    });
-
-    this.subscriptions.add(routeSub);
+    // Sincroniza o estado da rota com os signals na inicialização
+    this.syncStateFromRoute();
 
     const savedSort = localStorage.getItem(SORT_PREFERENCE_KEY);
     if (savedSort) {
@@ -239,6 +212,17 @@ export class Notebooks implements OnInit {
       this.searchTerm.set(term);
     });
     this.subscriptions.add(searchSub);
+  }
+
+  // NOVO: Método para sincronizar o estado a partir da rota ATUAL
+  private syncStateFromRoute() {
+    // Acessa o snapshot da rota atual para definir os IDs iniciais
+    const snapshot = this.route.snapshot;
+    const notebookIdFromRoute = snapshot.firstChild?.paramMap.get('notebookId');
+    const noteIdFromRoute = snapshot.firstChild?.paramMap.get('noteId');
+
+    this.selectedNotebookId.set(notebookIdFromRoute || null);
+    this.currentNoteId.set(noteIdFromRoute || null);
   }
 
   retryFetchNotebooks() {
@@ -404,11 +388,13 @@ export class Notebooks implements OnInit {
     this.closeDeleteModal();
 
     try {
+      // Se o caderno deletado for o selecionado, navega para a raiz
       if (this.selectedNotebookId() === notebook.id) {
+        this.router.navigate(['/notebooks']);
         this.selectedNotebookId.set(null);
-        this.selectedNoteId.set(null);
+        this.currentNoteId.set(null);
       }
-      await this.deleteNotebook(notebook.id);
+      await this.dataService.deleteNotebook(notebook.id); // Chama o dataService diretamente
       this.notificationService.showSuccess(`Caderno "${notebook.name}" deletado com sucesso.`);
     } catch (error) {
       console.error(`Erro ao deletar o caderno ${notebook.name}:`, error);
@@ -422,8 +408,11 @@ export class Notebooks implements OnInit {
   }
 
   selectNotebook(id: string) {
+    // 1. Atualiza o signal interno, que é a fonte da verdade
     this.selectedNotebookId.set(id);
-    this.selectedNoteId.set(null); // Reseta a nota selecionada ao trocar de caderno
+    // 2. Comanda a navegação para refletir o estado
+    this.router.navigate(['/notebooks', id]);
+    // 3. A coluna de notas reagirá à mudança do signal e carregará as notas.
   }
 
   async toggleFavorite(notebook: Notebook) {
@@ -436,7 +425,7 @@ export class Notebooks implements OnInit {
 
     try {
       await this.dataService.updateNotebookFavoriteStatus(notebook.id, newFavoriteStatus);
-      const message = newFavoriteStatus 
+      const message = newFavoriteStatus
         ? `Caderno "${notebook.name}" adicionado aos favoritos.`
         : `Caderno "${notebook.name}" removido dos favoritos.`;
       this.notificationService.showSuccess(message);
@@ -445,10 +434,6 @@ export class Notebooks implements OnInit {
       console.error('Erro ao atualizar o status de favorito:', error);
       this.notificationService.showError('Erro ao atualizar o status de favorito.');
     }
-  }
-
-  onNoteSelected(noteId: string) {
-    this.selectedNoteId.set(noteId);
   }
 
   // Methods for Note Modal
