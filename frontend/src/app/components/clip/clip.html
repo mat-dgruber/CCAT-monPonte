@@ -1,13 +1,13 @@
-<div class="flex-grow bg-gray-100 dark:bg-dark-primary p-4 rounded-lg md:p-8 transition-colors duration-300">
+<div class="flex-grow bg-background dark:bg-dark-primary p-4 rounded-lg md:p-8 transition-colors duration-300">
 
-  <div class="max-w-4xl mx-auto bg-white dark:bg-dark-secondary rounded-3xl shadow-2xl overflow-hidden transition-colors duration-300">
+  <div class="max-w-4xl mx-auto bg-background dark:bg-dark-secondary rounded-3xl shadow-2xl overflow-hidden transition-colors duration-300">
 
     <div class="p-4 sm:p-6">
       <textarea
         [ngModel]="clipService.copyText()"
         (ngModelChange)="onTextChange($event)"
         aria-label="Conteúdo do Clip"
-        class="w-full border rounded-lg notebook-textarea leading-6 pl-14 pt-2 bg-yellow-50 border-gray-300 focus:border-sky-600 focus:ring-2 focus:ring-sky-600 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:placeholder-dark-text-secondary dark:focus:border-sky-500 transition-colors duration-300 text-gray-800"
+        class="w-full border rounded-lg notebook-textarea leading-6 pl-14 pt-2 bg-background border-neutral focus:border-accent focus:ring-2 focus:ring-accent dark:bg-dark-primary dark:border-dark-border dark:text-white dark:placeholder-dark-text-secondary dark:focus:border-sky-500 transition-colors duration-300 text-text"
         [class.notebook-bg]="themeService.notebookStyle()"
         placeholder="Cole seu texto aqui..."
         rows="15"
@@ -16,24 +16,24 @@
       </textarea>
     </div>
 
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-dark-secondary/50 border-t border-gray-200 dark:border-dark-border transition-colors duration-300">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-background dark:bg-dark-secondary/50 border-t border-neutral dark:border-dark-border transition-colors duration-300">
       
       <div class="flex flex-wrap items-center gap-x-6 gap-y-4 w-full md:w-auto justify-center md:justify-start">
         <div class="flex items-center gap-2">
           <button
             (click)="clearText()" aria-label="Limpar conteúdo do Clip"
-            class="px-4 py-2 bg-transparent text-gray-600 rounded-lg hover:bg-gray-100 font-medium transition-colors duration-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent border border-gray-300 dark:border-dark-border">
+            class="px-4 py-2 bg-transparent text-text rounded-lg hover:bg-neutral font-medium transition-colors duration-200 dark:text-dark-text-secondary dark:hover:bg-dark-accent border border-neutral dark:border-dark-border">
             Limpar
           </button>
           <button
             (click)="onCopy()" aria-label="Copiar todo o conteúdo do Clip"
-            class="px-4 py-2 bg-transparent text-blue-600 rounded-lg hover:bg-blue-100 font-medium transition-colors duration-200 dark:text-blue-400 dark:hover:bg-dark-accent border border-blue-500 dark:border-blue-500">
+            class="px-4 py-2 bg-transparent text-accent rounded-lg hover:bg-accent hover:text-white font-medium transition-colors duration-200 dark:text-blue-400 dark:hover:bg-dark-accent border border-accent dark:border-blue-500">
             Copiar tudo
           </button>
         </div>
 
         @if (clipService.showAdvancedClipOptions() && clipService.showCounts()) {
-          <div class="text-sm text-gray-500 dark:text-dark-text-secondary font-mono">
+          <div class="text-sm text-text dark:text-dark-text-secondary font-mono">
             <span>Caracteres: {{ clipService.characterCount() }}</span>
             <span class="mx-2">|</span>
             <span>Palavras: {{ clipService.wordCount() }}</span>
@@ -42,9 +42,9 @@
 
         @if (clipService.showAdvancedClipOptions() && clipService.showFontSelect()) {
           <div class="flex items-center gap-2">
-            <label for="font-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Fonte:</label>
+            <label for="font-select" class="text-sm font-medium text-text dark:text-dark-text-secondary">Fonte:</label>
             <select id="font-select"
-                    class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"
+                    class="px-2 py-1 border border-neutral rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:bg-dark-primary dark:border-dark-border dark:text-white"
                     [value]="clipService.selectedFont()"
                     (change)="onFontChange($event)">
               @for (font of availableFonts; track font.family) {
@@ -56,9 +56,9 @@
 
         @if (clipService.showAdvancedClipOptions() && clipService.showFontSizeSelect()) {
           <div class="flex items-center gap-2">
-            <label for="font-size-select" class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Tamanho:</label>
+            <label for="font-size-select" class="text-sm font-medium text-text dark:text-dark-text-secondary">Tamanho:</label>
             <select id="font-size-select"
-                    class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-primary dark:border-dark-border dark:text-white"
+                    class="px-2 py-1 border border-neutral rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:bg-dark-primary dark:border-dark-border dark:text-white"
                     [value]="clipService.selectedFontSize()"
                     (change)="onFontSizeChange($event)">
               @for (size of availableFontSizes; track size.size) {
@@ -72,7 +72,7 @@
       <div class="w-full md:w-auto flex justify-center md:justify-end">
         <button 
           (click)="openConvertToNoteModal()" aria-label="Converter Clip em Nota"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors duration-200 shadow-sm hover:shadow-md w-full md:w-auto">
+          class="px-4 py-2 bg-success text-white rounded-lg hover:bg-opacity-80 font-medium transition-colors duration-200 shadow-sm hover:shadow-md w-full md:w-auto">
           Converter em Nota
         </button>
       </div>

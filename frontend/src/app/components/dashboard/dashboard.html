@@ -1,40 +1,40 @@
-<div class="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen rounded-xl shadow-lg">
+<div class="p-6 bg-background dark:bg-gray-900 min-h-screen rounded-xl shadow-lg">
   <div class="flex flex-col gap-6 rounded-xl">
 
     <!-- Linha Superior: Perfil e Clip -->
     <div class="dashboard-grid">
       <!-- Perfil -->
       <div class="lg:w-1/2 dashboard-card">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg h-full flex flex-col items-center text-center justify-center">
+        <div class="bg-background dark:bg-gray-800 p-6 rounded-2xl shadow-lg h-full flex flex-col items-center text-center justify-center">
           @if (currentUser(); as user) {
-            <div class="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mb-4">
+            <div class="w-24 h-24 bg-accent rounded-full flex items-center justify-center mb-4">
               <span class="text-4xl font-bold text-white">{{ getInitials(user.displayName) }}</span>
             </div>
-            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Seja bem-vindo(a) de volta!</h1>
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">{{ user.displayName || 'Usuário' }}</h2>
-            <p class="text-gray-500 dark:text-gray-400">{{ user.email }}</p>
+            <h1 class="text-xl font-semibold text-text dark:text-white">Seja bem-vindo(a) de volta!</h1>
+            <h2 class="text-2xl font-bold text-text dark:text-white">{{ user.displayName || 'Usuário' }}</h2>
+            <p class="text-text dark:text-gray-400">{{ user.email }}</p>
           } @else {
-            <div class="w-24 h-24 bg-gray-300 dark:bg-gray-600 rounded-full mb-4 animate-pulse"></div>
-            <div class="h-8 w-3/4 bg-gray-300 dark:bg-gray-600 rounded mb-2 animate-pulse"></div>
-            <div class="h-4 w-1/2 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+            <div class="w-24 h-24 bg-neutral dark:bg-gray-600 rounded-full mb-4 animate-pulse"></div>
+            <div class="h-8 w-3/4 bg-neutral dark:bg-gray-600 rounded mb-2 animate-pulse"></div>
+            <div class="h-4 w-1/2 bg-neutral dark:bg-gray-600 rounded animate-pulse"></div>
           }
         </div>
       </div>
 
       <!-- Clip Rápido -->
       <div class="lg:w-1/2 dashboard-card">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg h-full">
+        <div class="bg-background dark:bg-gray-800 p-6 rounded-2xl shadow-lg h-full">
           <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">
             <div class="flex items-center gap-2">
-              <h3 class="text-xl font-bold text-gray-800 dark:text-white">Clip Rápido</h3>
-              <button (click)="copyClipContent()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <lucide-icon name="copy" class="w-5 h-5 text-gray-500 dark:text-gray-400"></lucide-icon>
+              <h3 class="text-xl font-bold text-text dark:text-white">Clip Rápido</h3>
+              <button (click)="copyClipContent()" class="p-2 rounded-full hover:bg-neutral dark:hover:bg-gray-700">
+                  <lucide-icon name="copy" class="w-5 h-5 text-text dark:text-gray-400"></lucide-icon>
               </button>
             </div>
-            <a routerLink="/clip" class="text-sm text-blue-500 hover:underline">Ir para o Clip</a>
+            <a routerLink="/clip" class="text-sm text-accent hover:underline">Ir para o Clip</a>
           </div>
-          <div class="h-48 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 overflow-auto">
-            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
+          <div class="h-48 bg-background dark:bg-gray-700 rounded-lg p-3 overflow-auto">
+            <p class="text-sm text-text dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
               {{ clipService.copyText() || 'Seu clip está vazio. Visite a página do Clip para começar.' }}
             </p>
           </div>
@@ -44,25 +44,25 @@
 
     <!-- Linha Inferior: Notas -->
     <div>
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <div class="bg-background dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 relative gap-2" clickOutside (clickOutside)="closeFilterMenu()">
             <div class="flex items-center space-x-2">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Notas Recentes</h3>
+                <h3 class="text-xl font-bold text-text dark:text-white">Notas Recentes</h3>
                 <div class="relative">
-                    <button (click)="toggleFilterMenu()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <lucide-icon name="ellipsis" class="w-5 h-5 text-gray-500 dark:text-gray-400"></lucide-icon>
+                    <button (click)="toggleFilterMenu()" class="p-2 rounded-full hover:bg-neutral dark:hover:bg-gray-700">
+                      <lucide-icon name="ellipsis" class="w-5 h-5 text-text dark:text-gray-400"></lucide-icon>
                     </button>
                     @if (isFilterMenuOpen()) {
-                      <div @flyInOut class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-xl z-10">
+                      <div @flyInOut class="absolute left-0 mt-2 w-56 bg-background dark:bg-gray-700 rounded-lg shadow-xl z-10">
                         <ul class="py-1">
                           <li>
-                            <a (click)="selectNotebook(null)" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                            <a (click)="selectNotebook(null)" class="block px-4 py-2 text-sm text-text dark:text-gray-200 hover:bg-neutral dark:hover:bg-gray-600 cursor-pointer">
                               Todos os Cadernos
                             </a>
                           </li>
                           @for (notebook of notebookService.notebooks(); track notebook.id) {
                             <li>
-                              <a (click)="selectNotebook(notebook)" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                              <a (click)="selectNotebook(notebook)" class="block px-4 py-2 text-sm text-text dark:text-gray-200 hover:bg-neutral dark:hover:bg-gray-600 cursor-pointer">
                                 {{ notebook.name }}
                               </a>
                             </li>
@@ -72,9 +72,9 @@
                     }
                 </div>
             </div>
-            <a routerLink="/notebooks" class="text-sm text-blue-500 hover:underline md:self-center">Ir para os Cadernos</a>
+            <a routerLink="/notebooks" class="text-sm text-accent hover:underline md:self-center">Ir para os Cadernos</a>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <p class="text-sm text-text dark:text-gray-400 mb-4">
           {{ selectedNotebook()?.name || 'Todos os Cadernos' }}
         </p>
         <div>
@@ -82,25 +82,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <!-- Skeleton Loader -->
               @for (i of [1,2,3,4,5,6]; track i) {
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 animate-pulse">
-                  <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-                  <div class="h-3 w-1/2 bg-gray-200 dark:bg-gray-600 rounded mt-2"></div>
+                <div class="p-3 rounded-lg bg-background dark:bg-gray-700 animate-pulse">
+                  <div class="h-4 w-3/4 bg-neutral dark:bg-gray-600 rounded"></div>
+                  <div class="h-3 w-1/2 bg-neutral dark:bg-gray-600 rounded mt-2"></div>
                 </div>
               }
             </div>
           } @else if (filteredNotes().length > 0) {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (note of filteredNotes(); track note.id) {
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors relative group">
+                <div class="p-3 rounded-lg bg-background dark:bg-gray-700 hover:bg-neutral dark:hover:bg-gray-600 transition-colors relative group">
                   <a [routerLink]="['/notebooks', note.notebookId, 'notes', note.id]" class="block">
-                    <h4 class="font-semibold text-gray-800 dark:text-white truncate">{{ note.title || 'Nota sem título' }}</h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ (note.content | htmlToText | slice:0:100) || 'Sem conteúdo adicional' }}</p>
+                    <h4 class="font-semibold text-text dark:text-white truncate">{{ note.title || 'Nota sem título' }}</h4>
+                    <p class="text-sm text-text dark:text-gray-400 truncate">{{ (note.content | htmlToText | slice:0:100) || 'Sem conteúdo adicional' }}</p>
                   </a>
                 </div>
               }
             </div>
           } @else {
-            <p class="text-gray-500 dark:text-gray-400">Nenhuma nota recente encontrada.</p>
+            <p class="text-text dark:text-gray-400">Nenhuma nota recente encontrada.</p>
           }
         </div>
       </div>
@@ -109,13 +109,13 @@
     <!-- Lembretes (Comentado para o futuro) -->
     <!--
     <div class="lg:col-span-1">
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <div class="bg-background dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Lembretes</h3>
-          <button class="text-blue-500 hover:text-blue-600 text-xl font-bold">+</button>
+          <h3 class="text-xl font-bold text-text dark:text-white">Lembretes</h3>
+          <button class="text-accent hover:text-opacity-80 text-xl font-bold">+</button>
         </div>
         <div>
-          <p class="text-gray-500 dark:text-gray-400">Funcionalidade em breve...</p>
+          <p class="text-text dark:text-gray-400">Funcionalidade em breve...</p>
         </div>
       </div>
     </div>

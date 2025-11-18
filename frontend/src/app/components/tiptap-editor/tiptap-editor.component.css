@@ -18,6 +18,16 @@
   --tiptap-border-color: #3F3F46;
 }
 
+.capycro {
+  --tiptap-editor-bg: #fbf9f6;
+  --tiptap-editor-text: #3a3a3a;
+  --tiptap-icon-color: #3a3a3a;
+  --tiptap-icon-hover-bg: #f3e4c9;
+  --tiptap-icon-active-bg: #d8704c;
+  --tiptap-icon-active-color: #fbf9f6;
+  --tiptap-border-color: #b0b0b0;
+}
+
 .tiptap-editor-container .editor-header {
   border: 1px solid var(--tiptap-border-color);
   background-color: var(--tiptap-editor-bg);
