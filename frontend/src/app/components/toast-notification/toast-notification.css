@@ -24,19 +24,19 @@
   background-color: #f0fdf4; /* green-50 */
 }
 .dark .toast-success {
-  background-color: #166534; /* green-700 */
+  background-color: #16a34a; /* green-600 */
 }
 
 .toast-error {
   background-color: #fef2f2; /* red-50 */
 }
 .dark .toast-error {
-  background-color: #b91c1c; /* red-700 */
+  background-color: #dc2626; /* red-600 */
 }
 
 .toast-info {
   background-color: #eff6ff; /* blue-50 */
 }
 .dark .toast-info {
-  background-color: #1e40af; /* blue-700 */
+  background-color: #2563eb; /* blue-600 */
 }
