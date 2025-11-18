@@ -3,7 +3,7 @@ import { Firestore, doc, onSnapshot, setDoc, getDoc, Unsubscribe } from '@angula
 import { AuthService } from './auth';
 import { Subscription } from 'rxjs';
 
-export type Theme = 'Normal' | 'Escuro' | 'Alto Contraste';
+export type Theme = 'Normal' | 'Escuro' | 'Alto Contraste' | 'CapyCro';
 export type FontFamily = 'sans' | 'serif' | 'mono';
 
 @Injectable({
@@ -70,11 +70,13 @@ export class ThemeService {
   private setupThemeEffect(): void {
     effect(() => {
       const currentTheme = this.theme();
-      document.documentElement.classList.remove('dark', 'high-contrast');
+      document.documentElement.classList.remove('dark', 'high-contrast', 'capycro');
       if (currentTheme === 'Escuro') {
         document.documentElement.classList.add('dark');
       } else if (currentTheme === 'Alto Contraste') {
         document.documentElement.classList.add('high-contrast');
+      } else if (currentTheme === 'CapyCro') {
+        document.documentElement.classList.add('capycro');
       }
     });
   }

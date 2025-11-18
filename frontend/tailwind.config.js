@@ -25,5 +25,54 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwindcss-themer')({
+      defaultTheme: {
+        extend: {
+          colors: {
+            'primary': '#18181B',
+            'secondary': '#27272A',
+            'accent': '#3B82F6',
+            'neutral': '#3F3F46',
+            'background': '#FFFFFF',
+            'text': '#18181B',
+            'success': '#22C55E',
+            'error': '#EF4444',
+            'warning': '#F97316',
+          }
+        }
+      },
+      themes: [
+        {
+          name: 'dark',
+          extend: {
+            colors: {
+              'primary': '#18181B',
+              'secondary': '#27272A',
+              'accent': '#3B82F6',
+              'neutral': '#3F3F46',
+              'background': '#18181B',
+              'text': '#F4F4F5',
+            }
+          }
+        },
+        {
+          name: 'capycro',
+          extend: {
+            colors: {
+              'primary': '#5d8a8c',
+              'secondary': '#d8704c',
+              'accent': '#f0a040',
+              'neutral': '#b0b0b0',
+              'background': '#fbf9f6',
+              'text': '#3a3a3a',
+              'success': '#5a9261',
+              'error': '#d15c5c',
+              'warning': '#e6a700',
+            }
+          }
+        }
+      ]
+    })
+  ],
 }
