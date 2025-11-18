@@ -131,7 +131,11 @@ export class DataService {
   // --- Métodos para Notas (Notes) ---
 
   getNotes(notebookId: string, onlyPinned: boolean = false): Observable<Note[]> {
-    if (!this.userId) return of([]);
+    if (!this.userId) {
+      console.log('DataService.getNotes: No userId, returning empty array.');
+      return of([]);
+    }
+    console.log(`DataService.getNotes: Fetching notes for userId: ${this.userId}, notebookId: ${notebookId}`);
 
     const notesCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes`);
     let q = query(notesCollection, orderBy('createdAt', 'desc'));
@@ -144,6 +148,7 @@ export class DataService {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const notes = snapshot.docs.map(doc => ({ id: doc.id, notebookId: notebookId, ...doc.data() } as Note));
         this.zone.run(() => {
+          console.log(`DataService.getNotes: Received ${notes.length} notes for notebookId: ${notebookId}`);
           subscriber.next(notes);
         });
       });

@@ -38,6 +38,7 @@ export class NoteColumn implements OnInit, OnDestroy {
     this.notebookIdSignal.set(id);
     this.noteService.activeNotebookId.set(id);
     this.searchTerm.set('');
+    console.log(`NoteColumn: Input notebookId set to: ${id}`);
   }
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
@@ -70,6 +71,8 @@ export class NoteColumn implements OnInit, OnDestroy {
   filteredNotes: Signal<Note[]> = computed(() => {
     const notesToSort = this.notes();
     const term = this.searchTerm().toLowerCase();
+
+    console.log(`NoteColumn: filteredNotes computed. Notes count: ${notesToSort.length}, Search term: ${term}`);
 
     // Ordena as notas: fixadas primeiro, depois por data de criação
     const sortedNotes = [...notesToSort].sort((a, b) => {

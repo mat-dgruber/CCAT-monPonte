@@ -5,7 +5,7 @@ import { DataService, Notebook } from '../../services/data.service';
 import { ClipService } from '../../services/clip.service';
 import { NotebookService } from '../../services/notebook.service';
 import { User } from '@angular/fire/auth';
-import { Note } from '../../services/note.service';
+import { Note, NoteService } from '../../services/note.service'; // Import NoteService and Note interface
 import { Subscription, forkJoin, of } from 'rxjs';
 import { map, catchError, timeout, take, finalize } from 'rxjs/operators';
 import { RouterLink } from '@angular/router';
@@ -41,6 +41,7 @@ export class DashboardComponent {
   notebookService = inject(NotebookService); // Public for template access
   clipService = inject(ClipService); // Public for template access
   private notificationService = inject(NotificationService);
+  private noteService = inject(NoteService); // Inject NoteService
   private subscriptions: Subscription = new Subscription();
   private htmlToTextPipe = inject(HtmlToTextPipe);
 
@@ -117,10 +118,11 @@ export class DashboardComponent {
     });
   }
 
-    selectNotebook(notebook: Notebook | null) {
-      this.selectedNotebook.set(notebook);
-      this.closeFilterMenu();
-    }
+  selectNotebook(notebook: Notebook | null) {
+    this.selectedNotebook.set(notebook);
+    this.closeFilterMenu();
+  }
+
   toggleFilterMenu() {
     this.isFilterMenuOpen.set(!this.isFilterMenuOpen());
   }
@@ -156,6 +158,7 @@ export class DashboardComponent {
       this.notificationService.showInfo('O clip está vazio.');
     }
   }
+
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
