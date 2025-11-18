@@ -23,7 +23,20 @@
 .toast-success {
   background-color: #f0fdf4; /* green-50 */
 }
+.dark .toast-success {
+  background-color: #166534; /* green-700 */
+}
 
 .toast-error {
   background-color: #fef2f2; /* red-50 */
+}
+.dark .toast-error {
+  background-color: #b91c1c; /* red-700 */
+}
+
+.toast-info {
+  background-color: #eff6ff; /* blue-50 */
+}
+.dark .toast-info {
+  background-color: #1e40af; /* blue-700 */
 }

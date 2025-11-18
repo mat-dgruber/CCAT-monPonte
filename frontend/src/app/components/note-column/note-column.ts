@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { Subscription, debounceTime, Subject, filter, switchMap, of } from 'rxjs';
+import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../../services/notebook.service';
 import { Modal } from '../modal/modal';
 import { NotificationService } from '../../services/notification.service'; 
 import { NoteService, Note } from '../../services/note.service';
+import { ResponsiveService } from '../../services/responsive';
+import { Notebook } from '../../services/data.service';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -36,16 +38,19 @@ export class NoteColumn implements OnInit, OnDestroy {
     this.notebookIdSignal.set(id);
     this.noteService.activeNotebookId.set(id);
     this.searchTerm.set('');
+    console.log(`NoteColumn: Input notebookId set to: ${id}`);
   }
   @Input() showBackButton = false;
   @Output() noteSelected = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
+  @Output() createNoteClicked = new EventEmitter<void>();
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   notebookService = inject(NotebookService);
   private notificationService = inject(NotificationService);
   noteService = inject(NoteService);
+  responsiveService = inject(ResponsiveService);
   private searchSubject = new Subject<string>();
   private routerSubscription: Subscription | null = null;
 
@@ -53,12 +58,11 @@ export class NoteColumn implements OnInit, OnDestroy {
   searchTerm: WritableSignal<string> = signal('');
   activeNoteId: WritableSignal<string | null> = signal(null);
 
-  isNoteModalVisible: WritableSignal<boolean> = signal(false);
-  currentNote: WritableSignal<Partial<Note>> = signal({});
-  isEditing: WritableSignal<boolean> = signal(false);
-
-  modalTags: WritableSignal<string> = signal('');
-  modalIsPinned: WritableSignal<boolean> = signal(false);
+  currentNotebook: Signal<Notebook | undefined> = computed(() => {
+    const notebookId = this.notebookIdSignal();
+    if (!notebookId) return undefined;
+    return this.notebookService.notebooks().find(n => n.id === notebookId);
+  });
 
   // As notas agora vêm do NoteService
   notes: Signal<Note[]> = this.noteService.notes;
@@ -67,6 +71,8 @@ export class NoteColumn implements OnInit, OnDestroy {
   filteredNotes: Signal<Note[]> = computed(() => {
     const notesToSort = this.notes();
     const term = this.searchTerm().toLowerCase();
+
+    console.log(`NoteColumn: filteredNotes computed. Notes count: ${notesToSort.length}, Search term: ${term}`);
 
     // Ordena as notas: fixadas primeiro, depois por data de criação
     const sortedNotes = [...notesToSort].sort((a, b) => {
@@ -123,18 +129,9 @@ export class NoteColumn implements OnInit, OnDestroy {
   }
 
   openCreateNoteModal() {
-    this.isEditing.set(false);
-    this.currentNote.set({ title: '', content: '' });
-    this.modalTags.set('');
-    this.modalIsPinned.set(false);
-    this.isNoteModalVisible.set(true);
+    this.createNoteClicked.emit();
   }
 
-  closeNoteModal() {
-    this.isNoteModalVisible.set(false);
-    this.currentNote.set({});
-  }
-  
   async togglePin(note: Note) {
     try {
       await this.noteService.updateNotePinnedStatus(note.id, !note.isPinned);
@@ -142,22 +139,6 @@ export class NoteColumn implements OnInit, OnDestroy {
     } catch (error) { 
       console.error('Erro ao fixar/desafixar a nota:', error);
       this.notificationService.showError('Erro ao atualizar a nota.');
-    }
-  }
-
-  async saveNote(noteData: Partial<Note>) {
-    try {
-      const tagsArray = this.modalTags().split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-      const isPinned = this.modalIsPinned();
-
-      if (this.isEditing() && noteData.id) {
-        await this.noteService.updateNote(noteData.id, { title: noteData.title!, content: noteData.content!, tags: tagsArray, isPinned: isPinned });
-      } else {
-        await this.noteService.createNote(noteData.title!, noteData.content!, tagsArray, isPinned);
-      }
-      this.closeNoteModal();
-    } catch (error) {
-      console.error('Erro ao salvar nota:', error);
     }
   }
 }

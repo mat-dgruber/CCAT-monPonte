@@ -24,14 +24,14 @@
       <!-- Clip Rápido -->
       <div class="lg:w-1/2 dashboard-card">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg h-full">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-white">Clip Rápido</h3>
-            <div class="flex items-center space-x-2">
-                <button (click)="copyClipContent()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <lucide-icon name="copy" class="w-5 h-5 text-gray-500 dark:text-gray-400"></lucide-icon>
-                </button>
-                <a routerLink="/clip" class="text-sm text-blue-500 hover:underline">Ir para o Clip</a>
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">
+            <div class="flex items-center gap-2">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-white">Clip Rápido</h3>
+              <button (click)="copyClipContent()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <lucide-icon name="copy" class="w-5 h-5 text-gray-500 dark:text-gray-400"></lucide-icon>
+              </button>
             </div>
+            <a routerLink="/clip" class="text-sm text-blue-500 hover:underline">Ir para o Clip</a>
           </div>
           <div class="h-48 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 overflow-auto">
             <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
@@ -45,7 +45,7 @@
     <!-- Linha Inferior: Notas -->
     <div>
       <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-        <div class="flex justify-between items-center mb-4 relative" clickOutside (clickOutside)="closeFilterMenu()">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 relative gap-2" clickOutside (clickOutside)="closeFilterMenu()">
             <div class="flex items-center space-x-2">
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white">Notas Recentes</h3>
                 <div class="relative">
@@ -72,7 +72,7 @@
                     }
                 </div>
             </div>
-            <a routerLink="/notebooks" class="text-sm text-blue-500 hover:underline">Ir para os Cadernos</a>
+            <a routerLink="/notebooks" class="text-sm text-blue-500 hover:underline md:self-center">Ir para os Cadernos</a>
         </div>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
           {{ selectedNotebook()?.name || 'Todos os Cadernos' }}
@@ -91,7 +91,7 @@
           } @else if (filteredNotes().length > 0) {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (note of filteredNotes(); track note.id) {
-                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors relative group">
                   <a [routerLink]="['/notebooks', note.notebookId, 'notes', note.id]" class="block">
                     <h4 class="font-semibold text-gray-800 dark:text-white truncate">{{ note.title || 'Nota sem título' }}</h4>
                     <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ (note.content | htmlToText | slice:0:100) || 'Sem conteúdo adicional' }}</p>
@@ -104,7 +104,7 @@
           }
         </div>
       </div>
-    </div>
+    </div> 
 
     <!-- Lembretes (Comentado para o futuro) -->
     <!--
@@ -122,3 +122,4 @@
     -->
   </div>
 </div>
+

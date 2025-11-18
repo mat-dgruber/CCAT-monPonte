@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, AfterViewInit, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect, AfterViewInit, ViewContainerRef, ComponentFactoryResolver, Output, EventEmitter } from '@angular/core';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map } from 'rxjs';
+import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, takeUntil, map, filter } from 'rxjs';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -12,33 +13,45 @@ import { Modal } from '../modal/modal';
 
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 import { DataService, Note } from '../../services/data.service';
+import { NoteService } from '../../services/note.service';
 import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
-import { ClickOutsideDirective } from '../directives/click-outside.directive';
+import { ResponsiveService } from '../../services/responsive';
 
 
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent],
   templateUrl: './note-editor.html',
-  styleUrls: ['./note-editor.css']
+  styleUrls: ['./note-editor.css'],
+  animations: [
+    trigger('flyInOut', [
+      state('void', style({ transform: 'translateY(-10%)', opacity: 0 })),
+      transition('void => *', [
+        animate('150ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ]),
+      transition('* => void', [
+        animate('150ms ease-in', style({ transform: 'translateY(-10%)', opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private dataService = inject(DataService);
+  private noteService = inject(NoteService);
   private notificationService = inject(NotificationService);
-  themeService = inject(ThemeService); 
-
-   
+  private location = inject(Location);
+  themeService = inject(ThemeService);
+  responsiveService = inject(ResponsiveService);
 
   note: WritableSignal<Note | null> = signal(null);
   isLoading: WritableSignal<boolean> = signal(true);
   isSaving: WritableSignal<boolean> = signal(false);
-  showDeleteConfirmationModal: WritableSignal<boolean> = signal(false);
   showMoreOptions: WritableSignal<boolean> = signal(false);
   tagInput: WritableSignal<string> = signal('');
   allTags: WritableSignal<string[]> = signal([]);
@@ -55,7 +68,8 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private notebookId: string | null = null;
   private noteId: string | null = null;
 
-  private contentChanges = new Subject<{ notebookId: string, noteId: string, content: string }>();
+  private contentChanges = new Subject<string>();
+  private titleChanges = new Subject<string>();
   private searchTermChanges = new Subject<string>();
   private subscriptions = new Subscription();
   private destroy$ = new Subject<void>();
@@ -89,48 +103,63 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscriptions.add(this.route.paramMap.pipe(
+    const note$ = this.route.paramMap.pipe(
       switchMap(params => {
         this.notebookId = params.get('notebookId');
         this.noteId = params.get('noteId');
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
-          return this.dataService.getNote(this.notebookId, this.noteId).pipe(
-            switchMap(note => {
-              this.isLoading.set(false);
-              this.searchTerm.set('');
-              this.showSearch.set(false);
-
-              if (note && note.id) {
-                const fullNote: Note = {
-                  ...note,
-                  title: note.title ?? '',
-                  content: note.content ?? '',
-                };
-                this.note.set(fullNote);
-
-                // Return an observable that listens for content changes for this specific note
-                return this.contentChanges.pipe(
-                  debounceTime(300),
-                  map(data => ({ ...data, notebookId: this.notebookId!, noteId: this.noteId! }))
-                );
-              } else {
-                this.router.navigate(['/notebooks']);
-                return of(null); // Return an observable that immediately completes
-              }
-            })
-          );
+          return this.dataService.getNote(this.notebookId, this.noteId);
         }
-        return of(null); // No notebookId or noteId, so return an observable that immediately completes
+        return of(null);
       }),
       takeUntil(this.destroy$)
-    ).subscribe(data => {
-      // This subscribe block will now receive the debounced content changes
-      // or null if a note wasn't found/navigated away.
-      if (data && data.notebookId && data.noteId && data.content) {
-        this.saveNote(data.notebookId, data.noteId, data.content);
+    );
+
+    this.subscriptions.add(note$.subscribe(note => {
+      this.isLoading.set(false);
+      this.searchTerm.set('');
+      this.showSearch.set(false);
+      if (note && note.id) {
+        this.note.set({ ...note, title: note.title ?? '', content: note.content ?? '' });
+      } else {
+        this.note.set(null);
       }
     }));
+
+    const contentSave$ = this.contentChanges.pipe(
+      debounceTime(500),
+      switchMap(content => {
+        if (this.notebookId && this.noteId) {
+          return this.dataService.updateNote(this.notebookId, this.noteId, { content });
+        }
+        return of(null);
+      })
+    );
+
+    const titleSave$ = this.titleChanges.pipe(
+      debounceTime(500),
+      switchMap(title => {
+        if (this.notebookId && this.noteId) {
+          return this.dataService.updateNote(this.notebookId, this.noteId, { title });
+        }
+        return of(null);
+      })
+    );
+
+    this.subscriptions.add(note$.pipe(
+      switchMap(() => {
+        this.isSaving.set(false); // Reset saving state on new note
+        return contentSave$;
+      })
+    ).subscribe(() => this.isSaving.set(false)));
+
+    this.subscriptions.add(note$.pipe(
+      switchMap(() => {
+        this.isSaving.set(false);
+        return titleSave$;
+      })
+    ).subscribe(() => this.isSaving.set(false)));
   }
 
   ngAfterViewInit(): void {}
@@ -145,35 +174,19 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   onContentChange(newContent: string): void {
     const currentNote = this.note();
-    if (this.notebookId && this.noteId && currentNote) {
-      // Capture the current notebookId and noteId to ensure the correct note is saved
-      const notebookIdToSave = this.notebookId;
-      const noteIdToSave = this.noteId;
+    if (currentNote) {
       this.note.set({ ...currentNote, content: newContent });
-      this.contentChanges.next({ notebookId: notebookIdToSave, noteId: noteIdToSave, content: newContent });
+      this.isSaving.set(true);
+      this.contentChanges.next(newContent);
     }
-  }
-
-  // Modify saveNote to accept notebookId and noteId as parameters
-  async saveNote(notebookId: string, noteId: string, content: string) {
-    if (!notebookId || !noteId) return;
-    this.isSaving.set(true);
-    await this.dataService.updateNote(notebookId, noteId, { content });
-    this.isSaving.set(false);
   }
 
   onTitleChange(): void {
     const currentNote = this.note();
-    if (!this.notebookId || !this.noteId || !currentNote) return;
-    const notebookIdToSave = this.notebookId;
-    const noteIdToSave = this.noteId;
-    const titleToSave = currentNote.title;
-    this.isSaving.set(true);
-    setTimeout(() => {
-      this.dataService.updateNote(notebookIdToSave, noteIdToSave, { title: titleToSave }).then(() => {
-        this.isSaving.set(false);
-      });
-    }, 1000);
+    if (currentNote) {
+      this.isSaving.set(true);
+      this.titleChanges.next(currentNote.title);
+    }
   }
 
   async togglePin() {
@@ -237,18 +250,13 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   openStatsModal(): void { this.showStatsModal.set(true); this.closeMoreOptions(); }
   closeStatsModal(): void { this.showStatsModal.set(false); }
   closeMoreOptions(): void { this.showMoreOptions.set(false); }
-  deleteNote(): void { this.closeMoreOptions(); this.showDeleteConfirmationModal.set(true); }
-  cancelDeleteNote(): void { this.showDeleteConfirmationModal.set(false); }
 
-  async confirmDeleteNote(): Promise<void> {
-    if (!this.notebookId || !this.noteId) return;
-    try {
-      await this.dataService.deleteNote(this.notebookId, this.noteId);
-      this.notificationService.showSuccess(`Nota "${this.note()?.title}" deletada com sucesso.`);
-      this.showDeleteConfirmationModal.set(false);
-    } catch (error) {
-      this.notificationService.showError('Erro ao deletar a nota.');
+  deleteNote(): void {
+    const noteToDelete = this.note();
+    if (noteToDelete) {
+      this.noteService.requestDeleteNote(noteToDelete);
     }
+    this.closeMoreOptions();
   }
 
   goToNextMatch(): void {
@@ -261,5 +269,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
     if (this.searchResultCount() > 0) {
       this.currentMatchIndex.set((this.currentMatchIndex() - 1 + this.searchResultCount()) % this.searchResultCount());
     }
+  }
+
+  navigateBack(): void {
+    this.router.navigate(['/notebooks']);
   }
 }

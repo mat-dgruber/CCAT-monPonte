@@ -1,11 +1,15 @@
-<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<div class="relative rounded-3xl md:flex h-[calc(100vh-64px)] overflow-hidden rounded-3xl">
   <!-- Notebooks Sidebar -->
   <aside
-    class="notebooks-sidebar w-72 flex-shrink-0 bg-gray-50 dark:bg-dark-panel-left transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border flex"
+    class="notebooks-sidebar w-full md:w-72 flex-shrink-0 bg-gray-50 dark:bg-dark-panel-left transition-transform duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border flex md:static md:translate-x-0 rounded-3xl"
+    [class.absolute]="responsiveService.isMobile()"
+    [class.inset-0]="responsiveService.isMobile()"
+    [class.translate-x-0]="responsiveService.isMobile() && !selectedNotebookId()"
+    [class.-translate-x-full]="responsiveService.isMobile() && selectedNotebookId()"
   >
     <div class="flex flex-col w-full">
       <!-- Header -->
-      <div class="sidebar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
+      <div class="sidebar-header rounded-3xl flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Cadernos</h2>
         <button (click)="openCreateModal()" class="p-1 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-dark-accent dark:hover:text-white transition-colors duration-300" title="Criar novo caderno">
           <lucide-icon name="plus-circle" size="18"></lucide-icon>
@@ -65,7 +69,7 @@
               <ul class="space-y-1 mb-3">
                 @for (notebook of favoriteNotebooks(); track notebook.id) {
                   <li
-                    class="flex items-center justify-between px-4 py-2 rounded-md cursor-pointer transition-colors duration-150 group"
+                    class="flex items-center justify-between px-4 py-2 rounded-lg cursor-pointer transition-colors duration-150 group"
                     [class.bg-indigo-100]="notebook.id === selectedNotebookId()"
                     [class.dark:bg-dark-accent]="notebook.id === selectedNotebookId()"
                     [class.hover:bg-gray-200]="notebook.id !== selectedNotebookId()"
@@ -130,24 +134,32 @@
 
   <!-- Notes Column -->
   <main
-    class="notes-column w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex min-w-0"
+    class="notes-column w-full md:w-80 flex-shrink-0 bg-gray-100 dark:bg-dark-panel-middle border-l border-gray-200 dark:border-dark-border transition-transform duration-300 ease-in-out flex min-w-0 md:static md:translate-x-0 rounded-3xl"
+    [class.absolute]="responsiveService.isMobile()"
+    [class.inset-0]="responsiveService.isMobile()"
+    [class.translate-x-full]="responsiveService.isMobile() && !selectedNotebookId()"
+    [class.translate-x-0]="responsiveService.isMobile() && selectedNotebookId() && !currentNoteId()"
+    [class.-translate-x-full]="responsiveService.isMobile() && selectedNotebookId() && currentNoteId()"
   >
-    <div class="w-full h-full" [hidden]="!selectedNotebookId()">
+    <div class="w-full h-full">
       <app-note-column
         [notebookId]="selectedNotebookId()"
         (noteSelected)="onNoteSelected($event)"
+        (back)="navigateBack()"
+        (createNoteClicked)="openCreateNoteModal()"
       ></app-note-column>
-    </div>
-    <div class="placeholder w-full flex items-center justify-center h-full text-gray-500 dark:text-dark-text-secondary" [hidden]="selectedNotebookId()">
-      Selecione um caderno para ver as notas.
     </div>
   </main>
 
   <!-- Note Editor -->
   <section
-    class="note-editor-column flex-grow relative bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-all duration-300 ease-in-out flex"
+    class="note-editor-column flex-grow bg-white dark:bg-dark-panel-right border-l border-gray-200 dark:border-dark-border transition-transform duration-300 ease-in-out flex md:relative md:translate-x-0 rounded-3xl"
+    [class.absolute]="responsiveService.isMobile()"
+    [class.inset-0]="responsiveService.isMobile()"
+    [class.translate-x-full]="responsiveService.isMobile() && !currentNoteId()"
+    [class.translate-x-0]="responsiveService.isMobile() && currentNoteId()"
   >
-    <div class="absolute inset-0 overflow-y-auto" [@routeAnimation]="outlet.isActivated ? outlet.activatedRoute.snapshot.url.join('/') : ''">
+    <div class="absolute inset-0 overflow-y-auto" [@routeAnimation]="routeAnimationState()">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>
   </section>
@@ -192,4 +204,42 @@
       </div>
     </div>
   </app-modal>
+}
+
+<!-- Modal de Criar/Editar Nota -->
+@if (isNoteModalVisible()) {
+<app-modal [isOpen]="isNoteModalVisible()" [title]="isEditing() ? 'Editar Nota' : 'Criar Nova Nota'" confirmText="Salvar"
+  (onConfirm)="saveNote(currentNote())" (onCancel)="closeNoteModal()">
+  <div class="space-y-4">
+    <input type="text" [(ngModel)]="currentNote().title"
+      class="w-full p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300"
+      placeholder="Título da nota">
+    <textarea [(ngModel)]="currentNote().content"
+      class="w-full p-2 border rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300"
+      placeholder="Conteúdo da nota" rows="5"></textarea>
+  </div>
+  <div class="flex items-center gap-2">
+    <label class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Tags (separadas por vírgula):</label>
+    <input type="text" [(ngModel)]="modalTags"
+      class="flex-grow p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300"
+      placeholder="tag1, tag2">
+  </div>
+  <div class="flex items-center mt-4">
+    <input type="checkbox" id="pinNote" [(ngModel)]="modalIsPinned" class="mr-2">
+    <label for="pinNote" class="text-sm text-gray-700 dark:text-dark-text-secondary">Fixar esta nota</label>
+  </div>
+
+</app-modal>
+}
+
+<!-- Modal de Confirmação de Deleção de Nota -->
+@if (showDeleteNoteModal()) {
+  <app-modal
+    [isOpen]="showDeleteNoteModal()"
+    title="Confirmar Deleção"
+    [message]="'Tem certeza que deseja deletar a nota &quot;' + noteToDelete()?.title + '&quot;? Esta ação não pode ser desfeita.'"
+    confirmText="Deletar"
+    (onConfirm)="confirmDeleteNote()"
+    (onCancel)="closeDeleteNoteModal()"
+  ></app-modal>
 }

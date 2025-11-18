@@ -14,14 +14,12 @@ import YouTube from '@tiptap/extension-youtube';
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
 import { SearchSelection } from './extensions/search-selection.extension';
-import Underline from '@tiptap/extension-underline';
 import { Extension } from '@tiptap/core';
 
 const AllShortcuts = Extension.create({
     name: 'allShortcuts',
     addKeyboardShortcuts() {
         return {
-            'Mod-u': () => this.editor.commands.toggleUnderline(),
             'Mod-Shift-x': () => this.editor.commands.toggleStrike(),
             'Mod-Shift-h': () => this.editor.commands.toggleHighlight(),
             'Mod-k': () => {
@@ -90,7 +88,6 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
             keepAttributes: true,
           },
         }),
-        Underline,
         AllShortcuts,
             TextAlign.configure({
               types: ['heading', 'paragraph'],

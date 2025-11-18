@@ -1,87 +1,79 @@
-<div class="flex flex-col h-full w-80 bg-white dark:bg-dark-panel-middle transition-colors duration-300">
-  <!-- Header with Search and Create Button -->
-  <div class="flex-shrink-0 p-3 border-b border-gray-200 dark:border-dark-border transition-colors duration-300">
-    <div class="flex items-center gap-2">      
+<div class="flex flex-col h-full w-full rounded-3xl md:w-80 bg-white dark:bg-dark-panel-middle transition-colors duration-300">
+  <!-- Header -->
+  <div class="flex-shrink-0 p-3 border-b rounded-3xl border-gray-200 dark:border-dark-border transition-colors duration-300">
+    <!-- Mobile Header -->
+    @if (responsiveService.isMobile()) {
+    <div class="flex items-center justify-between mb-2">
+      <button (click)="back.emit()"
+        class="p-2 -ml-2 text-gray-500 dark:text-dark-text-secondary rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
+        <lucide-icon name="arrow-left" size="20"></lucide-icon>
+      </button>
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-white truncate">
+        {{ currentNotebook()?.name || 'Notas' }}
+      </h2>
+      <button (click)="openCreateNoteModal()"
+        class="p-2 -mr-2 text-gray-500 dark:text-dark-text-secondary rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
+        <lucide-icon name="plus" size="20"></lucide-icon>
+      </button>
+    </div>
+    }
+
+    <!-- Search and Create Button -->
+    <div class="flex items-center gap-2">
       <div class="relative flex-grow min-w-0">
-        <lucide-icon name="search" size="16" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
-        <input
-          type="text"
-          placeholder="Buscar notas..."
-          [value]="searchTerm()" 
-          (input)="onSearch($event)" 
-          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300"
-        />
+        <lucide-icon name="search" size="16"
+          class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
+        <input type="text" placeholder="Buscar notas..." [value]="searchTerm()" (input)="onSearch($event)"
+          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300" />
       </div>
-      <button (click)="openCreateNoteModal()" class="flex items-center flex-shrink p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">
+      @if (!responsiveService.isMobile()) {
+      <button (click)="openCreateNoteModal()"
+        class="flex items-center flex-shrink p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">
         <lucide-icon name="plus" size="18"></lucide-icon>
         <span class="ml-1 inline">Nova Nota</span>
       </button>
+      }
     </div>
   </div>
 
   <!-- Notes List Area -->
   <div class="flex-grow overflow-y-auto p-2">
     @if (notebookIdSignal() && notes().length === 0 && searchTerm() === '') {
-      <div class="space-y-2">
-        @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
-          <div class="h-20 bg-gray-200 rounded-lg dark:bg-dark-accent animate-pulse"></div>
-        }
-      </div>
+    <div class="space-y-2">
+      @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+      <div class="h-20 bg-gray-200 rounded-lg dark:bg-dark-accent animate-pulse"></div>
+      }
+    </div>
     } @else if (filteredNotes().length === 0) {
-      <div class="text-center py-10 px-4">
-        <lucide-icon name="file-text" size="48" class="mx-auto text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
-        <h3 class="mt-2 text-lg font-medium text-gray-800 dark:text-white">Nenhuma nota encontrada</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Crie uma nova nota para começar.</p>
-      </div>
+    <div class="text-center py-10 px-4">
+      <lucide-icon name="file-text" size="48" class="mx-auto text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
+      <h3 class="mt-2 text-lg font-medium text-gray-800 dark:text-white">Nenhuma nota encontrada</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Crie uma nova nota para começar.</p>
+    </div>
     } @else {
-      <div class="space-y-2" @listAnimation>
-        @for (note of filteredNotes(); track note.id) {
-          <div 
-            class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24"
-            [class.border-indigo-500]="note.id === activeNoteId()"
-            [class.bg-indigo-50]="note.id === activeNoteId()"
-            [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"
-            [class.border-transparent]="note.id !== activeNoteId()"
-            [class.hover:bg-gray-100]="note.id !== activeNoteId()"
-            [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()"
-            (click)="selectNote(note.id)">
-            <div class="flex justify-between items-start">
-              <h3 class="font-semibold text-md line-clamp-1 text-gray-800 dark:text-white flex-1 min-w-0 truncate" [innerHTML]="note.title | highlight: searchTerm()"></h3>
-              <button (click)="togglePin(note); $event.stopPropagation()"
-                    [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
-                    class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
-                <lucide-icon name="pin" size="16"
-                             [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-600 dark:text-gray-500'"></lucide-icon>
-              </button>
-            </div>
-            <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow" [innerHTML]="note.content | highlight: searchTerm()"></p>
-          </div>
-        }
+    <div class="space-y-2" @listAnimation>
+      @for (note of filteredNotes(); track note.id) {
+      <div
+        class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24"
+        [class.border-indigo-500]="note.id === activeNoteId()" [class.bg-indigo-50]="note.id === activeNoteId()"
+        [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"
+        [class.border-transparent]="note.id !== activeNoteId()" [class.hover:bg-gray-100]="note.id !== activeNoteId()"
+        [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()" (click)="selectNote(note.id)">
+        <div class="flex justify-between items-start">
+          <h3 class="font-semibold text-md line-clamp-1 text-gray-800 dark:text-white flex-1 min-w-0 truncate"
+            [innerHTML]="note.title | highlight: searchTerm()"></h3>
+          <button (click)="togglePin(note); $event.stopPropagation()"
+            [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
+            class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
+            <lucide-icon name="pin" size="16"
+              [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+          </button>
+        </div>
+        <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow"
+          [innerHTML]="note.content | highlight: searchTerm()"></p>
       </div>
+      }
+    </div>
     }
   </div>
 </div>
-
-<!-- Modal de Criar/Editar Nota -->
-@if (isNoteModalVisible()) {
-  <app-modal
-    [isOpen]="isNoteModalVisible()"
-    [title]="isEditing() ? 'Editar Nota' : 'Criar Nova Nota'"
-    confirmText="Salvar"
-    (onConfirm)="saveNote(currentNote())"
-    (onCancel)="closeNoteModal()"
-  >
-    <div class="space-y-4">
-      <input type="text" [(ngModel)]="currentNote().title" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Título da nota">
-      <textarea [(ngModel)]="currentNote().content" class="w-full p-2 border rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="Conteúdo da nota" rows="5"></textarea>
-    </div>    <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Tags (separadas por vírgula):</label>
-        <input type="text" [(ngModel)]="modalTags" class="flex-grow p-2 border border-gray-300 rounded-lg dark:bg-dark-primary dark:border-dark-border dark:text-white transition-colors duration-300" placeholder="tag1, tag2">
-      </div>
-    <div class="flex items-center mt-4">
-        <input type="checkbox" id="pinNote" [(ngModel)]="modalIsPinned" class="mr-2">
-        <label for="pinNote" class="text-sm text-gray-700 dark:text-dark-text-secondary">Fixar esta nota</label>
-      </div>
-
-  </app-modal>
-}

@@ -35,6 +35,10 @@ export class NoteService implements OnDestroy {
   loadingError: WritableSignal<boolean> = signal(false);
   activeNotebookId: WritableSignal<string | null> = signal(null);
 
+  // Subject for delete requests
+  private deleteNoteRequest = new Subject<Note>();
+  deleteNoteRequest$ = this.deleteNoteRequest.asObservable();
+
   constructor() {
     // Combina o estado de autenticação e a seleção do caderno
     const notebookChanges$ = combineLatest([
@@ -43,6 +47,7 @@ export class NoteService implements OnDestroy {
     ]);
 
     this.notesSubscription = notebookChanges$.pipe(
+      tap(([user, notebookId]) => console.log(`NoteService: combineLatest - User: ${user ? user.uid : 'null'}, NotebookId: ${notebookId}`)),
       switchMap(([user, notebookId]) => {
         if (user && notebookId) {
           this.isLoading.set(true);
@@ -50,6 +55,7 @@ export class NoteService implements OnDestroy {
           this.notes.set([]); // Limpa as notas imediatamente
 
           return this.dataService.getNotes(notebookId).pipe(
+            tap(notes => console.log(`NoteService: Received ${notes.length} notes from DataService for notebookId: ${notebookId}`)),
             catchError(error => {
               console.error('Erro ao buscar notas:', error);
               this.loadingError.set(true);
@@ -57,6 +63,7 @@ export class NoteService implements OnDestroy {
             })
           );
         } else {
+          console.log('NoteService: No user or notebookId, returning empty array.');
           return of([]); // Se não houver usuário ou caderno, emite um array vazio
         }
       }),
@@ -111,5 +118,18 @@ export class NoteService implements OnDestroy {
       return Promise.resolve(null);
     }
     return this.dataService.updateNotePinnedStatus(notebookId, noteId, isPinned);
+  }
+
+  deleteNote(noteId: string): Promise<void | null> {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) {
+      console.error('Nenhum caderno ativo para deletar a nota.');
+      return Promise.resolve(null);
+    }
+    return this.dataService.deleteNote(notebookId, noteId);
+  }
+
+  requestDeleteNote(note: Note) {
+    this.deleteNoteRequest.next(note);
   }
 }
