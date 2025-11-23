@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function para verificar se o usuário está autenticado.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // --- REGRAS PARA CADERNOS (NOTEBOOKS) ---
+    match /users/{requestUserId} {
+      // Allow only the authenticated user to access their own user document and subcollections
+      allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+
+      match /notebooks/{notebookId} {
+        // No need for resource.data.userId check here, as the parent match already ensures request.auth.uid == requestUserId.
+        allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+
+        match /notes/{noteId} {
+          // Access to notes is implicitly granted if the user can access the parent notebook,
+          // which is already secured by the /users/{requestUserId} rule.
+          allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+        } // End of match /notes/{noteId}
+      } // End of match /notebooks/{notebookId}
+
+      // --- REGRAS PARA O CLIP ---
+      match /clip/{clipId} { // Changed from {userId} to {clipId} as it's a subcollection
+        allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+      }
+
+      // --- REGRAS PARA CONFIGURAÇÕES DE USUÁRIO ---
+      match /user_settings/{settingsId} { // Changed from {userId} to {settingsId} as it's a subcollection
+        allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+      }
+    } // End of match /users/{requestUserId}
+  }
+}
