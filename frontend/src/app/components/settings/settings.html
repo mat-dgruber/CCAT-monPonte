@@ -17,10 +17,10 @@
               <input type="radio" id="dark-theme" name="theme" value="Escuro" [checked]="themeService.theme() === 'Escuro'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-accent dark:text-indigo-600 border-neutral dark:border-gray-300 focus:ring-accent dark:focus:ring-indigo-500">
               <label for="dark-theme" class="ml-3 block text-sm text-text dark:text-gray-300">Escuro</label>
             </div>
-            <div class="flex items-center">
+            <!-- <div class="flex items-center">
               <input type="radio" id="high-contrast-theme" name="theme" value="Alto Contraste" [checked]="themeService.theme() === 'Alto Contraste'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-accent dark:text-indigo-600 border-neutral dark:border-gray-300 focus:ring-accent dark:focus:ring-indigo-500">
               <label for="high-contrast-theme" class="ml-3 block text-sm text-text dark:text-gray-300">Alto Contraste</label>
-            </div>
+            </div> -->
             <div class="flex items-center">
               <input type="radio" id="capycro-theme" name="theme" value="CapyCro" [checked]="themeService.theme() === 'CapyCro'" (change)="onThemeChange($event)" class="form-radio h-4 w-4 text-accent dark:text-indigo-600 border-neutral dark:border-gray-300 focus:ring-accent dark:focus:ring-indigo-500">
               <label for="capycro-theme" class="ml-3 block text-sm text-text dark:text-gray-300">CapyCro</label>
