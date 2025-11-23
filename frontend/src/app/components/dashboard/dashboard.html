@@ -10,7 +10,9 @@
             <div class="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mb-4">
               <span class="text-4xl font-bold text-white">{{ getInitials(user.displayName) }}</span>
             </div>
-            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Seja bem-vindo(a) de volta!</h1>
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">
+              {{ isFirstAccess(user) ? 'Seja bem-vindo(a)!' : 'Seja bem-vindo(a) de volta!' }}
+            </h1>
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white">{{ user.displayName || 'Usuário' }}</h2>
             <p class="text-gray-500 dark:text-gray-400">{{ user.email }}</p>
           } @else {
@@ -45,31 +47,27 @@
     <!-- Linha Inferior: Notas -->
     <div>
       <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 relative gap-2" clickOutside (clickOutside)="closeFilterMenu()">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 relative gap-2">
             <div class="flex items-center space-x-2">
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white">Notas Recentes</h3>
                 <div class="relative">
-                    <button (click)="toggleFilterMenu()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button (click)="op.toggle($event)" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                       <lucide-icon name="ellipsis" class="w-5 h-5 text-gray-500 dark:text-gray-400"></lucide-icon>
                     </button>
-                    @if (isFilterMenuOpen()) {
-                      <div @flyInOut class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-xl z-10">
-                        <ul class="py-1">
-                          <li>
-                            <a (click)="selectNotebook(null)" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-                              Todos os Cadernos
-                            </a>
-                          </li>
-                          @for (notebook of notebookService.notebooks(); track notebook.id) {
-                            <li>
-                              <a (click)="selectNotebook(notebook)" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-                                {{ notebook.name }}
-                              </a>
-                            </li>
-                          }
-                        </ul>
-                      </div>
-                    }
+                    <p-overlayPanel #op>
+                        <p-listbox
+                            [options]="notebookOptions()"
+                            [ngModel]="selectedNotebook()"
+                            (ngModelChange)="selectNotebook($event); op.hide()"
+                            optionLabel="label"
+                            optionValue="value"
+                            [filter]="true"
+                            [virtualScroll]="true"
+                            [virtualScrollItemSize]="38"
+                            [listStyle]="{'height': '250px'}"
+                            [style]="{'width': '15rem'}">
+                        </p-listbox>
+                    </p-overlayPanel>
                 </div>
             </div>
             <a routerLink="/notebooks" class="text-sm text-blue-500 hover:underline md:self-center">Ir para os Cadernos</a>

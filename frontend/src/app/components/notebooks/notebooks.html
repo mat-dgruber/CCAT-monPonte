@@ -1,6 +1,7 @@
-<div class="relative rounded-3xl md:flex h-[calc(100vh-64px)] overflow-hidden rounded-3xl">
+<div class="relative rounded-3xl md:flex h-[calc(100vh-64px)] overflow-hidden rounded-3xl" (contextmenu)="onContextMenu($event)">
+  <p-contextMenu [model]="contextMenuItems" [target]="sidebarTarget"></p-contextMenu>
   <!-- Notebooks Sidebar -->
-  <aside
+  <aside #sidebarTarget
     class="notebooks-sidebar w-full md:w-72 flex-shrink-0 bg-gray-50 dark:bg-dark-panel-left transition-transform duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border flex md:static md:translate-x-0 rounded-3xl"
     [class.absolute]="responsiveService.isMobile()"
     [class.inset-0]="responsiveService.isMobile()"

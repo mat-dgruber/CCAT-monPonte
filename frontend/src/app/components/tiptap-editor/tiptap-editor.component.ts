@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Editor } from '@tiptap/core';
 
 import StarterKit from '@tiptap/starter-kit';
-import { TiptapEditorDirective } from 'ngx-tiptap';
+import { TiptapEditorDirective, TiptapBubbleMenuDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
@@ -13,6 +13,7 @@ import YouTube from '@tiptap/extension-youtube';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
 import { SearchSelection } from './extensions/search-selection.extension';
 import { Extension } from '@tiptap/core';
 
@@ -43,7 +44,7 @@ const AllShortcuts = Extension.create({
 @Component({
   selector: 'app-tiptap-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TiptapEditorDirective, LucideAngularModule, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, TiptapEditorDirective, TiptapBubbleMenuDirective, LucideAngularModule, ClickOutsideDirective],
   templateUrl: './tiptap-editor.component.html',
   styleUrls: ['./tiptap-editor.component.css'],
   encapsulation: ViewEncapsulation.None,
@@ -99,6 +100,9 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
           placeholder: 'Write something…',
         }),
         Highlight.configure({ multicolor: true }),
+        BubbleMenu.configure({
+            pluginKey: 'bubbleMenu', // Use a unique key
+        }),
         SearchSelection,
       ],
       content: this.content,

@@ -14,13 +14,15 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, Subject } from 'rxjs';
 import { filter, debounceTime } from 'rxjs/operators';
 import { ResponsiveService } from '../../services/responsive';
+import { ContextMenuModule } from 'primeng/contextmenu';
+import { MenuItem } from 'primeng/api';
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
+  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet, ContextMenuModule],
   templateUrl: './notebooks.html',
   animations: [
     trigger('itemAnimation', [
@@ -88,6 +90,9 @@ export class Notebooks implements OnInit, OnDestroy {
   
   // Animations state
   routeAnimationState: WritableSignal<string> = signal('');
+
+  // Context Menu
+  contextMenuItems: MenuItem[] = [];
 
   availableColors: string[] = [
     '#FFFFFF', '#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'
@@ -161,6 +166,44 @@ export class Notebooks implements OnInit, OnDestroy {
       this.searchTerm.set(term);
     });
     this.subscriptions.add(searchSub);
+
+    // Context Menu Items
+    this.contextMenuItems = [
+        { label: 'Criar Caderno', icon: 'pi pi-fw pi-plus', command: () => this.openCreateModal() },
+        {
+            label: 'Criar Nota',
+            icon: 'pi pi-fw pi-file',
+            command: () => {
+                if (this.selectedNotebookId()) {
+                    this.openCreateNoteModal();
+                } else {
+                   this.notificationService.showInfo('Selecione um caderno para criar a nota.');
+                }
+            },
+            visible: !!this.selectedNotebookId() // Initial visibility, logic needs update on right click or getter
+        }
+    ];
+  }
+
+  onContextMenu(event: MouseEvent) {
+      // Update visibility of "Criar Nota" based on selection
+      // However, ContextMenu items are static unless re-assigned.
+      this.contextMenuItems = [
+        { label: 'Criar Caderno', icon: 'pi pi-fw pi-book', command: () => this.openCreateModal() },
+        {
+            label: 'Criar Nota',
+            icon: 'pi pi-fw pi-file',
+            command: () => {
+                if (this.selectedNotebookId()) {
+                    this.openCreateNoteModal();
+                } else {
+                   this.notificationService.showInfo('Selecione um caderno primeiro.');
+                }
+            },
+            // Show "Criar Nota" only if a notebook is selected
+            visible: !!this.selectedNotebookId()
+        }
+    ];
   }
 
   /**

@@ -53,7 +53,8 @@ export class SignupComponent implements OnInit {
     const { name, email, password } = this.signupForm.value;
 
     try {
-      await this.authService.signup(name, email, password);
+      const userCredential = await this.authService.signup(name, email, password);
+      await this.authService.sendEmailVerification(userCredential.user);
       this.router.navigate(['/']);
     } catch (e) {
       const error = e as AuthError;

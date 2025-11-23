@@ -9,8 +9,6 @@ import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, t
 import { LucideAngularModule } from 'lucide-angular';
 
 // Componentes e Serviços
-import { Modal } from '../modal/modal';
-
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
 import { DataService, Note } from '../../services/data.service';
 import { NoteService } from '../../services/note.service';
@@ -23,7 +21,7 @@ import { ResponsiveService } from '../../services/responsive';
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, StatsModalComponent, TiptapEditorComponent],
   templateUrl: './note-editor.html',
   styleUrls: ['./note-editor.css'],
   animations: [
