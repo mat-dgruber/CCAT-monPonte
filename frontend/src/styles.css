@@ -1,9 +1,8 @@
+@import 'prosemirror-view/style/prosemirror.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import 'prosemirror-view/style/prosemirror.css';
-@import '@tiptap/starter-kit/dist/starter-kit.css';
 
 @layer base {
   :root {
@@ -17,6 +16,10 @@
     --font-size: 16px;
   }
 
+  body {
+    @apply bg-background dark:bg-dark-primary;
+  }
+
   .high-contrast {
     --color-primary: #000000;
     --color-secondary: #000000;
@@ -26,7 +29,8 @@
     --color-border: #ffffff;
   }
 
-  body, html {
+  body,
+  html {
     position: static !important;
     transform: none !important;
   }
