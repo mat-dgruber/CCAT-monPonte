@@ -15,11 +15,16 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { NotificationService } from '../../services/notification.service';
 import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 
+// PrimeNG
+import { ListboxModule } from 'primeng/listbox';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective, HtmlToTextPipe],
+  imports: [CommonModule, RouterLink, LucideAngularModule, HtmlToTextPipe, ListboxModule, OverlayPanelModule, FormsModule],
   providers: [HtmlToTextPipe],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
@@ -50,6 +55,15 @@ export class DashboardComponent {
   isLoadingNotes = signal(true);
   isFilterMenuOpen = signal(false);
   selectedNotebook: WritableSignal<Notebook | null> = signal(null);
+
+  // For PrimeNG Listbox
+  notebookOptions = computed(() => {
+    const notebooks = this.notebookService.notebooks();
+    return [
+      { label: 'Todos os Cadernos', value: null },
+      ...notebooks.map(n => ({ label: n.name, value: n }))
+    ];
+  });
 
   filteredNotes = computed(() => {
     const notes = this.allRecentNotes();
@@ -120,15 +134,21 @@ export class DashboardComponent {
 
   selectNotebook(notebook: Notebook | null) {
     this.selectedNotebook.set(notebook);
-    this.closeFilterMenu();
+    // this.closeFilterMenu(); // Not needed with OverlayPanel's behavior usually, but if manual close needed
   }
 
-  toggleFilterMenu() {
-    this.isFilterMenuOpen.set(!this.isFilterMenuOpen());
-  }
+  // toggleFilterMenu() removed as OverlayPanel handles it via #op template ref
 
-  closeFilterMenu() {
-    this.isFilterMenuOpen.set(false);
+  isFirstAccess(user: User): boolean {
+    if (!user.metadata.creationTime || !user.metadata.lastSignInTime) return false;
+    const creation = new Date(user.metadata.creationTime).getTime();
+    const lastSignIn = new Date(user.metadata.lastSignInTime).getTime();
+    // Assuming if creation and last sign in are close (e.g. within a few seconds), it is first access.
+    // However, after first login, lastSignInTime updates. So this logic only works ONCE during the first session.
+    // If the user refreshes, lastSignInTime might stay same until next sign in.
+    // Actually, Firebase updates lastSignInTime on each signIn.
+    // Let's assume if they are equal (as strings usually) it is first access.
+    return user.metadata.creationTime === user.metadata.lastSignInTime;
   }
 
   getInitials(displayName: string | null | undefined): string {

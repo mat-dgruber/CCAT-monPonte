@@ -88,5 +88,23 @@
       </button>
     </div>
   </div>
+  <tiptap-bubble-menu [editor]="editor" class="bubble-menu-container">
+      <div class="bubble-menu bg-white dark:bg-gray-800 shadow-lg rounded-lg flex p-1 border border-gray-200 dark:border-gray-700">
+        <button (click)="editor.chain().focus().toggleBold().run()" [class.is-active]="editor.isActive('bold')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+            <lucide-icon name="bold" size="16"></lucide-icon>
+        </button>
+        <button (click)="editor.chain().focus().toggleItalic().run()" [class.is-active]="editor.isActive('italic')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+            <lucide-icon name="italic" size="16"></lucide-icon>
+        </button>
+        <button (click)="editor.chain().focus().toggleStrike().run()" [class.is-active]="editor.isActive('strike')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+            <lucide-icon name="strikethrough" size="16"></lucide-icon>
+        </button>
+        <div class="w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+        <button (click)="editor.chain().focus().toggleBulletList().run()" [class.is-active]="editor.isActive('bulletList')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+            <lucide-icon name="list" size="16"></lucide-icon>
+        </button>
+      </div>
+  </tiptap-bubble-menu>
+
   <div tiptapEditor [editor]="editor"></div>
 </div>

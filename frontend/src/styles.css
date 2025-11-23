@@ -1,9 +1,11 @@
+@import 'primeng/resources/themes/lara-light-blue/theme.css';
+@import 'primeng/resources/primeng.css';
+@import 'primeicons/primeicons.css';
+@import 'prosemirror-view/style/prosemirror.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import 'prosemirror-view/style/prosemirror.css';
-@import '@tiptap/starter-kit/dist/starter-kit.css';
 
 @layer base {
   :root {
