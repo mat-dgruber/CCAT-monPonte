@@ -52,6 +52,14 @@ export class LoginComponent implements OnInit {
 
     try {
       await this.authService.login(email, password, rememberMe);
+
+      if (!this.authService.isEmailVerified) {
+        await this.authService.logout();
+        this.errorMessage = 'Por favor, verifique seu e-mail antes de fazer login.';
+        await minLoadingTime;
+        return;
+      }
+
       await minLoadingTime; // Ensure spinner is shown for at least minLoadingTime
       this.loginAttempts = 0; // Reset on success
       this.router.navigate(['/']);

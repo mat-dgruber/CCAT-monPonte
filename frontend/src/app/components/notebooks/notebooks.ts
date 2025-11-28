@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 import { AuthService } from '../../services/auth';
@@ -14,13 +14,15 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, Subject } from 'rxjs';
 import { filter, debounceTime } from 'rxjs/operators';
 import { ResponsiveService } from '../../services/responsive';
+import { ContextMenuModule } from 'primeng/contextmenu';
+import { MenuItem } from 'primeng/api';
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
+  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet, ContextMenuModule],
   templateUrl: './notebooks.html',
   animations: [
     trigger('itemAnimation', [
@@ -56,6 +58,9 @@ export class Notebooks implements OnInit, OnDestroy {
   responsiveService = inject(ResponsiveService);
   private subscriptions = new Subscription();
   private searchSubject = new Subject<string>();
+
+  // Context Menu
+  items: MenuItem[] = [];
 
   // --- Signals de Estado ---
   selectedNotebookId: WritableSignal<string | null> = signal(null);
@@ -123,6 +128,8 @@ export class Notebooks implements OnInit, OnDestroy {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
+  @ViewChild('cm') cm!: any;
+
   ngOnInit() {
     // 1. Atualiza o estado baseado na rota ATUAL imediatamente (corrige o problema do Dashboard)
     this.updateStateFromRoute();
@@ -161,6 +168,48 @@ export class Notebooks implements OnInit, OnDestroy {
       this.searchTerm.set(term);
     });
     this.subscriptions.add(searchSub);
+  }
+
+  onContextMenu(event: MouseEvent, notebook?: Notebook) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Fecha outros menus abertos simulando um clique fora
+    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    this.items = [];
+
+    if (notebook) {
+      this.items = [
+        {
+          label: 'Renomear Caderno',
+          icon: 'pi pi-pencil',
+          command: () => this.openRenameModal(notebook.id, notebook.name, notebook.color)
+        },
+        {
+          label: 'Deletar Caderno',
+          icon: 'pi pi-trash',
+          command: () => this.openDeleteModal(notebook.id, notebook.name)
+        },
+        { separator: true },
+        { 
+          label: 'Novo Caderno', 
+          icon: 'pi pi-plus', 
+          command: () => this.openCreateModal() 
+        }
+      ];
+    } else {
+      // Background
+      this.items = [
+        { 
+          label: 'Novo Caderno', 
+          icon: 'pi pi-plus', 
+          command: () => this.openCreateModal() 
+        }
+      ];
+    }
+
+    this.cm.show(event);
   }
 
   /**

@@ -1,4 +1,5 @@
-<div class="relative rounded-3xl md:flex h-[calc(100vh-64px)] overflow-hidden rounded-3xl">
+<div class="relative rounded-3xl md:flex h-[calc(100vh-64px)] overflow-hidden rounded-3xl" (contextmenu)="onContextMenu($event)">
+  <p-contextMenu #cm [model]="items" appendTo="body"></p-contextMenu>
   <!-- Notebooks Sidebar -->
   <aside
     class="notebooks-sidebar w-full md:w-72 flex-shrink-0 bg-background dark:bg-dark-panel-left transition-transform duration-300 ease-in-out border-r border-neutral dark:border-dark-border flex md:static md:translate-x-0 rounded-3xl"
@@ -74,7 +75,8 @@
                     [class.dark:bg-dark-accent]="notebook.id === selectedNotebookId()"
                     [class.hover:bg-neutral]="notebook.id !== selectedNotebookId()"
                     [class.dark:hover:bg-dark-primary]="notebook.id !== selectedNotebookId()"
-                    (click)="selectNotebook(notebook.id)">
+                    (click)="selectNotebook(notebook.id)"
+                    (contextmenu)="onContextMenu($event, notebook)">
                     <div class="flex items-center gap-3 min-w-0">
                       <span class="flex-shrink-0 w-3 h-3 rounded-full" [style.background-color]="notebook.color || '#FFFFFF'"></span>
                       <span class="text-sm truncate font-medium text-text dark:text-white" [class.font-semibold]="notebook.id === selectedNotebookId()" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
@@ -107,7 +109,8 @@
                   [class.dark:bg-dark-accent]="notebook.id === selectedNotebookId()"
                   [class.hover:bg-neutral]="notebook.id !== selectedNotebookId()"
                   [class.dark:hover:bg-dark-primary]="notebook.id !== selectedNotebookId()"
-                  (click)="selectNotebook(notebook.id)">
+                  (click)="selectNotebook(notebook.id)"
+                  (contextmenu)="onContextMenu($event, notebook)">
                   <div class="flex items-center gap-3 min-w-0">
                     <span class="flex-shrink-0 w-3 h-3 rounded-full" [style.background-color]="notebook.color || '#FFFFFF'"></span>
                     <span class="text-sm truncate font-medium text-text dark:text-white" [class.font-semibold]="notebook.id === selectedNotebookId()" [innerHTML]="notebook.name | highlight: searchTerm()"></span>
@@ -147,6 +150,8 @@
         (noteSelected)="onNoteSelected($event)"
         (back)="navigateBack()"
         (createNoteClicked)="openCreateNoteModal()"
+        (createNotebookClicked)="openCreateModal()"
+        (renameNotebookClicked)="openRenameModal($event.id, $event.name, $event.color)"
       ></app-note-column>
     </div>
   </main>

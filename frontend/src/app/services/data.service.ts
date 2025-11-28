@@ -130,7 +130,7 @@ export class DataService {
 
   // --- Métodos para Notas (Notes) ---
 
-  getNotes(notebookId: string, onlyPinned: boolean = false): Observable<Note[]> {
+  getNotes(notebookId: string, onlyPinned: boolean = false, includeArchived: boolean = false): Observable<Note[]> {
     if (!this.userId) {
       console.log('DataService.getNotes: No userId, returning empty array.');
       return of([]);
@@ -146,7 +146,9 @@ export class DataService {
 
     return new Observable<Note[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const notes = snapshot.docs.map(doc => ({ id: doc.id, notebookId: notebookId, ...doc.data() } as Note));
+        const notes = snapshot.docs
+          .map(doc => ({ id: doc.id, notebookId: notebookId, ...doc.data() } as Note))
+          .filter(note => includeArchived ? note.isArchived : !note.isArchived); 
         this.zone.run(() => {
           console.log(`DataService.getNotes: Received ${notes.length} notes for notebookId: ${notebookId}`);
           subscriber.next(notes);
@@ -193,6 +195,12 @@ export class DataService {
     if (!this.userId) throw new Error('Usuário não autenticado para atualizar o status de fixação da nota.');
     const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
     return updateDoc(docRef, { isPinned });
+  }
+
+  updateNoteArchivedStatus(notebookId: string, noteId: string, isArchived: boolean): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para arquivar a nota.');
+    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
+    return updateDoc(docRef, { isArchived });
   }
 
   updateNote(notebookId: string, noteId: string, data: { title?: string, content?: string }): Promise<void> {

@@ -14,6 +14,7 @@ export interface Note {
   createdAt?: any;
   notebookId?: string;
   isPinned?: boolean;
+  isArchived?: boolean;
 }
 
 
@@ -34,6 +35,7 @@ export class NoteService implements OnDestroy {
   isLoading: WritableSignal<boolean> = signal(false);
   loadingError: WritableSignal<boolean> = signal(false);
   activeNotebookId: WritableSignal<string | null> = signal(null);
+  showArchived: WritableSignal<boolean> = signal(false);
 
   // Subject for delete requests
   private deleteNoteRequest = new Subject<Note>();
@@ -43,18 +45,19 @@ export class NoteService implements OnDestroy {
     // Combina o estado de autenticação e a seleção do caderno
     const notebookChanges$ = combineLatest([
       this.authService.authState$,
-      toObservable(this.activeNotebookId) // Converte o signal para um observable
+      toObservable(this.activeNotebookId),
+      toObservable(this.showArchived)
     ]);
 
     this.notesSubscription = notebookChanges$.pipe(
-      tap(([user, notebookId]) => console.log(`NoteService: combineLatest - User: ${user ? user.uid : 'null'}, NotebookId: ${notebookId}`)),
-      switchMap(([user, notebookId]) => {
+      tap(([user, notebookId, showArchived]) => console.log(`NoteService: combineLatest - User: ${user ? user.uid : 'null'}, NotebookId: ${notebookId}, ShowArchived: ${showArchived}`)),
+      switchMap(([user, notebookId, showArchived]) => {
         if (user && notebookId) {
           this.isLoading.set(true);
           this.loadingError.set(false);
           this.notes.set([]); // Limpa as notas imediatamente
 
-          return this.dataService.getNotes(notebookId).pipe(
+          return this.dataService.getNotes(notebookId, false, showArchived).pipe(
             tap(notes => console.log(`NoteService: Received ${notes.length} notes from DataService for notebookId: ${notebookId}`)),
             catchError(error => {
               console.error('Erro ao buscar notas:', error);
@@ -118,6 +121,15 @@ export class NoteService implements OnDestroy {
       return Promise.resolve(null);
     }
     return this.dataService.updateNotePinnedStatus(notebookId, noteId, isPinned);
+  }
+
+  updateNoteArchivedStatus(note: Note, isArchived: boolean): Promise<void | null> {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) {
+      console.error('Nenhum caderno ativo para atualizar a nota.');
+      return Promise.resolve(null);
+    }
+    return this.dataService.updateNoteArchivedStatus(notebookId, note.id, isArchived);
   }
 
   deleteNote(noteId: string): Promise<void | null> {

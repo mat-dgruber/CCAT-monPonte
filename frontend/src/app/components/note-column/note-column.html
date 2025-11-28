@@ -1,4 +1,6 @@
-<div class="flex flex-col h-full w-full rounded-3xl md:w-80 bg-white dark:bg-dark-panel-middle transition-colors duration-300">
+<div class="flex flex-col h-full w-full rounded-3xl md:w-80 bg-gray-50 dark:bg-dark-panel-middle transition-colors duration-300 font-sans" (contextmenu)="onContextMenu($event)">
+  <p-contextMenu #cm [model]="menuItems" appendTo="body"></p-contextMenu>
+  <p-menu #noteMenu [model]="noteMenuItems" [popup]="true" appendTo="body"></p-menu>
   <!-- Header -->
   <div class="flex-shrink-0 p-3 border-b rounded-3xl border-gray-200 dark:border-dark-border transition-colors duration-300">
     <!-- Mobile Header -->
@@ -10,6 +12,7 @@
       </button>
       <h2 class="text-lg font-semibold text-gray-800 dark:text-white truncate">
         {{ currentNotebook()?.name || 'Notas' }}
+        @if (showArchived()) { <span class="text-sm font-normal text-gray-500 ml-1">(Arquivadas)</span> }
       </h2>
       <button (click)="openCreateNoteModal()"
         class="p-2 -mr-2 text-gray-500 dark:text-dark-text-secondary rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
@@ -54,20 +57,28 @@
     <div class="space-y-2" @listAnimation>
       @for (note of filteredNotes(); track note.id) {
       <div
-        class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24"
+        class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24 group shadow-sm hover:shadow-md"
         [class.border-indigo-500]="note.id === activeNoteId()" [class.bg-indigo-50]="note.id === activeNoteId()"
         [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"
         [class.border-transparent]="note.id !== activeNoteId()" [class.hover:bg-gray-100]="note.id !== activeNoteId()"
-        [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()" (click)="selectNote(note.id)">
+        [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()" (click)="selectNote(note.id)"
+        (contextmenu)="onContextMenu($event, note)">
         <div class="flex justify-between items-start">
           <h3 class="font-semibold text-md line-clamp-1 text-gray-800 dark:text-white flex-1 min-w-0 truncate"
             [innerHTML]="note.title | highlight: searchTerm()"></h3>
-          <button (click)="togglePin(note); $event.stopPropagation()"
-            [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
-            class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
-            <lucide-icon name="pin" size="16"
-              [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
-          </button>
+          <div class="flex-shrink-0 flex items-center gap-1">
+            <button (click)="togglePin(note); $event.stopPropagation()"
+              [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
+              class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <lucide-icon name="pin" size="16"
+                [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+            </button>
+            <button (click)="onNoteOptionsClick($event, note)" 
+                    class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+                    aria-label="Opções da nota">
+              <lucide-icon name="more-vertical" size="16" class="text-gray-400 dark:text-gray-500"></lucide-icon>
+            </button>
+          </div>
         </div>
         <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow"
           [innerHTML]="note.content | highlight: searchTerm()"></p>

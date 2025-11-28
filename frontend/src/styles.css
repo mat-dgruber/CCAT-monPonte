@@ -44,3 +44,129 @@
 [routerLink] {
   cursor: pointer;
 }
+
+/* Styling for PrimeNG ContextMenu and Menu - High Visibility & Spacing */
+.p-contextmenu,
+.p-menu {
+  background-color: #f8f8f8 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  font-family: var(--font-family);
+  padding: 0.5rem !important;
+  /* Container padding */
+  width: fit-content !important;
+  min-width: 220px;
+  z-index: 99999 !important;
+}
+
+/* Remove default padding from the list inside */
+.p-contextmenu .p-menu-list,
+.p-menu .p-menu-list {
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+/* Menu Items */
+.p-menuitem-link {
+  padding: 20px 30px !important;
+  /* INCREASED PADDING */
+  line-height: 2em !important;
+  color: #1f2937 !important;
+  display: flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  transition: background-color 0.2s, color 0.2s;
+  border-radius: 4px;
+}
+
+/* Border Bottom on Items (Targeting the list item to span full width) */
+.p-menuitem {
+  border-bottom: 1px solid #b8b8b8 !important;
+  /* VISIBLE BORDER */
+}
+
+.p-menuitem:last-child {
+  border-bottom: none !important;
+}
+
+/* Icons */
+.p-menuitem-link .p-menuitem-icon {
+  color: #4b5563 !important;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 1rem !important;
+  /* Increased icon spacing */
+}
+
+/* Text */
+.p-menuitem-link .p-menuitem-text {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+}
+
+/* Hover State */
+.p-menuitem:not(.p-menuitem-active):not(.p-disabled)>.p-menuitem-link:hover,
+.p-menuitem:not(.p-menuitem-active):not(.p-disabled)>.p-menuitem-link:focus {
+  background: #e9e9e9 !important;
+  color: #111827 !important;
+}
+
+/* Active State */
+.p-menuitem-active>.p-menuitem-link {
+  background: #d4e7ff !important;
+  color: #1e40af !important;
+}
+
+/* Separators (PrimeNG sometimes renders separate separator elements) */
+.p-menu-separator {
+  border-top: 1px solid #dcdcdc !important;
+  margin: 0.25rem 0 !important;
+}
+
+/* Dark Mode Overrides */
+.dark .p-contextmenu,
+.dark .p-menu {
+  background-color: #343a40 !important;
+  border-color: #495057 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .p-menuitem {
+  border-bottom: 1px solid #4b5563 !important;
+  /* Dark mode visible border */
+}
+
+.dark .p-menuitem:last-child {
+  border-bottom: none !important;
+}
+
+.dark .p-menuitem-link {
+  color: #e2e8f0 !important;
+}
+
+.dark .p-menuitem-link .p-menuitem-icon {
+  color: #a0aec0 !important;
+}
+
+.dark .p-menuitem:not(.p-menuitem-active):not(.p-disabled)>.p-menuitem-link:hover,
+.dark .p-menuitem:not(.p-menuitem-active):not(.p-disabled)>.p-menuitem-link:focus {
+  background: #3a475a !important;
+  color: #f9fafb !important;
+}
+
+.dark .p-menuitem-active>.p-menuitem-link {
+  background: #4c68b0 !important;
+  color: #e0f2fe !important;
+}
+
+.dark .p-menuitem-active>.p-menuitem-link .p-menuitem-text,
+.dark .p-menuitem-active>.p-menuitem-link .p-menuitem-icon {
+  color: #e0f2fe !important;
+}
+
+.dark .p-menu-separator {
+  border-top: 1px solid #4b5563 !important;
+}
