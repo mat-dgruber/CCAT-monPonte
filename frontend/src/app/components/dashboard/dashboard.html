@@ -53,21 +53,17 @@
                       <lucide-icon name="ellipsis" class="w-5 h-5 text-text dark:text-gray-400"></lucide-icon>
                     </button>
                     @if (isFilterMenuOpen()) {
-                      <div @flyInOut class="absolute left-0 mt-2 w-56 bg-background dark:bg-gray-700 rounded-lg shadow-xl z-10">
-                        <ul class="py-1">
-                          <li>
-                            <a (click)="selectNotebook(null)" class="block px-4 py-2 text-sm text-text dark:text-gray-200 hover:bg-neutral dark:hover:bg-gray-600 cursor-pointer">
-                              Todos os Cadernos
-                            </a>
-                          </li>
-                          @for (notebook of notebookService.notebooks(); track notebook.id) {
-                            <li>
-                              <a (click)="selectNotebook(notebook)" class="block px-4 py-2 text-sm text-text dark:text-gray-200 hover:bg-neutral dark:hover:bg-gray-600 cursor-pointer">
-                                {{ notebook.name }}
-                              </a>
-                            </li>
-                          }
-                        </ul>
+                      <div @flyInOut class="absolute left-0 mt-2 w-64 bg-background dark:bg-gray-700 rounded-lg shadow-xl z-10 overflow-hidden dashboard-listbox-wrapper">
+                        <p-listbox 
+                          [options]="notebookOptions()" 
+                          [(ngModel)]="selectedNotebook" 
+                          (onChange)="onNotebookChange($event)"
+                          [filter]="true" 
+                          optionLabel="label"
+                          [listStyle]="{'max-height': '250px'}"
+                          [virtualScroll]="true" 
+                          [virtualScrollItemSize]="38">
+                        </p-listbox>
                       </div>
                     }
                 </div>
