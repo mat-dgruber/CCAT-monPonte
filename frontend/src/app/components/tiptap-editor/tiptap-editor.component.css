@@ -202,3 +202,39 @@
 .tiptap-editor-container > [tiptapEditor] ol {
   list-style-type: decimal;
 }
+
+/* Bubble Menu & Floating Menu */
+.bubble-menu,
+.floating-menu {
+  display: flex;
+  background-color: var(--tiptap-editor-bg);
+  padding: 0.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--tiptap-border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.bubble-menu button,
+.floating-menu button {
+  background-color: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--tiptap-icon-color);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.bubble-menu button:hover,
+.floating-menu button:hover {
+  background-color: var(--tiptap-icon-hover-bg);
+}
+
+.bubble-menu button.is-active,
+.floating-menu button.is-active {
+  background-color: var(--tiptap-icon-active-bg);
+  color: var(--tiptap-icon-active-color);
+}

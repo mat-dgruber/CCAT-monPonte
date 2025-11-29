@@ -1,9 +1,20 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+  ChangeDetectorRef,
+  ViewEncapsulation,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Editor } from '@tiptap/core';
 
 import StarterKit from '@tiptap/starter-kit';
-import { TiptapEditorDirective } from 'ngx-tiptap';
+import { TiptapEditorDirective, TiptapBubbleMenuDirective, TiptapFloatingMenuDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
@@ -13,37 +24,52 @@ import YouTube from '@tiptap/extension-youtube';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
+import FloatingMenu from '@tiptap/extension-floating-menu';
 import { SearchSelection } from './extensions/search-selection.extension';
 import { Extension } from '@tiptap/core';
 
 const AllShortcuts = Extension.create({
-    name: 'allShortcuts',
-    addKeyboardShortcuts() {
-        return {
-            'Mod-Shift-x': () => this.editor.commands.toggleStrike(),
-            'Mod-Shift-h': () => this.editor.commands.toggleHighlight(),
-            'Mod-k': () => {
-                if (this.editor.isActive('link')) {
-                    return this.editor.chain().focus().unsetLink().run()
-                }
-                const url = window.prompt('URL');
-                if (url === null) {
-                    return false
-                }
-                return this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-            },
-            'Mod-Shift-8': () => this.editor.commands.toggleBulletList(),
-            'Mod-Shift-7': () => this.editor.commands.toggleOrderedList(),
-            'Mod-Alt-c': () => this.editor.commands.toggleCodeBlock(),
-            'Mod-Shift-b': () => this.editor.commands.toggleBlockquote(),
+  name: 'allShortcuts',
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Shift-x': () => this.editor.commands.toggleStrike(),
+      'Mod-Shift-h': () => this.editor.commands.toggleHighlight(),
+      'Mod-k': () => {
+        if (this.editor.isActive('link')) {
+          return this.editor.chain().focus().unsetLink().run();
         }
-    }
-})
+        const url = window.prompt('URL');
+        if (url === null) {
+          return false;
+        }
+        return this.editor
+          .chain()
+          .focus()
+          .extendMarkRange('link')
+          .setLink({ href: url })
+          .run();
+      },
+      'Mod-Shift-8': () => this.editor.commands.toggleBulletList(),
+      'Mod-Shift-7': () => this.editor.commands.toggleOrderedList(),
+      'Mod-Alt-c': () => this.editor.commands.toggleCodeBlock(),
+      'Mod-Shift-b': () => this.editor.commands.toggleBlockquote(),
+    };
+  },
+});
 
 @Component({
   selector: 'app-tiptap-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TiptapEditorDirective, LucideAngularModule, ClickOutsideDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TiptapEditorDirective,
+    TiptapBubbleMenuDirective,
+    TiptapFloatingMenuDirective,
+    LucideAngularModule,
+    ClickOutsideDirective,
+  ],
   templateUrl: './tiptap-editor.component.html',
   styleUrls: ['./tiptap-editor.component.css'],
   encapsulation: ViewEncapsulation.None,
@@ -64,7 +90,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     '#ffc0cb', // Rosa
     '#add8e6', // Azul Claro
     '#ffa500', // Laranja
-    '#d3d3d3'  // Cinza Claro
+    '#d3d3d3', // Cinza Claro
   ];
 
   showAlignDropdown = false;
@@ -89,9 +115,9 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
           },
         }),
         AllShortcuts,
-            TextAlign.configure({
-              types: ['heading', 'paragraph'],
-            }),
+        TextAlign.configure({
+          types: ['heading', 'paragraph'],
+        }),
         YouTube.configure({
           controls: false,
         }),
@@ -99,6 +125,8 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
           placeholder: 'Write something…',
         }),
         Highlight.configure({ multicolor: true }),
+        BubbleMenu,
+        FloatingMenu,
         SearchSelection,
       ],
       content: this.content,
@@ -148,7 +176,12 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     } else {
       const url = window.prompt('URL');
       if (url) {
-        this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        this.editor
+          .chain()
+          .focus()
+          .extendMarkRange('link')
+          .setLink({ href: url })
+          .run();
       }
     }
   }
@@ -175,7 +208,10 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   getInputValue(event: Event): string {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) {
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLSelectElement
+    ) {
       return event.target.value;
     }
     return '';
@@ -185,8 +221,6 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.showAlignDropdown = !this.showAlignDropdown;
     this.showListsDropdown = false;
   }
-
-
 
   toggleListsDropdown() {
     this.showListsDropdown = !this.showListsDropdown;
