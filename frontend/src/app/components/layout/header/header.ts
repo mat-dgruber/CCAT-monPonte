@@ -2,6 +2,7 @@ import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth';
+import { DataService } from '../../../services/data.service';
 import { Observable } from 'rxjs'; 
 import { User } from 'firebase/auth';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,10 +17,24 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
 })
 export class HeaderComponent {
   private authService = inject(AuthService);
+  private dataService = inject(DataService);
   private router = inject(Router);
   public authState$: Observable<User | null> = this.authService.authState$;
   isMobileMenuOpen: WritableSignal<boolean> = signal(false);
   isUserMenuOpen: WritableSignal<boolean> = signal(false);
+  userPhoto: WritableSignal<string | null> = signal(null);
+
+  constructor() {
+    this.authService.authState$.subscribe(user => {
+      if (user) {
+        this.dataService.getUserPhoto().subscribe(photo => {
+          this.userPhoto.set(photo);
+        });
+      } else {
+        this.userPhoto.set(null);
+      }
+    });
+  }
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.set(!this.isMobileMenuOpen());

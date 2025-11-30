@@ -1,87 +1,144 @@
-<header class="bg-background dark:bg-dark-primary text-text dark:text-white rounded-b-3xl shadow-md transition-colors duration-300">
-  <div class="container mx-auto flex items-center justify-between p-4" role="banner">
+<header
+  class="bg-background dark:bg-dark-primary text-text dark:text-white rounded-b-3xl shadow-md transition-colors duration-300"
+>
+  <div
+    class="container mx-auto flex items-center justify-between p-4"
+    role="banner"
+  >
     <div class="flex items-center gap-4">
-      <img src="assets/logo-ccat.png" alt="monNote Logo" class="h-10 w-10">
+      <img src="assets/logo-ccat.png" alt="monNote Logo" class="h-10 w-10" />
       <h1 class="text-2xl font-bold">
-        <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-accent dark:hover:text-indigo-600 flex items-center">
+        <a
+          routerLink="/"
+          aria-label="Ir para a página inicial"
+          class="hover:text-accent dark:hover:text-indigo-600 flex items-center"
+        >
           monClip
         </a>
       </h1>
     </div>
     @if (authState$ | async; as user) {
-      <nav aria-label="Navegação principal" class="flex items-center w-full">
-        <!-- Desktop Links -->
-        <div class="hidden md:flex items-center gap-4 mx-5">
-          <a routerLink="/clip"
-             routerLinkActive="active-link"
-             [routerLinkActiveOptions]="{ exact: true }"
-             aria-label="Ir para a página do Clip"
-             class="nav-link">Clip</a>
-          <a routerLink="/notebooks"
-             routerLinkActive="active-link"
-             [routerLinkActiveOptions]="{ exact: false }"
-             aria-label="Ir para a página de Cadernos"
-             class="nav-link">Cadernos</a>
-        </div>
+    <nav aria-label="Navegação principal" class="flex items-center w-full">
+      <!-- Desktop Links -->
+      <div class="hidden md:flex items-center gap-4 mx-5">
+        <a
+          routerLink="/clip"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: true }"
+          aria-label="Ir para a página do Clip"
+          class="nav-link"
+          >Clip</a
+        >
+        <a
+          routerLink="/notebooks"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: false }"
+          aria-label="Ir para a página de Cadernos"
+          class="nav-link"
+          >Cadernos</a
+        >
+      </div>
 
-        <!-- Spacer -->
-        <div class="flex-grow"></div>
+      <!-- Spacer -->
+      <div class="flex-grow"></div>
 
-        <!-- User Menu -->
-        <div class="hidden md:flex items-center gap-4">
-          <div class="relative" (clickOutside)="closeUserMenu()">
-            <button (click)="toggleUserMenu()" class="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent focus:outline-none transition-all duration-200">
-              <div class="w-8 h-8 rounded-full bg-accent dark:bg-dark-accent flex items-center justify-center text-white font-bold text-sm">
-                {{ getInitials(user) }}
-              </div>
-              <span class="hidden sm:inline text-sm font-medium text-text dark:text-dark-text">Olá, {{ getGreetingName(user) }}</span>
-                        </button>
+      <!-- User Menu -->
+      <div class="hidden md:flex items-center gap-4">
+        <div class="relative" (clickOutside)="closeUserMenu()">
+          <button
+            (click)="toggleUserMenu()"
+            class="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent focus:outline-none transition-all duration-200"
+          >
+            <div
+              class="w-8 h-8 rounded-full bg-accent dark:bg-dark-accent flex items-center justify-center text-white font-bold text-sm overflow-hidden"
+            >
+              @if (userPhoto()) {
+              <img
+                [src]="userPhoto()"
+                alt="Foto"
+                class="w-full h-full object-cover"
+              />
+              } @else {
+              {{ getInitials(user) }}
+              }
+            </div>
+            <span
+              class="hidden sm:inline text-sm font-medium text-text dark:text-dark-text"
+              >Olá, {{ getGreetingName(user) }}</span
+            >
+          </button>
 
-            @if (isUserMenuOpen()) {
-              <div class="absolute right-0 mt-2 w-48 bg-background dark:bg-dark-primary rounded-md shadow-lg py-1 z-50 border border-neutral dark:border-dark-secondary">
-                <a routerLink="/settings" (click)="closeUserMenu()" class="flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent">
-                  <lucide-icon name="settings" size="16"></lucide-icon>
-                  <span>Configurações</span>
-                </a>
-                <button (click)="logout()" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent">
-                  <lucide-icon name="log-out" size="16"></lucide-icon>
-                  <span>Sair</span>
-                </button>
-              </div>
-            }
+          @if (isUserMenuOpen()) {
+          <div
+            class="absolute right-0 mt-2 w-48 bg-background dark:bg-dark-primary rounded-md shadow-lg py-1 z-50 border border-neutral dark:border-dark-secondary"
+          >
+            <a
+              routerLink="/settings"
+              (click)="closeUserMenu()"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent"
+            >
+              <lucide-icon name="settings" size="16"></lucide-icon>
+              <span>Configurações</span>
+            </a>
+            <button
+              (click)="logout()"
+              class="w-full flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent"
+            >
+              <lucide-icon name="log-out" size="16"></lucide-icon>
+              <span>Sair</span>
+            </button>
           </div>
+          }
         </div>
+      </div>
 
-        <!-- Mobile Menu Button -->
-        <button (click)="toggleMobileMenu(); $event.stopPropagation()" class="md:hidden p-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent">
-          <lucide-icon name="menu" size="22"></lucide-icon>
-        </button>
-      </nav>
+      <!-- Mobile Menu Button -->
+      <button
+        (click)="toggleMobileMenu(); $event.stopPropagation()"
+        class="md:hidden p-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent"
+      >
+        <lucide-icon name="menu" size="22"></lucide-icon>
+      </button>
+    </nav>
     }
-    
   </div>
   <!-- Mobile Menu -->
-  <div 
+  <div
     class="md:hidden bg-background dark:bg-dark-primary border-t border-neutral dark:border-dark-border overflow-hidden transition-all duration-300 ease-in-out"
     [class.max-h-0]="!isMobileMenuOpen()"
     [class.max-h-96]="isMobileMenuOpen()"
     (clickOutside)="closeMobileMenu()"
   >
-      <a routerLink="/clip" (click)="closeMobileMenu()"
-         class="block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary border-b border-neutral dark:border-dark-border-light">Clip</a>
-      <a routerLink="/notebooks" (click)="closeMobileMenu()"
-         class="block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary border-b border-neutral dark:border-dark-border-light">Cadernos</a>
-      <a routerLink="/settings" (click)="closeMobileMenu()" class="block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary border-b border-neutral dark:border-dark-border-light">
-        <div class="flex items-center gap-2">
-            <lucide-icon name="settings" size="16"></lucide-icon>
-            <span>Configurações</span>
-        </div>
-      </a>
-      <button (click)="logout()" class="w-full block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary text-left">
-        <div class="flex items-center gap-2">
-            <lucide-icon name="log-out" size="16"></lucide-icon>
-            <span>Sair</span>
-        </div>
-      </button>
-    </div>
+    <a
+      routerLink="/clip"
+      (click)="closeMobileMenu()"
+      class="block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary border-b border-neutral dark:border-dark-border-light"
+      >Clip</a
+    >
+    <a
+      routerLink="/notebooks"
+      (click)="closeMobileMenu()"
+      class="block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary border-b border-neutral dark:border-dark-border-light"
+      >Cadernos</a
+    >
+    <a
+      routerLink="/settings"
+      (click)="closeMobileMenu()"
+      class="block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary border-b border-neutral dark:border-dark-border-light"
+    >
+      <div class="flex items-center gap-2">
+        <lucide-icon name="settings" size="16"></lucide-icon>
+        <span>Configurações</span>
+      </div>
+    </a>
+    <button
+      (click)="logout()"
+      class="w-full block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary text-left"
+    >
+      <div class="flex items-center gap-2">
+        <lucide-icon name="log-out" size="16"></lucide-icon>
+        <span>Sair</span>
+      </div>
+    </button>
+  </div>
 </header>

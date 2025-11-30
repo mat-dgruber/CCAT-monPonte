@@ -240,7 +240,7 @@ export class DataService {
 
         Promise.all(notePromises).then(notesSnapshots => {
           notesSnapshots.forEach(notesSnapshot => {
-            notesSnapshot.forEach((noteDoc: { data: () => { (): any; new(): any; tags: any[]; }; }) => {
+            notesSnapshots.forEach((noteDoc: { data: () => { (): any; new(): any; tags: any[]; }; }) => {
               const noteData = noteDoc.data();
               if (noteData.tags && Array.isArray(noteData.tags)) {
                 noteData.tags.forEach(tag => allTags.add(tag));
@@ -252,6 +252,44 @@ export class DataService {
           });
         });
       });
+    });
+  }
+
+  // --- Métodos para Foto de Perfil ---
+
+  async updateUserPhoto(photoBase64: string): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar a foto.');
+    const userDocRef = doc(this.firestore, `users/${this.userId}`);
+    
+    // Verifica se o documento do usuário existe, se não, cria
+    const userDoc = await getDoc(userDocRef);
+    if (!userDoc.exists()) {
+       // Se não existir, cria com a foto e outros dados básicos se necessário
+       // Mas geralmente o documento do usuário já deve existir ou ser criado no signup.
+       // Vamos usar setDoc com merge: true para garantir.
+       const { setDoc } = await import('@angular/fire/firestore');
+       return setDoc(userDocRef, { photoBase64 }, { merge: true });
+    }
+
+    return updateDoc(userDocRef, { photoBase64 });
+  }
+
+  getUserPhoto(): Observable<string | null> {
+    if (!this.userId) return of(null);
+    const userDocRef = doc(this.firestore, `users/${this.userId}`);
+    
+    return new Observable<string | null>(subscriber => {
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        this.zone.run(() => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            subscriber.next(data['photoBase64'] || null);
+          } else {
+            subscriber.next(null);
+          }
+        });
+      });
+      return () => unsubscribe();
     });
   }
 }

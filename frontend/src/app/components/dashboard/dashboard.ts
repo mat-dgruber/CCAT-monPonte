@@ -47,6 +47,7 @@ export class DashboardComponent {
   private htmlToTextPipe = inject(HtmlToTextPipe);
 
   currentUser: WritableSignal<User | null> = signal(null);
+  userPhoto: WritableSignal<string | null> = signal(null);
   allRecentNotes: WritableSignal<Note[]> = signal([]);
   isLoadingNotes = signal(true);
   isFilterMenuOpen = signal(false);
@@ -91,6 +92,11 @@ export class DashboardComponent {
       this.currentUser.set(user);
       if (!user) {
         this.allRecentNotes.set([]);
+        this.userPhoto.set(null);
+      } else {
+        this.dataService.getUserPhoto().subscribe(photo => {
+          this.userPhoto.set(photo);
+        });
       }
     });
     this.subscriptions.add(authSub);
