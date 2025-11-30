@@ -11,7 +11,7 @@
   }
 
   .nav-link:hover {
-    @apply text-indigo-600 dark:text-indigo-400;
+    @apply text-accent dark:text-accent;
   }
 
   .nav-link::after {
@@ -22,7 +22,7 @@
     bottom: -2px;
     left: 50%;
     transform: translateX(-50%);
-    @apply bg-indigo-600 dark:bg-indigo-400;
+    @apply bg-accent dark:bg-accent;
     transition: width 0.3s ease-in-out;
   }
 
@@ -31,7 +31,7 @@
   }
 
   .active-link {
-    @apply text-indigo-600 dark:text-indigo-400 font-bold;
+    @apply text-accent dark:text-accent font-bold;
   }
 
   .active-link::after {

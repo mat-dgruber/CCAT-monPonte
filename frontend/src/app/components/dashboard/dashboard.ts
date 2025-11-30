@@ -67,6 +67,25 @@ export class DashboardComponent {
     return notes.filter(note => note.notebookId === selected.id).slice(0, 6);
   });
 
+  welcomeMessage = computed(() => {
+    const user = this.currentUser();
+    if (!user) return 'Seja bem-vindo(a)!';
+
+    const metadata = user.metadata;
+    if (metadata.creationTime && metadata.lastSignInTime) {
+      const creationTime = new Date(metadata.creationTime).getTime();
+      const lastSignInTime = new Date(metadata.lastSignInTime).getTime();
+      
+      // Se a diferença entre a criação e o último login for pequena (ex: menos de 2 minutos),
+      // consideramos como o primeiro acesso (cadastro).
+      if (Math.abs(lastSignInTime - creationTime) < 120000) {
+        return 'Seja bem-vindo(a)!';
+      }
+    }
+    
+    return 'Seja bem-vindo(a) de volta!';
+  });
+
   constructor() {
     const authSub = this.authService.authState$.subscribe(user => {
       this.currentUser.set(user);

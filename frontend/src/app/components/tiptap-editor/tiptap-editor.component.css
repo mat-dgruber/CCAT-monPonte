@@ -18,6 +18,11 @@
   --tiptap-border-color: #3F3F46;
 }
 
+/* Fix for highlight visibility in dark mode */
+.dark .tiptap-editor-container mark {
+  color: #000000 !important;
+}
+
 .capycro {
   --tiptap-editor-bg: #fbf9f6;
   --tiptap-editor-text: #3a3a3a;
