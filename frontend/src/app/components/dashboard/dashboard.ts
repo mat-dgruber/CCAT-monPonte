@@ -1,30 +1,26 @@
 import { Component, inject, signal, WritableSignal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth';
 import { DataService, Notebook } from '../../services/data.service';
 import { ClipService } from '../../services/clip.service';
 import { NotebookService } from '../../services/notebook.service';
 import { User } from '@angular/fire/auth';
-import { Note, NoteService } from '../../services/note.service'; // Import NoteService and Note interface
+import { Note, NoteService } from '../../services/note.service';
 import { Subscription, forkJoin, of } from 'rxjs';
 import { map, catchError, timeout, take, finalize } from 'rxjs/operators';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, Copy, Ellipsis } from 'lucide-angular';
+import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutsideDirective } from '../directives/click-outside.directive';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { NotificationService } from '../../services/notification.service';
 import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
-
-// PrimeNG
 import { ListboxModule } from 'primeng/listbox';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { FormsModule } from '@angular/forms';
-
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, HtmlToTextPipe, ListboxModule, OverlayPanelModule, FormsModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule, ClickOutsideDirective, HtmlToTextPipe, ListboxModule, FormsModule],
   providers: [HtmlToTextPipe],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
@@ -43,10 +39,10 @@ import { FormsModule } from '@angular/forms';
 export class DashboardComponent {
   private authService = inject(AuthService);
   private dataService = inject(DataService);
-  notebookService = inject(NotebookService); // Public for template access
-  clipService = inject(ClipService); // Public for template access
+  notebookService = inject(NotebookService);
+  clipService = inject(ClipService);
   private notificationService = inject(NotificationService);
-  private noteService = inject(NoteService); // Inject NoteService
+  private noteService = inject(NoteService);
   private subscriptions: Subscription = new Subscription();
   private htmlToTextPipe = inject(HtmlToTextPipe);
 
@@ -56,20 +52,17 @@ export class DashboardComponent {
   isFilterMenuOpen = signal(false);
   selectedNotebook: WritableSignal<Notebook | null> = signal(null);
 
-  // For PrimeNG Listbox
   notebookOptions = computed(() => {
-    const notebooks = this.notebookService.notebooks();
-    return [
-      { label: 'Todos os Cadernos', value: null },
-      ...notebooks.map(n => ({ label: n.name, value: n }))
-    ];
+    const allOption = { label: 'Todos os Cadernos', value: null };
+    const notebooks = this.notebookService.notebooks().map(n => ({ label: n.name, value: n }));
+    return [allOption, ...notebooks];
   });
 
   filteredNotes = computed(() => {
     const notes = this.allRecentNotes();
     const selected = this.selectedNotebook();
     if (!selected) {
-      return notes.slice(0, 6); // Retorna as 6 mais recentes de todos os cadernos
+      return notes.slice(0, 6);
     }
     return notes.filter(note => note.notebookId === selected.id).slice(0, 6);
   });
@@ -130,6 +123,11 @@ export class DashboardComponent {
         this.isLoadingNotes.set(false);
       }
     });
+  }
+
+  onNotebookChange(event: any) {
+    this.selectedNotebook.set(event.value);
+    this.closeFilterMenu();
   }
 
   selectNotebook(notebook: Notebook | null) {

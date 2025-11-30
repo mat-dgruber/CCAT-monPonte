@@ -1,62 +1,72 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-dark-primary p-4">
-  <div class="max-w-md w-full bg-white dark:bg-dark-secondary p-10 rounded-3xl shadow-xl relative overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
+<div class="min-h-screen flex items-center justify-center bg-background dark:bg-dark-primary p-4">
+  <div class="max-w-md w-full bg-background dark:bg-dark-secondary p-10 rounded-3xl shadow-xl relative overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
     <div class="relative z-10">
       <div class="flex flex-col items-center justify-center mb-8">
         <img src="assets/logo-ccat.png" alt="monClip Logo" class="h-28 w-28 mb-3">
-        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">monClip</h1>
+        <h1 class="text-4xl font-extrabold text-text dark:text-white tracking-tight">monClip</h1>
       </div>
-      <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-2">Crie sua conta</h2>
-      <p class="text-center text-gray-600 dark:text-dark-text-secondary mb-8">Junte-se a nós e comece a organizar suas notas.</p>
+      <h2 class="text-3xl font-extrabold text-text dark:text-white text-center mb-2">Crie sua conta</h2>
+      <p class="text-center text-text dark:text-dark-text-secondary mb-8">Junte-se a nós e comece a organizar suas notas.</p>
 
       @if (errorMessage) {
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div class="bg-error border border-red-400 text-white px-4 py-3 rounded relative mb-4" role="alert">
           <span class="block sm:inline">{{ errorMessage }}</span>
+        </div>
+      }
+
+      @if (emailExistsError) {
+        <div class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-200 px-4 py-4 rounded-xl relative mb-6 text-center shadow-sm" role="alert">
+          <strong class="font-bold block mb-1">Conta já existente!</strong>
+          <span class="block mb-3">Este e-mail já está em uso.</span>
+          <a routerLink="/login" class="inline-block w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+            Fazer Login
+          </a>
         </div>
       }
 
       <form [formGroup]="signupForm" class="space-y-7" (ngSubmit)="onSignup()">
         <div role="form" aria-labelledby="nameLabel">
-          <label id="nameLabel" for="name" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nome</label>
+          <label id="nameLabel" for="name" class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1">Nome</label>
           <input
             id="name"
             type="text"
             formControlName="name"
             autocomplete="name"
             [class.border-red-500]="name?.invalid && (name?.dirty || name?.touched)"
-            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
+            class="mt-1 block w-full px-4 py-3 border border-neutral dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-background dark:bg-dark-primary text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-purple-600 focus:border-transparent transition-all duration-200">
           @if (name?.invalid && (name?.dirty || name?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
+            <p class="mt-1 text-sm text-error">
               @if (name?.errors?.['required']) { O nome é obrigatório. }
             </p>
           }
         </div>
         <div role="form" aria-labelledby="emailLabel">
-          <label id="emailLabel" for="email" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Endereço de E-mail</label>
+          <label id="emailLabel" for="email" class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1">Endereço de E-mail</label>
           <input
             id="email"
             type="email"
             formControlName="email"
             autocomplete="email"
             [class.border-red-500]="email?.invalid && (email?.dirty || email?.touched)"
-            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
+            class="mt-1 block w-full px-4 py-3 border border-neutral dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-background dark:bg-dark-primary text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-purple-600 focus:border-transparent transition-all duration-200">
           @if (email?.invalid && (email?.dirty || email?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
+            <p class="mt-1 text-sm text-error">
               @if (email?.errors?.['required']) { O e-mail é obrigatório. }
               @if (email?.errors?.['email']) { Por favor, insira um e-mail válido. }
             </p>
           }
         </div>
         <div role="form" aria-labelledby="passwordLabel">
-          <label id="passwordLabel" for="password" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Senha</label>
+          <label id="passwordLabel" for="password" class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1">Senha</label>
           <input
             id="password"
             type="password"
             formControlName="password"
             autocomplete="new-password"
             [class.border-red-500]="password?.invalid && (password?.dirty || password?.touched)"
-            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
+            class="mt-1 block w-full px-4 py-3 border border-neutral dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-background dark:bg-dark-primary text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-purple-600 focus:border-transparent transition-all duration-200">
           @if (password?.invalid && (password?.dirty || password?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
+            <p class="mt-1 text-sm text-error">
               @if (password?.errors?.['required']) { A senha é obrigatória. }
               @if (password?.errors?.['minlength']) { A senha deve ter no mínimo 8 caracteres. }
               @if (password?.errors?.['pattern']) { A senha deve conter uma letra maiúscula, minúscula, número e caractere especial. }
@@ -64,21 +74,21 @@
           }
         </div>
         <div role="form" aria-labelledby="confirmPasswordLabel">
-          <label id="confirmPasswordLabel" for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Confirmar Senha</label>
+          <label id="confirmPasswordLabel" for="confirmPassword" class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1">Confirmar Senha</label>
           <input
             id="confirmPassword"
             type="password"
             formControlName="confirmPassword"
             autocomplete="new-password"
             [class.border-red-500]="(confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)) || (signupForm.errors?.['passwordsMismatch'] && (confirmPassword?.dirty || confirmPassword?.touched))"
-            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
+            class="mt-1 block w-full px-4 py-3 border border-neutral dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-background dark:bg-dark-primary text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-purple-600 focus:border-transparent transition-all duration-200">
           @if (confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
+            <p class="mt-1 text-sm text-error">
               @if (confirmPassword?.errors?.['required']) { A confirmação de senha é obrigatória. }
             </p>
           }
           @if (signupForm.errors?.['passwordsMismatch'] && (confirmPassword?.dirty || confirmPassword?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
+            <p class="mt-1 text-sm text-error">
               As senhas não coincidem.
             </p>
           }
@@ -88,8 +98,8 @@
             id="terms"
             type="checkbox"
             formControlName="termsAccepted"
-            class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-dark-border rounded">
-          <label for="terms" class="ml-2 block text-sm text-gray-900 dark:text-dark-text-secondary">
+            class="h-4 w-4 text-accent dark:text-purple-600 focus:ring-accent dark:focus:ring-purple-500 border-neutral dark:border-dark-border rounded">
+          <label for="terms" class="ml-2 block text-sm text-text dark:text-dark-text-secondary">
             Eu li e aceito os <a routerLink="/terms-of-use" class="underline">Termos de Serviço</a> e a <a routerLink="/privacy-policy" class="underline">Política de Privacidade</a>.
           </label>
         </div>
@@ -97,7 +107,7 @@
           <button
             type="submit"
             [disabled]="signupForm.invalid || isLoading"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300">
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-accent hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300">
             @if (isLoading) {
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             }
@@ -105,9 +115,9 @@
           </button>
         </div>
       </form>
-      <p class="mt-8 text-center text-sm text-gray-600 dark:text-dark-text-secondary">
+      <p class="mt-8 text-center text-sm text-text dark:text-dark-text-secondary">
         Já tem uma conta?
-        <a routerLink="/login" class="cursor-pointer font-medium text-purple-600 hover:text-purple-500 dark:hover:text-dark-text transition-colors duration-200">
+        <a routerLink="/login" class="cursor-pointer font-medium text-accent dark:text-purple-600 hover:text-opacity-80 dark:hover:text-dark-text transition-colors duration-200">
           Faça login
         </a>
       </p>

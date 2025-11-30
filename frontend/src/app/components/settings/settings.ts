@@ -163,6 +163,8 @@ export class SettingsComponent implements OnInit {
 
 
 
+
+
   async deleteAccount() {
     this.isDeleting = true;
     try {

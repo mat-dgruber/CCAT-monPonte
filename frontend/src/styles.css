@@ -1,6 +1,3 @@
-@import 'primeng/resources/themes/lara-light-blue/theme.css';
-@import 'primeng/resources/primeng.css';
-@import 'primeicons/primeicons.css';
 @import 'prosemirror-view/style/prosemirror.css';
 
 @tailwind base;
@@ -19,6 +16,10 @@
     --font-size: 16px;
   }
 
+  body {
+    @apply bg-background dark:bg-dark-primary;
+  }
+
   .high-contrast {
     --color-primary: #000000;
     --color-secondary: #000000;
@@ -28,7 +29,8 @@
     --color-border: #ffffff;
   }
 
-  body, html {
+  body,
+  html {
     position: static !important;
     transform: none !important;
   }
@@ -41,4 +43,289 @@
 
 [routerLink] {
   cursor: pointer;
+}
+
+/* Styling for PrimeNG ContextMenu and Menu - High Visibility & Spacing */
+.p-contextmenu,
+.p-menu {
+  background-color: #f8f8f8 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  font-family: var(--font-family);
+  padding: 0.5rem !important;
+  /* Container padding */
+  width: fit-content !important;
+  min-width: 220px;
+  z-index: 99999 !important;
+}
+
+/* Remove default padding from the list inside */
+.p-contextmenu .p-menu-list,
+.p-menu .p-menu-list {
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+/* Menu Items */
+body .p-contextmenu .p-contextmenu-item-link,
+body .p-menu .p-menu-item-link {
+  padding: 16px 24px !important;
+  /* INCREASED PADDING */
+  line-height: 1.5 !important;
+  color: #1f2937 !important;
+  display: flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  transition: background-color 0.2s, color 0.2s;
+  border-radius: 4px;
+}
+
+/* Border Bottom on Items (Targeting the list item to span full width) */
+.p-contextmenu-item,
+.p-menu-item {
+  border-bottom: 1px solid #b8b8b8 !important;
+  /* VISIBLE BORDER */
+}
+
+.p-contextmenu-item:last-child,
+.p-menu-item:last-child {
+  border-bottom: none !important;
+}
+
+/* Icons */
+.p-contextmenu-item-link .p-contextmenu-item-icon,
+.p-menu-item-link .p-menu-item-icon {
+  color: #4b5563 !important;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 1rem !important;
+  /* Increased icon spacing */
+}
+
+/* Text */
+.p-contextmenu-item-link .p-contextmenu-item-label,
+.p-menu-item-link .p-menu-item-label {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+}
+
+/* Hover State */
+.p-contextmenu-item:not(.p-disabled) > .p-contextmenu-item-link:hover,
+.p-contextmenu-item:not(.p-disabled) > .p-contextmenu-item-link:focus,
+.p-menu-item:not(.p-disabled) > .p-menu-item-link:hover,
+.p-menu-item:not(.p-disabled) > .p-menu-item-link:focus {
+  background: #e9e9e9 !important;
+  color: #111827 !important;
+}
+
+/* Active State */
+.p-contextmenu-item-active > .p-contextmenu-item-link,
+.p-menu-item-active > .p-menu-item-link {
+  background: #d4e7ff !important;
+  color: #1e40af !important;
+}
+
+/* Separators (PrimeNG sometimes renders separate separator elements) */
+.p-contextmenu-separator,
+.p-menu-separator {
+  border-top: 1px solid #dcdcdc !important;
+  margin: 0.25rem 0 !important;
+}
+
+/* Dark Mode Overrides */
+.dark .p-contextmenu,
+.dark .p-menu {
+  background-color: #343a40 !important;
+  border-color: #495057 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .p-contextmenu-item,
+.dark .p-menu-item {
+  border-bottom: 1px solid #4b5563 !important;
+  /* Dark mode visible border */
+}
+
+.dark .p-contextmenu-item:last-child,
+.dark .p-menu-item:last-child {
+  border-bottom: none !important;
+}
+
+.dark .p-contextmenu-item-link,
+.dark .p-menu-item-link {
+  color: #e2e8f0 !important;
+}
+
+.dark .p-contextmenu-item-link .p-contextmenu-item-icon,
+.dark .p-menu-item-link .p-menu-item-icon {
+  color: #a0aec0 !important;
+}
+
+.dark .p-contextmenu-item:not(.p-disabled) > .p-contextmenu-item-link:hover,
+.dark .p-contextmenu-item:not(.p-disabled) > .p-contextmenu-item-link:focus,
+.dark .p-menu-item:not(.p-disabled) > .p-menu-item-link:hover,
+.dark .p-menu-item:not(.p-disabled) > .p-menu-item-link:focus {
+  background: #3a475a !important;
+  color: #f9fafb !important;
+}
+
+.dark .p-contextmenu-item-active > .p-contextmenu-item-link,
+.dark .p-menu-item-active > .p-menu-item-link {
+  background: #4c68b0 !important;
+  color: #e0f2fe !important;
+}
+
+.dark .p-contextmenu-item-active > .p-contextmenu-item-link .p-contextmenu-item-label,
+.dark .p-contextmenu-item-active > .p-contextmenu-item-link .p-contextmenu-item-icon,
+.dark .p-menu-item-active > .p-menu-item-link .p-menu-item-label,
+.dark .p-menu-item-active > .p-menu-item-link .p-menu-item-icon {
+  color: #e0f2fe !important;
+}
+
+.dark .p-contextmenu-separator,
+.dark .p-menu-separator {
+  border-top: 1px solid #4b5563 !important;
+}
+
+/* Styling for PrimeNG Listbox - Matching ContextMenu */
+.p-listbox {
+  background-color: #f8f8f8 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  font-family: var(--font-family);
+  padding: 0.5rem !important;
+  width: 100% !important;
+}
+
+.p-listbox .p-listbox-header {
+  background-color: inherit !important;
+  border-bottom: 1px solid #ccc !important;
+  padding: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.p-listbox .p-listbox-list {
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+.p-listbox .p-listbox-option {
+  padding: 12px 16px !important;
+  line-height: 1.5 !important;
+  color: #1f2937 !important;
+  display: flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  transition: background-color 0.2s, color 0.2s;
+  border-radius: 4px;
+  border-bottom: 1px solid #b8b8b8 !important;
+  cursor: pointer !important;
+}
+
+.p-listbox .p-listbox-option:last-child {
+  border-bottom: none !important;
+}
+
+.p-listbox .p-listbox-option:not(.p-disabled):hover {
+  background: #e9e9e9 !important;
+  color: #111827 !important;
+}
+
+.p-listbox .p-listbox-option.p-listbox-option-selected {
+  background: #d4e7ff !important;
+  color: #1e40af !important;
+}
+
+/* Dark Mode Overrides */
+.dark .p-listbox {
+  background-color: #343a40 !important;
+  border-color: #495057 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .p-listbox .p-listbox-header {
+  border-bottom-color: #495057 !important;
+}
+
+.dark .p-listbox .p-listbox-option {
+  border-bottom: 1px solid #4b5563 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .p-listbox .p-listbox-option:last-child {
+  border-bottom: none !important;
+}
+
+.dark .p-listbox .p-listbox-option:not(.p-disabled):hover {
+  background: #3a475a !important;
+  color: #f9fafb !important;
+}
+
+.dark .p-listbox .p-listbox-option.p-listbox-option-selected {
+  background: #4c68b0 !important;
+  color: #e0f2fe !important;
+}
+
+/* Listbox Filter Styling */
+.p-listbox .p-listbox-header .p-iconfield {
+  width: 100% !important;
+  position: relative !important;
+  display: block !important;
+}
+
+.p-listbox .p-listbox-header .p-listbox-filter {
+  width: 100% !important;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem !important; /* Right padding for icon */
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  outline: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.p-listbox .p-listbox-header .p-listbox-filter:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+.p-listbox .p-listbox-header .p-inputicon {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.75rem !important;
+  transform: translateY(-50%) !important;
+  color: #6b7280 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  z-index: 1 !important;
+}
+
+.p-listbox .p-listbox-header .p-inputicon svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Dark Mode Filter */
+.dark .p-listbox .p-listbox-header .p-listbox-filter {
+  background-color: #1f2937 !important;
+  border-color: #4b5563 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .p-listbox .p-listbox-header .p-listbox-filter:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
+}
+
+.dark .p-listbox .p-listbox-header .p-inputicon {
+  color: #9ca3af !important;
 }

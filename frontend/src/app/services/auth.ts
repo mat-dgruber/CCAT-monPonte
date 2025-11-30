@@ -29,12 +29,24 @@ export class AuthService {
     }
   }
 
+  async sendVerificationEmail(user: User) {
+    return sendEmailVerification(user);
+  }
+
+  get isEmailVerified(): boolean {
+    return this.auth.currentUser ? this.auth.currentUser.emailVerified : false;
+  }
+
   logout() {
     return signOut(this.auth);
   }
 
   getCurrentUserId(): string | null {
     return this.auth.currentUser ? this.auth.currentUser.uid : null;
+  }
+
+  get currentUser(): User | null {
+    return this.auth.currentUser;
   }
   
   updateProfile(profile: { displayName?: string; photoURL?: string; }) {
