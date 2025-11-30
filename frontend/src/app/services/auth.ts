@@ -90,4 +90,8 @@ export class AuthService {
     }
     return deleteUser(user);
   }
+
+  async sendEmailVerification(user: User) {
+    return sendEmailVerification(user);
+  }
 }
