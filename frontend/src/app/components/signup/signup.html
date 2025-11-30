@@ -14,6 +14,16 @@
         </div>
       }
 
+      @if (emailExistsError) {
+        <div class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-200 px-4 py-4 rounded-xl relative mb-6 text-center shadow-sm" role="alert">
+          <strong class="font-bold block mb-1">Conta já existente!</strong>
+          <span class="block mb-3">Este e-mail já está em uso.</span>
+          <a routerLink="/login" class="inline-block w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+            Fazer Login
+          </a>
+        </div>
+      }
+
       <form [formGroup]="signupForm" class="space-y-7" (ngSubmit)="onSignup()">
         <div role="form" aria-labelledby="nameLabel">
           <label id="nameLabel" for="name" class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1">Nome</label>

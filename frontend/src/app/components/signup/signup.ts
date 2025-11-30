@@ -22,6 +22,7 @@ export function passwordsMatchValidator(control: AbstractControl): ValidationErr
 export class SignupComponent implements OnInit {
   signupForm!: FormGroup;
   errorMessage: string | null = null;
+  emailExistsError = false;
   isLoading = false;
 
   private fb = inject(FormBuilder);
@@ -49,6 +50,7 @@ export class SignupComponent implements OnInit {
     }
 
     this.errorMessage = null;
+    this.emailExistsError = false;
     this.isLoading = true;
     const { name, email, password } = this.signupForm.value;
 
@@ -60,7 +62,12 @@ export class SignupComponent implements OnInit {
       this.router.navigate(['/login']);
     } catch (e) {
       const error = e as AuthError;
-      this.errorMessage = this.getFriendlyErrorMessage(error);
+      if (error.code === 'auth/email-already-in-use') {
+        this.emailExistsError = true;
+        this.errorMessage = null;
+      } else {
+        this.errorMessage = this.getFriendlyErrorMessage(error);
+      }
       this.loggingService.error('Signup failed', error);
     } finally {
       this.isLoading = false;
@@ -70,7 +77,7 @@ export class SignupComponent implements OnInit {
   private getFriendlyErrorMessage(error: AuthError): string {
     switch (error.code) {
       case 'auth/email-already-in-use':
-        return 'Este endereço de e-mail já está em uso por outra conta.';
+        return 'Este e-mail já está em uso. Tente fazer login.';
       case 'auth/weak-password':
         return 'A senha fornecida é muito fraca.';
       case 'auth/invalid-email':

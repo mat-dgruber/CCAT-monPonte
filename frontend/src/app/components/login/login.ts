@@ -22,6 +22,8 @@ export class LoginComponent implements OnInit {
   showPassword = false;
   loginAttempts = 0;
   isLocked = false;
+  isUnverified = false;
+  resendSuccess = false;
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -54,7 +56,7 @@ export class LoginComponent implements OnInit {
       await this.authService.login(email, password, rememberMe);
 
       if (!this.authService.isEmailVerified) {
-        await this.authService.logout();
+        this.isUnverified = true;
         this.errorMessage = 'Por favor, verifique seu e-mail antes de fazer login.';
         await minLoadingTime;
         return;
@@ -69,6 +71,8 @@ export class LoginComponent implements OnInit {
       this.loginAttempts++;
       if (this.loginAttempts >= 5) {
         this.lockForm();
+      } else if (this.loginAttempts >= 3) {
+        this.errorMessage += ' Verifique se sua senha está correta ou se você confirmou seu e-mail.';
       }
       this.loggingService.error('Login failed', error);
       await minLoadingTime; // Ensure spinner is shown for at least minLoadingTime even on error
@@ -102,4 +106,29 @@ export class LoginComponent implements OnInit {
 
   get email() { return this.loginForm.get('email'); }
   get password() { return this.loginForm.get('password'); }
+
+  async onResendEmail() {
+    this.isLoading = true;
+    try {
+      const user = this.authService.currentUser;
+      if (user) {
+        await this.authService.sendVerificationEmail(user);
+        this.resendSuccess = true;
+        this.errorMessage = 'E-mail de verificação reenviado! Verifique sua caixa de entrada.';
+      }
+    } catch (e) {
+      this.errorMessage = 'Erro ao reenviar e-mail. Tente novamente.';
+      this.loggingService.error('Resend verification failed', e);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async backToLogin() {
+    await this.authService.logout();
+    this.isUnverified = false;
+    this.resendSuccess = false;
+    this.errorMessage = null;
+    this.loginForm.reset();
+  }
 }

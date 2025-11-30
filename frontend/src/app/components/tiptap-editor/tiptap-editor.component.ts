@@ -21,6 +21,8 @@ import { ClickOutsideDirective } from '../directives/click-outside.directive';
 
 import TextAlign from '@tiptap/extension-text-align';
 import YouTube from '@tiptap/extension-youtube';
+import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
@@ -104,7 +106,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.editor = new Editor({
       extensions: [
         StarterKit.configure({
-          heading: false,
+          // heading: false, // Re-enabled heading extension
           bulletList: {
             keepMarks: true,
             keepAttributes: true,
@@ -117,6 +119,10 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
         AllShortcuts,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
+        }),
+        Underline,
+        Link.configure({
+          openOnClick: false,
         }),
         YouTube.configure({
           controls: false,
