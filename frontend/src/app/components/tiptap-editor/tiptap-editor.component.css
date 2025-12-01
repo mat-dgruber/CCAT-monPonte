@@ -11,10 +11,12 @@
 .dark {
   --tiptap-editor-bg: #27272A;
   --tiptap-editor-text: #F4F4F5;
-  --tiptap-icon-color: #ffffff; /* Changed to white for better visibility */
+  --tiptap-icon-color: #ffffff;
+  /* Changed to white for better visibility */
   --tiptap-icon-hover-bg: #3F3F46;
   --tiptap-icon-active-bg: #3B82F6;
-  --tiptap-icon-active-color: #ffffff; /* Changed to white for better visibility */
+  --tiptap-icon-active-color: #ffffff;
+  /* Changed to white for better visibility */
   --tiptap-border-color: #3F3F46;
 }
 
@@ -41,17 +43,17 @@
   padding: 0.5rem;
 }
 
-.tiptap-editor-container .editor-header > .menu {
+.tiptap-editor-container .editor-header>.menu {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.tiptap-editor-container .editor-header > .menu > button lucide-icon svg {
+.tiptap-editor-container .editor-header>.menu>button lucide-icon svg {
   stroke: currentColor;
 }
 
-.tiptap-editor-container .editor-header > .menu > button {
+.tiptap-editor-container .editor-header>.menu>button {
   background-color: transparent;
   border: none;
   border-radius: 0.25rem;
@@ -65,16 +67,16 @@
   transition: background-color 0.2s ease-in-out;
 }
 
-.tiptap-editor-container .editor-header > .menu > button:hover {
+.tiptap-editor-container .editor-header>.menu>button:hover {
   background-color: var(--tiptap-icon-hover-bg);
 }
 
-.tiptap-editor-container .editor-header > .menu > button.is-active {
+.tiptap-editor-container .editor-header>.menu>button.is-active {
   background-color: var(--tiptap-icon-active-bg);
   color: var(--tiptap-icon-active-color);
 }
 
-.tiptap-editor-container .editor-header > .menu > select {
+.tiptap-editor-container .editor-header>.menu>select {
   padding: 0.25rem 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.25rem;
@@ -82,7 +84,7 @@
   color: var(--tiptap-editor-text);
 }
 
-.tiptap-editor-container > [tiptapEditor] {
+.tiptap-editor-container>[tiptapEditor] {
   border: 1px solid var(--tiptap-border-color);
   border-radius: 0 0 0.5rem 0.5rem;
   padding: 1rem;
@@ -93,10 +95,13 @@
   flex-direction: column;
 }
 
-.tiptap-editor-container > [tiptapEditor] > .ProseMirror {
-  min-height: 15rem; /* A reasonable minimum height for the editable area */
-  height: 100%; /* Take full height of its parent */
-  outline: none; /* Remove default focus outline */
+.tiptap-editor-container>[tiptapEditor]>.ProseMirror {
+  min-height: 15rem;
+  /* A reasonable minimum height for the editable area */
+  height: 100%;
+  /* Take full height of its parent */
+  outline: none;
+  /* Remove default focus outline */
 }
 
 /* Estilos para o novo seletor de cor */
@@ -113,7 +118,7 @@
   background-color: var(--tiptap-editor-bg);
   border: 1px solid var(--tiptap-border-color);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
@@ -178,16 +183,17 @@
 
 .search-selection {
   border: 2px solid var(--tiptap-icon-active-bg);
-  border-radius: 0.5rem;  
+  border-radius: 0.5rem;
 }
 
-.tiptap-editor-container > [tiptapEditor] a {
-  color: #3b82f6; /* Tailwind blue-500 */
+.tiptap-editor-container>[tiptapEditor] a {
+  color: #3b82f6;
+  /* Tailwind blue-500 */
   text-decoration: underline;
 }
 
 /* Blockquote styling */
-.tiptap-editor-container > [tiptapEditor] blockquote {
+.tiptap-editor-container>[tiptapEditor] blockquote {
   border-left: 3px solid var(--tiptap-icon-active-bg);
   margin-left: 1rem;
   padding-left: 1rem;
@@ -195,16 +201,16 @@
 }
 
 /* List styling */
-.tiptap-editor-container > [tiptapEditor] ul,
-.tiptap-editor-container > [tiptapEditor] ol {
+.tiptap-editor-container>[tiptapEditor] ul,
+.tiptap-editor-container>[tiptapEditor] ol {
   padding-left: 2rem;
 }
 
-.tiptap-editor-container > [tiptapEditor] ul {
+.tiptap-editor-container>[tiptapEditor] ul {
   list-style-type: disc;
 }
 
-.tiptap-editor-container > [tiptapEditor] ol {
+.tiptap-editor-container>[tiptapEditor] ol {
   list-style-type: decimal;
 }
 
@@ -242,4 +248,55 @@
 .floating-menu button.is-active {
   background-color: var(--tiptap-icon-active-bg);
   color: var(--tiptap-icon-active-color);
+}
+
+/* Mobile responsive styles */
+.mobile-more-btn {
+  display: none;
+  background-color: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--tiptap-icon-color);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  align-items: center;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.mobile-more-btn:hover {
+  background-color: var(--tiptap-icon-hover-bg);
+}
+
+.extra-items {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+
+  .bubble-menu,
+  .floating-menu {
+    max-width: 90vw;
+    flex-wrap: wrap;
+  }
+
+  .mobile-more-btn {
+    display: flex;
+  }
+
+  .extra-items {
+    display: none;
+    width: 100%;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--tiptap-border-color);
+    padding-top: 0.5rem;
+    justify-content: center;
+    /* Center items in the dropdown */
+  }
+
+  .extra-items.show-mobile {
+    display: flex;
+  }
 }

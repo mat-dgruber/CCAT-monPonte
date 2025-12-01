@@ -75,14 +75,14 @@ export class DashboardComponent {
     if (metadata.creationTime && metadata.lastSignInTime) {
       const creationTime = new Date(metadata.creationTime).getTime();
       const lastSignInTime = new Date(metadata.lastSignInTime).getTime();
-      
+
       // Se a diferença entre a criação e o último login for pequena (ex: menos de 2 minutos),
       // consideramos como o primeiro acesso (cadastro).
       if (Math.abs(lastSignInTime - creationTime) < 120000) {
         return 'Seja bem-vindo(a)!';
       }
     }
-    
+
     return 'Seja bem-vindo(a) de volta!';
   });
 
@@ -102,11 +102,11 @@ export class DashboardComponent {
 
       if (isLoadingNotebooks) {
         this.isLoadingNotes.set(true);
-        return; 
+        return;
       }
 
       if (user && notebooks.length > 0) {
-        this.isLoadingNotes.set(true); 
+        this.isLoadingNotes.set(true);
         const noteObservables = notebooks.map(notebook =>
           this.dataService.getNotes(notebook.id, false).pipe(
             timeout(10000), // 10 second timeout
@@ -115,7 +115,7 @@ export class DashboardComponent {
             catchError(error => {
               console.error(`Error fetching notes for notebook ${notebook.name}:`, error);
               // Return an empty array for this notebook, allowing others to load
-              return of([]); 
+              return of([]);
             })
           )
         );
@@ -154,7 +154,13 @@ export class DashboardComponent {
     // this.closeFilterMenu(); // Not needed with OverlayPanel's behavior usually, but if manual close needed
   }
 
-  // toggleFilterMenu() removed as OverlayPanel handles it via #op template ref
+  toggleFilterMenu() {
+    this.isFilterMenuOpen.update(v => !v);
+  }
+
+  closeFilterMenu() {
+    this.isFilterMenuOpen.set(false);
+  }
 
   isFirstAccess(user: User): boolean {
     if (!user.metadata.creationTime || !user.metadata.lastSignInTime) return false;

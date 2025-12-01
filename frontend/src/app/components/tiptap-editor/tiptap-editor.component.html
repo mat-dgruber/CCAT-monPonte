@@ -203,36 +203,43 @@
       >
         <lucide-icon name="highlighter" size="16"></lucide-icon>
       </button>
-      <button
-        (click)="editor.chain().focus().toggleUnderline().run()"
-        [class.is-active]="editor.isActive('underline')"
-      >
-        <lucide-icon name="underline" size="16"></lucide-icon>
+
+      <button class="mobile-more-btn" (click)="toggleBubbleMore()">
+        <lucide-icon [name]="showBubbleMore ? 'chevron-left' : 'chevron-right'" size="16"></lucide-icon>
       </button>
-      <button
-        (click)="toggleLink()"
-        [class.is-active]="editor.isActive('link')"
-      >
-        <lucide-icon name="link" size="16"></lucide-icon>
-      </button>
-      <button
-        (click)="editor.chain().focus().setTextAlign('left').run()"
-        [class.is-active]="editor.isActive({ textAlign: 'left' })"
-      >
-        <lucide-icon name="align-left" size="16"></lucide-icon>
-      </button>
-      <button
-        (click)="editor.chain().focus().setTextAlign('center').run()"
-        [class.is-active]="editor.isActive({ textAlign: 'center' })"
-      >
-        <lucide-icon name="align-center" size="16"></lucide-icon>
-      </button>
-      <button
-        (click)="editor.chain().focus().setTextAlign('right').run()"
-        [class.is-active]="editor.isActive({ textAlign: 'right' })"
-      >
-        <lucide-icon name="align-right" size="16"></lucide-icon>
-      </button>
+
+      <div class="extra-items" [class.show-mobile]="showBubbleMore">
+        <button
+          (click)="editor.chain().focus().toggleUnderline().run()"
+          [class.is-active]="editor.isActive('underline')"
+        >
+          <lucide-icon name="underline" size="16"></lucide-icon>
+        </button>
+        <button
+          (click)="toggleLink()"
+          [class.is-active]="editor.isActive('link')"
+        >
+          <lucide-icon name="link" size="16"></lucide-icon>
+        </button>
+        <button
+          (click)="editor.chain().focus().setTextAlign('left').run()"
+          [class.is-active]="editor.isActive({ textAlign: 'left' })"
+        >
+          <lucide-icon name="align-left" size="16"></lucide-icon>
+        </button>
+        <button
+          (click)="editor.chain().focus().setTextAlign('center').run()"
+          [class.is-active]="editor.isActive({ textAlign: 'center' })"
+        >
+          <lucide-icon name="align-center" size="16"></lucide-icon>
+        </button>
+        <button
+          (click)="editor.chain().focus().setTextAlign('right').run()"
+          [class.is-active]="editor.isActive({ textAlign: 'right' })"
+        >
+          <lucide-icon name="align-right" size="16"></lucide-icon>
+        </button>
+      </div>
     </div>
   </tiptap-bubble-menu>
 
@@ -256,35 +263,42 @@
       >
         Bullet List
       </button>
-      <button
-        (click)="editor.chain().focus().toggleHeading({ level: 3 }).run()"
-        [class.is-active]="editor.isActive('heading', { level: 3 })"
-      >
-        H3
+
+      <button class="mobile-more-btn" (click)="toggleFloatingMore()">
+        <lucide-icon [name]="showFloatingMore ? 'chevron-left' : 'chevron-right'" size="16"></lucide-icon>
       </button>
-      <button
-        (click)="editor.chain().focus().toggleOrderedList().run()"
-        [class.is-active]="editor.isActive('orderedList')"
-      >
-        Ordered List
-      </button>
-      <button
-        (click)="editor.chain().focus().toggleCodeBlock().run()"
-        [class.is-active]="editor.isActive('codeBlock')"
-      >
-        Code Block
-      </button>
-      <button
-        (click)="editor.chain().focus().toggleBlockquote().run()"
-        [class.is-active]="editor.isActive('blockquote')"
-      >
-        Quote
-      </button>
-      <button
-        (click)="editor.chain().focus().setHorizontalRule().run()"
-      >
-        Horizontal Rule
-      </button>
+
+      <div class="extra-items" [class.show-mobile]="showFloatingMore">
+        <button
+          (click)="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+          [class.is-active]="editor.isActive('heading', { level: 3 })"
+        >
+          H3
+        </button>
+        <button
+          (click)="editor.chain().focus().toggleOrderedList().run()"
+          [class.is-active]="editor.isActive('orderedList')"
+        >
+          Ordered List
+        </button>
+        <button
+          (click)="editor.chain().focus().toggleCodeBlock().run()"
+          [class.is-active]="editor.isActive('codeBlock')"
+        >
+          Code Block
+        </button>
+        <button
+          (click)="editor.chain().focus().toggleBlockquote().run()"
+          [class.is-active]="editor.isActive('blockquote')"
+        >
+          Quote
+        </button>
+        <button
+          (click)="editor.chain().focus().setHorizontalRule().run()"
+        >
+          Horizontal Rule
+        </button>
+      </div>
     </div>
   </tiptap-floating-menu>
 

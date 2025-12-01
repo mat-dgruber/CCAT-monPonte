@@ -99,7 +99,18 @@ export class TiptapEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   showListsDropdown = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  showBubbleMore = false;
+  showFloatingMore = false;
+
+  toggleBubbleMore() {
+    this.showBubbleMore = !this.showBubbleMore;
+  }
+
+  toggleFloatingMore() {
+    this.showFloatingMore = !this.showFloatingMore;
+  }
+
+  constructor(private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this._initialContent = this.content; // Set initial content

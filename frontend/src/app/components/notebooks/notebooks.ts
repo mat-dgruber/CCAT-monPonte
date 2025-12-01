@@ -7,7 +7,7 @@ import { NoteColumn } from '../note-column/note-column';
 import { DataService, Notebook, SortBy, SortDirection } from '../../services/data.service';
 import { NoteService, Note } from '../../services/note.service';
 import { NotebookService } from '../../services/notebook.service';
-import { NotificationService } from '../../services/notification.service'; 
+import { NotificationService } from '../../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
@@ -66,7 +66,7 @@ export class Notebooks implements OnInit, OnDestroy {
   selectedNotebookId: WritableSignal<string | null> = signal(null);
   currentNoteId: WritableSignal<string | null> = signal(null);
   selectedNoteId: WritableSignal<string | null> = signal(null);
-  
+
   // Signals de Modais e Ações
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
   showDeleteModal: WritableSignal<boolean> = signal(false);
@@ -87,10 +87,10 @@ export class Notebooks implements OnInit, OnDestroy {
   // Signals Delete Note Modal
   showDeleteNoteModal: WritableSignal<boolean> = signal(false);
   noteToDelete: WritableSignal<Note | null> = signal(null);
-  
+
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
-  
+
   // Animations state
   routeAnimationState: WritableSignal<string> = signal('');
 
@@ -121,7 +121,7 @@ export class Notebooks implements OnInit, OnDestroy {
     });
   });
 
-  favoriteNotebooks: Signal<Notebook[]> = computed(() => 
+  favoriteNotebooks: Signal<Notebook[]> = computed(() =>
     this.filteredNotebooks().filter(n => n.isFavorite)
   );
 
@@ -129,7 +129,7 @@ export class Notebooks implements OnInit, OnDestroy {
     this.filteredNotebooks().filter(n => !n.isFavorite)
   );
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef) { }
 
   @ViewChild('cm') cm!: any;
 
@@ -174,40 +174,19 @@ export class Notebooks implements OnInit, OnDestroy {
 
     // Context Menu Items
     this.contextMenuItems = [
-        { label: 'Criar Caderno', icon: 'pi pi-fw pi-plus', command: () => this.openCreateModal() },
-        {
-            label: 'Criar Nota',
-            icon: 'pi pi-fw pi-file',
-            command: () => {
-                if (this.selectedNotebookId()) {
-                    this.openCreateNoteModal();
-                } else {
-                   this.notificationService.showInfo('Selecione um caderno para criar a nota.');
-                }
-            },
-            visible: !!this.selectedNotebookId() // Initial visibility, logic needs update on right click or getter
-        }
-    ];
-  }
-
-  onContextMenu(event: MouseEvent) {
-      // Update visibility of "Criar Nota" based on selection
-      // However, ContextMenu items are static unless re-assigned.
-      this.contextMenuItems = [
-        { label: 'Criar Caderno', icon: 'pi pi-fw pi-book', command: () => this.openCreateModal() },
-        {
-            label: 'Criar Nota',
-            icon: 'pi pi-fw pi-file',
-            command: () => {
-                if (this.selectedNotebookId()) {
-                    this.openCreateNoteModal();
-                } else {
-                   this.notificationService.showInfo('Selecione um caderno primeiro.');
-                }
-            },
-            // Show "Criar Nota" only if a notebook is selected
-            visible: !!this.selectedNotebookId()
-        }
+      { label: 'Criar Caderno', icon: 'pi pi-fw pi-plus', command: () => this.openCreateModal() },
+      {
+        label: 'Criar Nota',
+        icon: 'pi pi-fw pi-file',
+        command: () => {
+          if (this.selectedNotebookId()) {
+            this.openCreateNoteModal();
+          } else {
+            this.notificationService.showInfo('Selecione um caderno para criar a nota.');
+          }
+        },
+        visible: !!this.selectedNotebookId()
+      }
     ];
   }
 
@@ -233,19 +212,19 @@ export class Notebooks implements OnInit, OnDestroy {
           command: () => this.openDeleteModal(notebook.id, notebook.name)
         },
         { separator: true },
-        { 
-          label: 'Novo Caderno', 
-          icon: 'pi pi-plus', 
-          command: () => this.openCreateModal() 
+        {
+          label: 'Novo Caderno',
+          icon: 'pi pi-plus',
+          command: () => this.openCreateModal()
         }
       ];
     } else {
       // Background
       this.items = [
-        { 
-          label: 'Novo Caderno', 
-          icon: 'pi pi-plus', 
-          command: () => this.openCreateModal() 
+        {
+          label: 'Novo Caderno',
+          icon: 'pi pi-plus',
+          command: () => this.openCreateModal()
         }
       ];
     }
@@ -253,10 +232,6 @@ export class Notebooks implements OnInit, OnDestroy {
     this.cm.show(event);
   }
 
-  /**
-   * Função Central para Sincronizar URL -> Estado do Componente
-   * Procura recursivamente por notebookId e noteId na árvore de rotas ativa.
-   */
   private updateStateFromRoute() {
     const snapshot = this.route.snapshot;
     const notebookId = this.findParamInTree(snapshot, 'notebookId');
@@ -264,7 +239,7 @@ export class Notebooks implements OnInit, OnDestroy {
 
     // Atualiza os signals
     this.currentNoteId.set(noteId);
-    
+
     if (notebookId) {
       this.selectedNotebookId.set(notebookId);
     } else {
@@ -377,7 +352,7 @@ export class Notebooks implements OnInit, OnDestroy {
   }
 
   async deleteNotebook(id: string) {
-    try { await this.dataService.deleteNotebook(id); } 
+    try { await this.dataService.deleteNotebook(id); }
     catch (error) { console.error('Erro ao deletar o caderno:', error); }
   }
 
@@ -419,8 +394,8 @@ export class Notebooks implements OnInit, OnDestroy {
     this.selectedNotebookId.set(id);
     // Se estamos no mobile e selecionamos um caderno, vamos para a visualização dele
     if (this.responsiveService.isMobile()) {
-        // A navegação via Router seria ideal aqui se tiveres uma rota para /notebooks/:id
-        // Mas como a tua UI controla via routerLink na lista, aqui apenas atualizamos o estado.
+      // A navegação via Router seria ideal aqui se tiveres uma rota para /notebooks/:id
+      // Mas como a tua UI controla via routerLink na lista, aqui apenas atualizamos o estado.
     }
   }
 
