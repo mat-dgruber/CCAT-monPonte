@@ -27,7 +27,7 @@ export const routes: Routes = [
                  loadComponent: () => import('./components/notebooks/notebooks').then(m => m.Notebooks)
                ,
                  children: [
-                   { path: ':notebookId/notes/:noteId', loadComponent: () => import('./components/note-editor/note-editor').then(m => m.NoteEditor) }
+                   { path: ':notebookId/notes/:noteId', loadComponent: () => import('./components/note-editor/note-editor').then(m => m.NoteEditor), runGuardsAndResolvers: 'always' }
                  ]},
               {path: 'settings', loadComponent: () => import('./components/settings/settings').then(m => m.SettingsComponent)},
           ]

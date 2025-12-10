@@ -13,6 +13,7 @@
       <h2 class="text-lg font-semibold text-gray-800 dark:text-white truncate">
         {{ currentNotebook()?.name || 'Notas' }}
         @if (showArchived()) { <span class="text-sm font-normal text-gray-500 ml-1">(Arquivadas)</span> }
+        @if (showTrashed()) { <span class="text-sm font-normal text-red-500 ml-1">(Lixeira)</span> }
       </h2>
       <button (click)="openCreateNoteModal()"
         class="p-2 -mr-2 text-gray-500 dark:text-dark-text-secondary rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
@@ -29,7 +30,7 @@
         <input type="text" placeholder="Buscar notas..." [value]="searchTerm()" (input)="onSearch($event)"
           class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300" />
       </div>
-      @if (!responsiveService.isMobile()) {
+      @if (!responsiveService.isMobile() && !showTrashed()) {
       <button (click)="openCreateNoteModal()"
         class="flex items-center flex-shrink p-2 bg-accent text-white rounded-lg hover:bg-opacity-90 text-sm font-medium whitespace-nowrap">
         <lucide-icon name="plus" size="18"></lucide-icon>

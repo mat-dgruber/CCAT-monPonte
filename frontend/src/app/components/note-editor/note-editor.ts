@@ -10,6 +10,7 @@ import { LucideAngularModule } from 'lucide-angular';
 
 // Componentes e Serviços
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
+import { HistoryModalComponent } from './modals/history-modal/history-modal.component';
 import { DataService, Note } from '../../services/data.service';
 import { NoteService } from '../../services/note.service';
 import { NotificationService } from '../../services/notification.service';
@@ -18,11 +19,13 @@ import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component'
 import { ResponsiveService } from '../../services/responsive';
 
 
+
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, StatsModalComponent, TiptapEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, StatsModalComponent, HistoryModalComponent, TiptapEditorComponent],
   templateUrl: './note-editor.html',
+
   styleUrls: ['./note-editor.css'],
   animations: [
     trigger('flyInOut', [
@@ -62,10 +65,12 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   currentMatchIndex: WritableSignal<number> = signal(0);
 
   showStatsModal: WritableSignal<boolean> = signal(false);
+  showHistoryModal: WritableSignal<boolean> = signal(false);
 
   private notebookId: string | null = null;
   private noteId: string | null = null;
   private lastSavedContent: string | null = null;
+  private lastVersionSavedTime: number = 0; // Timestamp of last history save
 
   private contentChanges = new Subject<string>();
   private titleChanges = new Subject<string>();
@@ -106,8 +111,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       switchMap(params => {
         this.notebookId = params.get('notebookId');
         this.noteId = params.get('noteId');
+        console.log(`NoteEditor: Route Params changed - NB: ${this.notebookId}, Note: ${this.noteId}`);
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
+          console.log(`NoteEditor: Fetching note...`);
           return this.dataService.getNote(this.notebookId, this.noteId);
         }
         return of(null);
@@ -152,6 +159,17 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       switchMap(content => {
         if (this.notebookId && this.noteId) {
           this.lastSavedContent = content; // Store the content we are about to save
+          
+          // --- History Saving Logic ---
+          // Save a version if more than 10 minutes have passed since last save
+          // OR if it's the first save of this session (handled by initial load snapshot maybe? No, let's do it here)
+          const now = Date.now();
+          if (now - this.lastVersionSavedTime > 2 * 60 * 1000) {
+              console.log('Auto-saving note version to history...');
+              this.noteService.saveVersion(this.noteId, content).catch(e => console.error('Error saving version', e));
+              this.lastVersionSavedTime = now;
+          }
+
           return this.dataService.updateNote(this.notebookId, this.noteId, { content });
         }
         return of(null);
@@ -271,6 +289,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   openStatsModal(): void { this.showStatsModal.set(true); this.closeMoreOptions(); }
   closeStatsModal(): void { this.showStatsModal.set(false); }
   closeMoreOptions(): void { this.showMoreOptions.set(false); }
+
+  openHistoryModal(): void { this.showHistoryModal.set(true); this.closeMoreOptions(); }
+  closeHistoryModal(): void { this.showHistoryModal.set(false); }
 
   deleteNote(): void {
     const noteToDelete = this.note();

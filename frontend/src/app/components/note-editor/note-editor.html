@@ -54,6 +54,12 @@
                     <span>Detalhes/Estatísticas</span>
                   </a>
                 </li>
+                <li>
+                  <a (click)="openHistoryModal()" class="flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent cursor-pointer">
+                    <lucide-icon name="history" size="16" class="stroke-current"></lucide-icon>
+                    <span>Histórico de Versões</span>
+                  </a>
+                </li>
                 <li class="border-t border-neutral dark:border-dark-border my-1"></li>
                 <li>
                   <a (click)="deleteNote()" class="flex items-center gap-2 px-4 py-2 text-sm text-error dark:text-red-500 hover:bg-neutral dark:hover:bg-dark-accent cursor-pointer">
@@ -136,3 +142,10 @@
   [note]="note()"
   (close)="closeStatsModal()"
 ></app-stats-modal>
+
+@if (showHistoryModal() && note()) {
+<app-history-modal
+  [noteId]="note()!.id"
+  (close)="closeHistoryModal()"
+></app-history-modal>
+}

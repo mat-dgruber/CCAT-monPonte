@@ -15,6 +15,8 @@ export interface Note {
   notebookId?: string;
   isPinned?: boolean;
   isArchived?: boolean;
+  isTrashed?: boolean;
+  trashedAt?: any;
 }
 
 
@@ -35,7 +37,9 @@ export class NoteService implements OnDestroy {
   isLoading: WritableSignal<boolean> = signal(false);
   loadingError: WritableSignal<boolean> = signal(false);
   activeNotebookId: WritableSignal<string | null> = signal(null);
+
   showArchived: WritableSignal<boolean> = signal(false);
+  showTrashed: WritableSignal<boolean> = signal(false);
 
   // Subject for delete requests
   private deleteNoteRequest = new Subject<Note>();
@@ -46,19 +50,21 @@ export class NoteService implements OnDestroy {
     const notebookChanges$ = combineLatest([
       this.authService.authState$,
       toObservable(this.activeNotebookId),
-      toObservable(this.showArchived)
+
+      toObservable(this.showArchived),
+      toObservable(this.showTrashed)
     ]);
 
     this.notesSubscription = notebookChanges$.pipe(
-      tap(([user, notebookId, showArchived]) => console.log(`NoteService: combineLatest - User: ${user ? user.uid : 'null'}, NotebookId: ${notebookId}, ShowArchived: ${showArchived}`)),
-      switchMap(([user, notebookId, showArchived]) => {
+      tap(([user, notebookId, showArchived, showTrashed]) => console.log(`NoteService: combining - NB: ${notebookId}, Arch: ${showArchived}, Trash: ${showTrashed}`)),
+      switchMap(([user, notebookId, showArchived, showTrashed]) => {
         if (user && notebookId) {
           this.isLoading.set(true);
           this.loadingError.set(false);
-          this.notes.set([]); // Limpa as notas imediatamente
+          this.notes.set([]); 
 
-          return this.dataService.getNotes(notebookId, false, showArchived).pipe(
-            tap(notes => console.log(`NoteService: Received ${notes.length} notes from DataService for notebookId: ${notebookId}`)),
+          return this.dataService.getNotes(notebookId, false, showArchived, showTrashed).pipe(
+            tap(notes => console.log(`NoteService: Received ${notes.length} notes`)),
             catchError(error => {
               console.error('Erro ao buscar notas:', error);
               this.loadingError.set(true);
@@ -84,6 +90,9 @@ export class NoteService implements OnDestroy {
     ).subscribe(user => {
       if (!user) {
         this.activeNotebookId.set(null);
+      } else {
+        // Run cleanup on login/init
+        this.dataService.cleanupTrash().catch(err => console.error('Error cleaning trash:', err));
       }
     });
   }
@@ -134,11 +143,33 @@ export class NoteService implements OnDestroy {
 
   deleteNote(noteId: string): Promise<void | null> {
     const notebookId = this.activeNotebookId();
-    if (!notebookId) {
-      console.error('Nenhum caderno ativo para deletar a nota.');
-      return Promise.resolve(null);
-    }
+    if (!notebookId) return Promise.resolve(null);
     return this.dataService.deleteNote(notebookId, noteId);
+  }
+
+  deleteNotePermanently(noteId: string): Promise<void | null> {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) return Promise.resolve(null);
+    return this.dataService.deleteNotePermanently(notebookId, noteId);
+  }
+
+  restoreNote(note: Note): Promise<void | null> {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) return Promise.resolve(null);
+    return this.dataService.restoreNote(notebookId, note.id);
+  }
+
+  // History Delegates
+  saveVersion(noteId: string, content: string): Promise<void | null> {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) return Promise.resolve(null);
+    return this.dataService.saveNoteVersion(notebookId, noteId, content);
+  }
+
+  getHistory(noteId: string) {
+    const notebookId = this.activeNotebookId();
+    if (!notebookId) return of([]);
+    return this.dataService.getNoteHistory(notebookId, noteId);
   }
 
   requestDeleteNote(note: Note) {

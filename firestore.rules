@@ -21,6 +21,10 @@ service cloud.firestore {
           // Access to notes is implicitly granted if the user can access the parent notebook,
           // which is already secured by the /users/{requestUserId} rule.
           allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+
+          match /history/{historyId} {
+            allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
+          }
         } // End of match /notes/{noteId}
       } // End of match /notebooks/{notebookId}
     } // End of match /users/{requestUserId}

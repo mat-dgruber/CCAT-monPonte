@@ -73,7 +73,9 @@ export class NoteColumn implements OnInit, OnDestroy {
   });
 
   // Signal para controlar a visualização (Ativas vs Arquivadas)
+  // Signal para controlar a visualização (Ativas vs Arquivadas)
   showArchived: Signal<boolean> = this.noteService.showArchived;
+  showTrashed: Signal<boolean> = this.noteService.showTrashed;
 
   // As notas agora vêm do NoteService
   notes: Signal<Note[]> = this.noteService.notes;
@@ -140,29 +142,44 @@ export class NoteColumn implements OnInit, OnDestroy {
       // Context menu for a specific note
       this.selectNote(note.id); // Select the note first
       this.menuItems = [
-        { label: 'Editar Nota', icon: 'pi pi-pencil', command: () => this.selectNote(note.id) },
-        { label: 'Deletar Nota', icon: 'pi pi-trash', command: () => this.noteService.requestDeleteNote(note) },
+        { label: 'Editar Nota', icon: 'pi pi-pencil', command: () => this.selectNote(note.id), visible: !this.showTrashed() },
+        { label: 'Deletar Nota', icon: 'pi pi-trash', command: () => this.noteService.requestDeleteNote(note), visible: !this.showTrashed() },
+        { label: 'Restaurar Nota', icon: 'pi pi-refresh', command: () => this.noteService.restoreNote(note), visible: !!this.showTrashed() },
+        { label: 'Excluir Permanentemente', icon: 'pi pi-times', command: () => {
+             if(confirm('Tem certeza? Essa ação não pode ser desfeita.')) this.noteService.deleteNotePermanently(note.id);
+          }, visible: !!this.showTrashed() },
         {
+
           label: note.isArchived ? 'Desarquivar Nota' : 'Arquivar Nota',
           icon: note.isArchived ? 'pi pi-folder-open' : 'pi pi-box',
           command: () => this.noteService.updateNoteArchivedStatus(note, !note.isArchived)
         },
         { separator: true },
-        { label: 'Nova Nota', icon: 'pi pi-plus', command: () => this.openCreateNoteModal() }
+        { label: 'Nova Nota', icon: 'pi pi-plus', command: () => this.openCreateNoteModal() },
+        { separator: true },
+        {
+          label: this.showTrashed() ? 'Sair da Lixeira' : 'Ver Lixeira',
+          icon: 'pi pi-trash',
+          command: () => {
+             this.noteService.showArchived.set(false);
+             this.noteService.showTrashed.set(!this.showTrashed());
+          }
+        }
       ];
     } else {
       // Context menu for the background (general actions)
       this.menuItems = [
-        { label: 'Nova Nota', icon: 'pi pi-file', command: () => this.openCreateNoteModal() },
+        { label: 'Nova Nota', icon: 'pi pi-file', command: () => this.openCreateNoteModal(), visible: !this.showTrashed() },
         {
           label: 'Novo Caderno',
           icon: 'pi pi-folder',
-          command: () => this.createNotebookClicked.emit()
+          command: () => this.createNotebookClicked.emit(),
+          visible: !this.showTrashed()
         },
         {
           label: 'Renomear Caderno',
           icon: 'pi pi-pencil',
-          visible: !!this.notebookIdSignal(),
+          visible: !!this.notebookIdSignal() && !this.showTrashed(),
           command: () => {
             const currentNotebook = this.currentNotebook();
             if (currentNotebook) {
@@ -178,7 +195,19 @@ export class NoteColumn implements OnInit, OnDestroy {
         {
           label: this.showArchived() ? 'Ver Notas Ativas' : 'Ver Notas Arquivadas',
           icon: this.showArchived() ? 'pi pi-list' : 'pi pi-history',
-          command: () => this.noteService.showArchived.set(!this.showArchived())
+          command: () => {
+             this.noteService.showTrashed.set(false);
+             this.noteService.showArchived.set(!this.showArchived());
+          },
+          visible: !this.showTrashed()
+        },
+        {
+          label: this.showTrashed() ? 'Sair da Lixeira' : 'Ver Lixeira',
+          icon: 'pi pi-trash',
+          command: () => {
+             this.noteService.showArchived.set(false);
+             this.noteService.showTrashed.set(!this.showTrashed());
+          }
         }
       ];
     }
@@ -193,8 +222,12 @@ export class NoteColumn implements OnInit, OnDestroy {
     document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     this.noteMenuItems = [
-      { label: 'Editar Nota', icon: 'pi pi-pencil', command: () => this.selectNote(note.id) },
-      { label: 'Deletar Nota', icon: 'pi pi-trash', command: () => this.noteService.requestDeleteNote(note) },
+      { label: 'Editar Nota', icon: 'pi pi-pencil', command: () => this.selectNote(note.id), visible: !this.showTrashed() },
+      { label: 'Deletar Nota', icon: 'pi pi-trash', command: () => this.noteService.requestDeleteNote(note), visible: !this.showTrashed() },
+      { label: 'Restaurar Nota', icon: 'pi pi-refresh', command: () => this.noteService.restoreNote(note), visible: !!this.showTrashed() },
+      { label: 'Excluir Permanentemente', icon: 'pi pi-times', command: () => { 
+           if(confirm('Tem certeza?')) this.noteService.deleteNotePermanently(note.id); 
+        }, visible: !!this.showTrashed() },
       {
         label: note.isArchived ? 'Desarquivar Nota' : 'Arquivar Nota',
         icon: note.isArchived ? 'pi pi-folder-open' : 'pi pi-box',
