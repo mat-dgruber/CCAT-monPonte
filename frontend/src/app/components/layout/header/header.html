@@ -43,6 +43,12 @@
                   <lucide-icon name="settings" size="16"></lucide-icon>
                   <span>Configurações</span>
                 </a>
+                @if (installPrompt()) {
+                  <button (click)="installApp()" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent">
+                    <lucide-icon name="download" size="16"></lucide-icon>
+                    <span>Instalar App</span>
+                  </button>
+                }
                 <button (click)="logout()" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent">
                   <lucide-icon name="log-out" size="16"></lucide-icon>
                   <span>Sair</span>
@@ -53,7 +59,7 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button (click)="toggleMobileMenu(); $event.stopPropagation()" class="md:hidden p-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent">
+        <button (click)="toggleMobileMenu(); $event.stopPropagation()" aria-label="Menu principal" class="md:hidden p-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent">
           <lucide-icon name="menu" size="22"></lucide-icon>
         </button>
       </nav>
@@ -77,6 +83,14 @@
             <span>Configurações</span>
         </div>
       </a>
+      @if (installPrompt()) {
+        <button (click)="installApp()" class="w-full block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary text-left border-b border-neutral dark:border-dark-border-light">
+          <div class="flex items-center gap-2">
+            <lucide-icon name="download" size="16"></lucide-icon>
+            <span>Instalar App</span>
+          </div>
+        </button>
+      }
       <button (click)="logout()" class="w-full block px-4 py-3 text-base text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-secondary text-left">
         <div class="flex items-center gap-2">
             <lucide-icon name="log-out" size="16"></lucide-icon>

@@ -31,6 +31,7 @@
     "@angular/platform-browser": "^20.3.0",
     "@angular/platform-browser-dynamic": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@angular/service-worker": "^21.0.3",
     "@floating-ui/dom": "^1.7.4",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tiptap/core": "^3.10.2",

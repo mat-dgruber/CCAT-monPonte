@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
 import { ResponsiveService } from './services/responsive';
 import { ThemeService } from './services/theme';
+import { PwaService } from './services/pwa.service';
 import { Observable } from 'rxjs';
 import { User } from 'firebase/auth';
 
@@ -20,7 +21,8 @@ import { User } from 'firebase/auth';
 export class AppComponent {
   private authService = inject(AuthService);
   private responsiveService = inject(ResponsiveService);
-  private themeService = inject(ThemeService); // Ensure ThemeService starts immediately
+  private themeService = inject(ThemeService); 
+  private pwaService = inject(PwaService); // PwaService initializes listener
   authState$: Observable<User | null> = this.authService.authState$;
 
   constructor() {

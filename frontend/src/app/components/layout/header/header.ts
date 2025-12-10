@@ -2,6 +2,7 @@ import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth';
+import { PwaService } from '../../../services/pwa.service';
 import { Observable } from 'rxjs'; 
 import { User } from 'firebase/auth';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,6 +17,7 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
 })
 export class HeaderComponent {
   private authService = inject(AuthService);
+  private pwaService = inject(PwaService);
   private router = inject(Router);
   public authState$: Observable<User | null> = this.authService.authState$;
   isMobileMenuOpen: WritableSignal<boolean> = signal(false);
@@ -27,6 +29,15 @@ export class HeaderComponent {
 
   closeMobileMenu() {
     this.isMobileMenuOpen.set(false);
+  }
+
+  // PWA via Service
+  installPrompt = this.pwaService.installPrompt;
+
+  async installApp() {
+    await this.pwaService.installApp();
+    this.closeUserMenu();
+    this.closeMobileMenu();
   }
 
   toggleUserMenu() {
