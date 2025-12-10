@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
 import { ResponsiveService } from './services/responsive';
+import { ThemeService } from './services/theme';
 import { Observable } from 'rxjs';
 import { User } from 'firebase/auth';
 
@@ -19,6 +20,7 @@ import { User } from 'firebase/auth';
 export class AppComponent {
   private authService = inject(AuthService);
   private responsiveService = inject(ResponsiveService);
+  private themeService = inject(ThemeService); // Ensure ThemeService starts immediately
   authState$: Observable<User | null> = this.authService.authState$;
 
   constructor() {

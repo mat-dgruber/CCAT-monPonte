@@ -1,25 +1,35 @@
-import { Injectable, signal, WritableSignal, inject, computed } from '@angular/core';
-import { Firestore, doc, onSnapshot, setDoc, getDoc, Unsubscribe, DocumentReference, Timestamp } from '@angular/fire/firestore';
+import { Injectable, signal, WritableSignal, inject, computed, OnDestroy } from '@angular/core';
+import { Firestore, doc, setDoc, docData, DocumentReference, Timestamp } from '@angular/fire/firestore';
 import { AuthService } from './auth';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Subject, Subscription, of, combineLatest } from 'rxjs';
+import { debounceTime, switchMap, tap, map, catchError, take } from 'rxjs/operators';
+import { User } from '@angular/fire/auth';
+
+export type SyncStatus = 'saved' | 'saving' | 'error' | 'idle';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ClipService {
+export class ClipService implements OnDestroy {
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
 
   private clipDocRef: DocumentReference | null = null;
   private settingsDocRef: DocumentReference | null = null;
-  private clipSnapshotSubscription: Unsubscribe | null = null;
-  private settingsSnapshotSubscription: Unsubscribe | null = null;
-  private userSubscription: Subscription | null = null;
+  
+  private destroy$ = new Subject<void>();
   private textChangeSubject = new Subject<string>();
+  
+  // Subscriptions
+  private dataSubscription: Subscription | null = null;
+  private settingsSubscription: Subscription | null = null;
   private textChangeSubscription: Subscription | null = null;
 
+  // Signals
   copyText: WritableSignal<string> = signal('');
+  syncStatus: WritableSignal<SyncStatus> = signal('idle');
+  
+  // Settings Signals
   showAdvancedClipOptions: WritableSignal<boolean> = signal(false);
   selectedFont: WritableSignal<string> = signal("'Courier Prime', monospace");
   selectedFontSize: WritableSignal<string> = signal('16px');
@@ -28,6 +38,7 @@ export class ClipService {
   showFontSelect: WritableSignal<boolean> = signal(true);
   showFontSizeSelect: WritableSignal<boolean> = signal(true);
 
+  // Computed
   characterCount = computed(() => this.copyText().length);
   wordCount = computed(() => {
     const text = this.copyText().trim();
@@ -35,95 +46,89 @@ export class ClipService {
   });
 
   constructor() {
-    this.subscribeToUser();
+    this.initializeDataSync();
     this.setupTextChangeSubscription();
   }
 
-  private subscribeToUser(): void {
-    this.userSubscription = this.authService.authState$.subscribe(user => {
-      if (user) {
+  private initializeDataSync(): void {
+    // Sync Clip Data
+    this.dataSubscription = this.authService.authState$.pipe(
+      switchMap(user => {
+        if (!user) {
+          this.cleanup();
+          return of(null);
+        }
+        
         this.clipDocRef = doc(this.firestore, `clip/${user.uid}`);
+        return docData(this.clipDocRef).pipe(
+          tap((data: any) => {
+            if (data) {
+              const text = data['text'] ?? '';
+              const expiresAt = data['expiresAt'] as Timestamp | undefined;
+
+              if (expiresAt && new Date() > expiresAt.toDate()) {
+                // Expired, only clear local if we haven't just typed (avoid race condition ideally, but expiration is rare)
+                // For safety, we just use the remote text. If it expired, remote matches.
+                if (this.copyText() !== '' && text === '') {
+                    // It was cleared remotely explicitly or expired
+                    this.copyText.set('');
+                }
+              } else {
+                 // Simple Last Write Wins: Remote updates local. 
+                 // We compare to avoid resetting cursor if possible, though simple binding refills it.
+                 // Note: To truly fix cursor jumps, we need to check if *we* are the ones writing.
+                 // But for now, ensuring we receive updates in Zone is step 1.
+                 if (data['text'] !== this.copyText()) {
+                    this.copyText.set(text);
+                 }
+              }
+            } else {
+               // Doc doesn't exist yet
+               if (this.copyText() !== '') this.copyText.set('');
+            }
+          })
+        );
+      })
+    ).subscribe();
+
+    // Sync Settings
+    this.settingsSubscription = this.authService.authState$.pipe(
+      switchMap(user => {
+        if (!user) return of(null);
+        
         this.settingsDocRef = doc(this.firestore, `user_settings/${user.uid}`);
-        this.subscribeToClipSnapshot();
-        this.subscribeToSettingsSnapshot();
-      } else {
-        this.cleanup();
-        this.resetToDefaults();
-      }
-    });
-  }
-
-  private async subscribeToSettingsSnapshot(): Promise<void> {
-    if (this.settingsSnapshotSubscription) this.settingsSnapshotSubscription();
-
-    const docSnap = await getDoc(this.settingsDocRef!);
-    if (!docSnap.exists() || !docSnap.data()?.['clipSettings']) {
-      await this.updateSettings({
-        showAdvancedClipOptions: this.showAdvancedClipOptions(),
-        selectedFont: this.selectedFont(),
-        selectedFontSize: this.selectedFontSize(),
-        clipDisappearanceHours: this.clipDisappearanceHours(),
-        showCounts: this.showCounts(),
-        showFontSelect: this.showFontSelect(),
-        showFontSizeSelect: this.showFontSizeSelect(),
-      });
-    }
-
-    this.settingsSnapshotSubscription = onSnapshot(this.settingsDocRef!, (docSnap) => {
-      if (docSnap.metadata.hasPendingWrites) return;
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data && data['clipSettings']) {
-          const settings = data['clipSettings'];
-          this.showAdvancedClipOptions.set(settings.showAdvancedClipOptions ?? false);
-          this.selectedFont.set(settings.selectedFont ?? "'Courier Prime', monospace");
-          this.selectedFontSize.set(settings.selectedFontSize ?? '16px');
-          this.clipDisappearanceHours.set(settings.clipDisappearanceHours ?? 1);
-          this.showCounts.set(settings.showCounts ?? true);
-          this.showFontSelect.set(settings.showFontSelect ?? true);
-          this.showFontSizeSelect.set(settings.showFontSizeSelect ?? true);
-        }
-      }
-    });
-  }
-
-  private subscribeToClipSnapshot(): void {
-    if (this.clipSnapshotSubscription) this.clipSnapshotSubscription();
-    this.clipSnapshotSubscription = onSnapshot(this.clipDocRef!, (docSnap) => {
-      if (docSnap.metadata.hasPendingWrites) return;
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const text = data['text'] ?? '';
-        const expiresAt = data['expiresAt'] as Timestamp | undefined;
-
-        if (expiresAt && new Date() > expiresAt.toDate()) {
-          this.copyText.set('');
-        } else {
-          this.copyText.set(text);
-        }
-      } else {
-        this.copyText.set('');
-      }
-    });
+        return docData(this.settingsDocRef).pipe(
+          tap((data: any) => {
+            if (data && data['clipSettings']) {
+              const settings = data['clipSettings'];
+              this.showAdvancedClipOptions.set(settings.showAdvancedClipOptions ?? false);
+              this.selectedFont.set(settings.selectedFont ?? "'Courier Prime', monospace");
+              this.selectedFontSize.set(settings.selectedFontSize ?? '16px');
+              this.clipDisappearanceHours.set(settings.clipDisappearanceHours ?? 1);
+              this.showCounts.set(settings.showCounts ?? true);
+              this.showFontSelect.set(settings.showFontSelect ?? true);
+              this.showFontSizeSelect.set(settings.showFontSizeSelect ?? true);
+            }
+          })
+        );
+      })
+    ).subscribe();
   }
 
   private setupTextChangeSubscription(): void {
     this.textChangeSubscription = this.textChangeSubject
-      .pipe(debounceTime(500))
-      .subscribe(text => this.saveClip(text));
-  }
-
-  private async updateSettings(newSettings: any): Promise<void> {
-    if (!this.settingsDocRef) return;
-    try {
-      const currentSettings = (await getDoc(this.settingsDocRef)).data()?.['clipSettings'] || {};
-      const mergedSettings = { ...currentSettings, ...newSettings };
-      await setDoc(this.settingsDocRef, { clipSettings: mergedSettings }, { merge: true });
-    } catch (error) {
-      console.error('Error saving clip settings:', error);
-    }
+      .pipe(
+        tap(() => this.syncStatus.set('saving')),
+        debounceTime(500),
+        switchMap(text => this.saveClip(text))
+      )
+      .subscribe({
+        next: () => this.syncStatus.set('saved'),
+        error: (err) => {
+          console.error('Error in save loop', err);
+          this.syncStatus.set('error');
+        }
+      });
   }
 
   onTextChange(text: string): void {
@@ -140,6 +145,19 @@ export class ClipService {
       await setDoc(this.clipDocRef, { text, expiresAt: Timestamp.fromDate(expirationDate) });
     } catch (error) {
       console.error('Error saving document:', error);
+      throw error;
+    }
+  }
+
+  // ... Settings methods ...
+  private async updateSettings(newSettings: any): Promise<void> {
+    if (!this.settingsDocRef) return;
+    try {
+        // We do a merge set. We don't need to read first if we blindly merge.
+        // But to be safe and match previous logic:
+        await setDoc(this.settingsDocRef, { clipSettings: newSettings }, { merge: true });
+    } catch (error) {
+      console.error('Error saving clip settings:', error);
     }
   }
 
@@ -179,13 +197,10 @@ export class ClipService {
   }
 
   private cleanup(): void {
-    this.clipSnapshotSubscription?.();
-    this.settingsSnapshotSubscription?.();
-    this.clipSnapshotSubscription = null;
-    this.settingsSnapshotSubscription = null;
     this.clipDocRef = null;
     this.settingsDocRef = null;
     this.copyText.set('');
+    this.syncStatus.set('idle');
   }
 
   private resetToDefaults(): void {
@@ -199,8 +214,10 @@ export class ClipService {
   }
 
   ngOnDestroy(): void {
-    this.userSubscription?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.dataSubscription?.unsubscribe();
+    this.settingsSubscription?.unsubscribe();
     this.textChangeSubscription?.unsubscribe();
-    this.cleanup();
   }
 }

@@ -23,16 +23,17 @@ service cloud.firestore {
           allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
         } // End of match /notes/{noteId}
       } // End of match /notebooks/{notebookId}
-
-      // --- REGRAS PARA O CLIP ---
-      match /clip/{clipId} { // Changed from {userId} to {clipId} as it's a subcollection
-        allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
-      }
-
-      // --- REGRAS PARA CONFIGURAÇÕES DE USUÁRIO ---
-      match /user_settings/{settingsId} { // Changed from {userId} to {settingsId} as it's a subcollection
-        allow read, write: if isSignedIn() && request.auth.uid == requestUserId;
-      }
     } // End of match /users/{requestUserId}
+
+    // --- REGRAS PARA O CLIP ---
+    match /clip/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // --- REGRAS PARA CONFIGURAÇÕES DE USUÁRIO ---
+    match /user_settings/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
   }
 }

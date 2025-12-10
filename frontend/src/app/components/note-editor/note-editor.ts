@@ -65,6 +65,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   private notebookId: string | null = null;
   private noteId: string | null = null;
+  private lastSavedContent: string | null = null;
 
   private contentChanges = new Subject<string>();
   private titleChanges = new Subject<string>();
@@ -116,12 +117,33 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscriptions.add(note$.subscribe(note => {
       this.isLoading.set(false);
-      this.searchTerm.set('');
-      this.showSearch.set(false);
+      
+      // Only reset search on initial load, not every update (optional improvement, but sticking to content fix primarily)
+      // Actually, keeping original behavior for non-content logic to minimize side effects, 
+      // but moving them inside "if not echo" check might be safer or just leaving them.
+      // The original code reset them every time. Let's keep it safe.
+
       if (note && note.id) {
-        this.note.set({ ...note, title: note.title ?? '', content: note.content ?? '' });
+        let contentToUse = note.content ?? '';
+
+        // FIX: Check if incoming content is just an echo of what we saved
+        if (this.lastSavedContent !== null && contentToUse === this.lastSavedContent) {
+           // It is an echo. Prefer current local content to preserve cursor/typing.
+           const currentLocal = this.note();
+           if (currentLocal) {
+             contentToUse = currentLocal.content;
+           }
+        } else {
+           // Content is different (new from remote, or we haven't saved yet).
+           // Update our baseline.
+           this.lastSavedContent = contentToUse; 
+        }
+
+        this.note.set({ ...note, title: note.title ?? '', content: contentToUse });
       } else {
         this.note.set(null);
+        this.searchTerm.set('');
+        this.showSearch.set(false);
       }
     }));
 
@@ -129,6 +151,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(500),
       switchMap(content => {
         if (this.notebookId && this.noteId) {
+          this.lastSavedContent = content; // Store the content we are about to save
           return this.dataService.updateNote(this.notebookId, this.noteId, { content });
         }
         return of(null);

@@ -32,6 +32,23 @@
           </button>
         </div>
 
+        <!-- Sync Status Indicator -->
+        <div class="flex items-center gap-2 text-sm font-medium transition-colors duration-200"
+             [ngClass]="{
+               'text-neutral dark:text-dark-text-secondary': clipService.syncStatus() === 'idle',
+               'text-accent dark:text-blue-400': clipService.syncStatus() === 'saving',
+               'text-success dark:text-green-400': clipService.syncStatus() === 'saved',
+               'text-error dark:text-red-400': clipService.syncStatus() === 'error'
+             }">
+          @if (clipService.syncStatus() === 'saving') {
+            <span class="animate-pulse">Salvando...</span>
+          } @else if (clipService.syncStatus() === 'saved') {
+            <span>Salvo</span>
+          } @else if (clipService.syncStatus() === 'error') {
+            <span>Erro ao salvar</span>
+          }
+        </div>
+
         @if (clipService.showAdvancedClipOptions() && clipService.showCounts()) {
           <div class="text-sm text-text dark:text-dark-text-secondary font-mono">
             <span>Caracteres: {{ clipService.characterCount() }}</span>
