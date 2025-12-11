@@ -18,6 +18,51 @@
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
+  "display_override": ["window-controls-overlay"],
   "start_url": "/",
-  "scope": "/"
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Novo Clip",
+      "short_name": "Clip",
+      "description": "Abrir área de transferência",
+      "url": "/clip",
+      "icons": [{ "src": "/web-app-manifest-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Meus Cadernos",
+      "short_name": "Cadernos",
+      "description": "Ver meus cadernos",
+      "url": "/notebooks",
+      "icons": [{ "src": "/web-app-manifest-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+monclip",
+      "url": "/?link=%s"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "monClip Acesso Rápido",
+      "description": "Acesse seu Clip e Cadernos rapidamente",
+      "tag": "monclip-quick-access",
+      "template": "widget",
+      "ms_ac_template": "widgets/widget.json",
+      "data": { "content": "static" },
+      "type": "application/json",
+      "screenshots": []
+    }
+  ]
 }

@@ -17,6 +17,7 @@ import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
 import { ResponsiveService } from '../../services/responsive';
+import { PwaService } from '../../services/pwa.service';
 
 
 
@@ -46,6 +47,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private dataService = inject(DataService);
   private noteService = inject(NoteService);
   private notificationService = inject(NotificationService);
+  private pwaService = inject(PwaService);
   private location = inject(Location);
   themeService = inject(ThemeService);
   responsiveService = inject(ResponsiveService);
@@ -56,6 +58,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   showMoreOptions: WritableSignal<boolean> = signal(false);
   tagInput: WritableSignal<string> = signal('');
   allTags: WritableSignal<string[]> = signal([]);
+
+  // Wake Lock
+  isWakeLockActive: WritableSignal<boolean> = signal(false);
 
   
 
@@ -316,4 +321,62 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   navigateBack(): void {
     this.router.navigate(['/notebooks']);
   }
+
+  async toggleWakeLock() {
+    if (this.isWakeLockActive()) {
+      await this.pwaService.releaseWakeLock();
+      this.isWakeLockActive.set(false);
+      this.notificationService.showInfo('Modo Leitura desativado');
+    } else {
+      const success = await this.pwaService.requestWakeLock();
+      if (success) {
+        this.isWakeLockActive.set(true);
+        this.notificationService.showSuccess('Modo Leitura ativado (Tela não desligará)');
+      } else {
+        this.notificationService.showError('Seu navegador não suporta Wake Lock');
+      }
+    }
+    this.closeMoreOptions();
+    async exportNote() {
+    if (!this.note()) return;
+    const currentNote = this.note()!;
+    const title = (currentNote.title || 'Sem Titulo').replace(/[^a-z0-9]/gi, '_');
+    const content = currentNote.content || '';
+    
+    // Modern API
+    if ('showSaveFilePicker' in window) {
+      try {
+        const handle = await (window as any).showSaveFilePicker({
+          suggestedName: `${title}.html`,
+          types: [{
+            description: 'HyperText Markup Language',
+            accept: { 'text/html': ['.html'] },
+          }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        this.notificationService.showSuccess('Arquivo exportado com sucesso!');
+        return;
+      } catch (err) {
+        if ((err as any).name !== 'AbortError') {
+          console.error(err);
+        } else {
+             return; // User cancelled
+        }
+      }
+    } 
+
+    // Legacy Fallback
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.html`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    this.notificationService.showSuccess('Download iniciado!');
+    this.closeMoreOptions();
+  }
+}
 }

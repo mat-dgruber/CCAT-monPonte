@@ -60,6 +60,18 @@
                     <span>Histórico de Versões</span>
                   </a>
                 </li>
+                <li>
+                  <a (click)="toggleWakeLock()" class="flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent cursor-pointer">
+                    <lucide-icon [name]="isWakeLockActive() ? 'eye-off' : 'eye'" size="16" class="stroke-current"></lucide-icon>
+                    <span>{{ isWakeLockActive() ? 'Desativar Modo Leitura' : 'Modo Leitura (Tela Ligada)' }}</span>
+                  </a>
+                </li>
+                <li>
+                  <a (click)="exportNote()" class="flex items-center gap-2 px-4 py-2 text-sm text-text dark:text-dark-text hover:bg-neutral dark:hover:bg-dark-accent cursor-pointer">
+                    <lucide-icon name="file-down" size="16" class="stroke-current"></lucide-icon>
+                    <span>Exportar Arquivo</span>
+                  </a>
+                </li>
                 <li class="border-t border-neutral dark:border-dark-border my-1"></li>
                 <li>
                   <a (click)="deleteNote()" class="flex items-center gap-2 px-4 py-2 text-sm text-error dark:text-red-500 hover:bg-neutral dark:hover:bg-dark-accent cursor-pointer">

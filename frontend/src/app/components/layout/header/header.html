@@ -1,6 +1,6 @@
 <header class="bg-background dark:bg-dark-primary text-text dark:text-white rounded-b-3xl shadow-md transition-colors duration-300">
-  <div class="container mx-auto flex items-center justify-between p-4" role="banner">
-    <div class="flex items-center gap-4">
+  <div class="container mx-auto flex items-center justify-between p-4 titlebar-drag-region" role="banner">
+    <div class="flex items-center gap-4 titlebar-no-drag">
       <img src="assets/logo-ccat.png" alt="monNote Logo" class="h-10 w-10">
       <h1 class="text-2xl font-bold">
         <a routerLink="/" aria-label="Ir para a página inicial" class="hover:text-accent dark:hover:text-indigo-600 flex items-center">
@@ -11,7 +11,7 @@
     @if (authState$ | async; as user) {
       <nav aria-label="Navegação principal" class="flex items-center w-full">
         <!-- Desktop Links -->
-        <div class="hidden md:flex items-center gap-4 mx-5">
+        <div class="hidden md:flex items-center gap-4 mx-5 titlebar-no-drag">
           <a routerLink="/clip"
              routerLinkActive="active-link"
              [routerLinkActiveOptions]="{ exact: true }"
@@ -28,14 +28,14 @@
         <div class="flex-grow"></div>
 
         <!-- User Menu -->
-        <div class="hidden md:flex items-center gap-4">
+        <div class="hidden md:flex items-center gap-4 titlebar-no-drag">
           <div class="relative" (clickOutside)="closeUserMenu()">
             <button (click)="toggleUserMenu()" class="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent focus:outline-none transition-all duration-200">
               <div class="w-8 h-8 rounded-full bg-accent dark:bg-dark-accent flex items-center justify-center text-white font-bold text-sm">
                 {{ getInitials(user) }}
               </div>
               <span class="hidden sm:inline text-sm font-medium text-text dark:text-dark-text">Olá, {{ getGreetingName(user) }}</span>
-                        </button>
+            </button>
 
             @if (isUserMenuOpen()) {
               <div class="absolute right-0 mt-2 w-48 bg-background dark:bg-dark-primary rounded-md shadow-lg py-1 z-50 border border-neutral dark:border-dark-secondary">
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button (click)="toggleMobileMenu(); $event.stopPropagation()" aria-label="Menu principal" class="md:hidden p-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent">
+        <button (click)="toggleMobileMenu(); $event.stopPropagation()" aria-label="Menu principal" class="md:hidden p-2 rounded-full hover:bg-neutral dark:hover:bg-dark-accent titlebar-no-drag">
           <lucide-icon name="menu" size="22"></lucide-icon>
         </button>
       </nav>

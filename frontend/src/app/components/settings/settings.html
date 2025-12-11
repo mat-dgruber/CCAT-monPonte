@@ -56,6 +56,15 @@
       </div>
     </div>
     
+    <!-- Seção de Notificações -->
+    <div class="bg-background dark:bg-dark-secondary p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-neutral dark:border-dark-border text-text dark:text-gray-300">Notificações</h3>
+      <p class="text-sm text-text dark:text-gray-300 mb-4">Receba alertas sobre novidades e lembretes.</p>
+      <button (click)="requestNotificationPermission()" class="px-4 py-2 bg-neutral dark:bg-dark-accent text-text dark:text-white rounded-md hover:bg-opacity-80 font-medium transition-colors duration-200">
+        Ativar Notificações
+      </button>
+    </div>
+
     <!-- Seção do Clip -->
     <!--<div class="bg-background dark:bg-dark-secondary p-6 rounded-lg shadow">
       <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-neutral dark:border-dark-border text-text dark:text-gray-300">Clip</h3>

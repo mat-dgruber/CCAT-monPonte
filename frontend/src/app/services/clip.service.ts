@@ -1,6 +1,7 @@
-import { Injectable, signal, WritableSignal, inject, computed, OnDestroy } from '@angular/core';
+import { Injectable, signal, WritableSignal, inject, computed, OnDestroy, effect } from '@angular/core';
 import { Firestore, doc, setDoc, docData, DocumentReference, Timestamp } from '@angular/fire/firestore';
 import { AuthService } from './auth';
+import { PwaService } from './pwa.service';
 import { Subject, Subscription, of, combineLatest } from 'rxjs';
 import { debounceTime, switchMap, tap, map, catchError, take } from 'rxjs/operators';
 import { User } from '@angular/fire/auth';
@@ -13,6 +14,7 @@ export type SyncStatus = 'saved' | 'saving' | 'error' | 'idle';
 export class ClipService implements OnDestroy {
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
+  private pwaService = inject(PwaService);
 
   private clipDocRef: DocumentReference | null = null;
   private settingsDocRef: DocumentReference | null = null;
@@ -46,6 +48,15 @@ export class ClipService implements OnDestroy {
   });
 
   constructor() {
+    effect(() => {
+      const count = this.wordCount();
+      if (this.showCounts()) {
+         this.pwaService.setBadge(count);
+      } else {
+         this.pwaService.clearBadge();
+      }
+    });
+
     this.initializeDataSync();
     this.setupTextChangeSubscription();
   }

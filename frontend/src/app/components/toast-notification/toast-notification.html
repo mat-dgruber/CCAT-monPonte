@@ -21,6 +21,11 @@
           </div>
           <div class="ml-3 flex-1 pt-0.5 toast-message">
             <p class="text-sm font-medium text-gray-900">{{ toast.message }}</p>
+            @if (toast.action) {
+              <button (click)="toast.action.callback(); notificationService.remove(toast.id)" class="mt-2 text-sm font-bold text-accent dark:text-blue-400 hover:underline">
+                {{ toast.action.label }}
+              </button>
+            }
           </div>
         </div>
       </div>
