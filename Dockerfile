@@ -18,7 +18,10 @@ RUN npm run build -- --configuration production
 FROM nginx:alpine
 
 # Copy the build artifacts from the build stage to the Nginx server directory
-COPY --from=build /app/dist/monPonte/browser /usr/share/nginx/html
+COPY --from=build /app/dist/monClip/browser /usr/share/nginx/html
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80 to allow traffic to the Nginx server
 EXPOSE 80

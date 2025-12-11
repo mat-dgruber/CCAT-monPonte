@@ -62,7 +62,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   // Wake Lock
   isWakeLockActive: WritableSignal<boolean> = signal(false);
 
-  
+
 
   showSearch: WritableSignal<boolean> = signal(false);
   searchTerm: WritableSignal<string> = signal('');
@@ -129,9 +129,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscriptions.add(note$.subscribe(note => {
       this.isLoading.set(false);
-      
+
       // Only reset search on initial load, not every update (optional improvement, but sticking to content fix primarily)
-      // Actually, keeping original behavior for non-content logic to minimize side effects, 
+      // Actually, keeping original behavior for non-content logic to minimize side effects,
       // but moving them inside "if not echo" check might be safer or just leaving them.
       // The original code reset them every time. Let's keep it safe.
 
@@ -148,7 +148,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
         } else {
            // Content is different (new from remote, or we haven't saved yet).
            // Update our baseline.
-           this.lastSavedContent = contentToUse; 
+           this.lastSavedContent = contentToUse;
         }
 
         this.note.set({ ...note, title: note.title ?? '', content: contentToUse });
@@ -164,7 +164,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       switchMap(content => {
         if (this.notebookId && this.noteId) {
           this.lastSavedContent = content; // Store the content we are about to save
-          
+
           // --- History Saving Logic ---
           // Save a version if more than 10 minutes have passed since last save
           // OR if it's the first save of this session (handled by initial load snapshot maybe? No, let's do it here)
@@ -208,10 +208,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {}
 
-  
+
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe(); 
+    this.subscriptions.unsubscribe();
     this.destroy$.next(); // <--- Add this
     this.destroy$.complete(); // <--- Add this
   }
@@ -337,12 +337,14 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     this.closeMoreOptions();
-    async exportNote() {
+  }
+
+  async exportNote() {
     if (!this.note()) return;
     const currentNote = this.note()!;
     const title = (currentNote.title || 'Sem Titulo').replace(/[^a-z0-9]/gi, '_');
     const content = currentNote.content || '';
-    
+
     // Modern API
     if ('showSaveFilePicker' in window) {
       try {
@@ -365,7 +367,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
              return; // User cancelled
         }
       }
-    } 
+    }
 
     // Legacy Fallback
     const blob = new Blob([content], { type: 'text/html' });
@@ -378,5 +380,4 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
     this.notificationService.showSuccess('Download iniciado!');
     this.closeMoreOptions();
   }
-}
 }

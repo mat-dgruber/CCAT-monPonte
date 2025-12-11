@@ -109,10 +109,11 @@
               >
                 <p-listbox
                   [options]="notebookOptions()"
-                  [(ngModel)]="selectedNotebook"
+                  [ngModel]="selectedNotebook()"
                   (onChange)="onNotebookChange($event)"
                   [filter]="true"
                   optionLabel="label"
+                  optionValue="value"
                   [listStyle]="{ 'max-height': '250px' }"
                   [virtualScroll]="true"
                   [virtualScrollItemSize]="38"

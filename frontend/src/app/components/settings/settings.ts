@@ -77,6 +77,11 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  // --- Notifications ---
+  async requestNotificationPermission() {
+    await this.notificationService.requestPermission();
+  }
+
   // --- Account Settings ---
   async updateName() {
     if (!this.user || !this.displayName.trim()) {

@@ -64,6 +64,7 @@ node_modules/
 
 # dotenv environment variables file
 .env
+.env.*
 
 # dataconnect generated files
 .dataconnect
@@ -75,6 +76,23 @@ tmp/
 /frontend/dist
 /frontend/.angular
 
+# Environments (Secrets)
+frontend/src/environments/environment.ts
+
 # Editor folders
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

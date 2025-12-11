@@ -1,0 +1,1425 @@
+﻿
+> monclip@0.0.0 build:firebase
+> ng build --configuration production
+
+[33mÔØ»[39m Building...
+[32mÔ£ö[39m Building...
+Application bundle generation failed. [90.731 seconds] - 2025-12-11T13:16:44.087Z
+
+node.exe : 
+[1m[31m[31mX [41;3
+1m[[41;97mERROR[41;3
+1m][0m [1mTS2304: 
+Cannot find name 
+'firebaseConfig'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+No C:\Program Files\no
+dejs\npm.ps1:29 
+caractere:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([1m[31m   
+ [31mX...r-compile    
+r][0m:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+
+    src/app/app.config
+.ts:14:43:
+[37m      14 Ôöé     
+provideFirebaseApp(() 
+=> initializeApp([32m
+firebaseConfig[37m)),
+         ÔòÁ          
+                      
+            [32m~~~~~
+~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 
+'provideAuth'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:15:4:
+[37m      15 Ôöé     
+[32mprovideAuth[37m(
+() => getAuth()),
+         ÔòÁ     
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 
+'getAuth'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:15:22:
+[37m      15 Ôöé     
+provideAuth(() => 
+[32mgetAuth[37m()),
+         ÔòÁ          
+             
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 'provideFire
+store'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:16:4:
+[37m      16 Ôöé     
+[32mprovideFirestore
+[37m(() => initializeF
+irestore(getApp(), {
+         ÔòÁ     [32m
+~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 'initializeF
+irestore'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:16:27:
+[37m      16 Ôöé     
+provideFirestore(() 
+=> [32minitializeFire
+store[37m(getApp(), {
+         ÔòÁ          
+                  [32
+m~~~~~~~~~~~~~~~~~~~[
+0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 'persistentL
+ocalCache'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:17:18:
+[37m      17 Ôöé     
+  localCache: [32mper
+sistentLocalCache[37m
+(),
+         ÔòÁ          
+         [32m~~~~~~~~
+~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 'LucideAngul
+arModule'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:24:
+[37m      21 Ôöé     
+importProvidersFrom([
+32mLucideAngularModule
+[37m.pick({ 
+PlusCircle, Pen...
+         ÔòÁ          
+               [32m~~
+~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'PlusCircle'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:51:
+[37m      21 Ôöé ...L
+ucideAngularModule.pic
+k({ 
+[32mPlusCircle[37m, 
+Pencil, Trash2, 
+ArrowUpD...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Pencil'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:63:
+[37m      21 Ôöé 
+...larModule.pick({ 
+PlusCircle, 
+[32mPencil[37m, 
+Trash2, ArrowUpDown, 
+Searc...
+         ÔòÁ          
+                      
+ [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Trash2'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:71:
+[37m      21 Ôöé 
+...e.pick({ 
+PlusCircle, Pencil, 
+[32mTrash2[37m, 
+ArrowUpDown, Search, 
+X, Bo...
+         ÔòÁ          
+                      
+ [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'ArrowUpDown'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:79:
+[37m      21 Ôöé 
+...usCircle, Pencil, 
+Trash2, [32mArrowUpDo
+wn[37m, Search, X, 
+BookOpenText,...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Search'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:92:
+[37m      21 Ôöé 
+...Pencil, Trash2, 
+ArrowUpDown, 
+[32mSearch[37m, X, 
+BookOpenText, Menu, 
+Che...
+         ÔòÁ          
+                      
+ [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'X'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:100:
+[37m      21 Ôöé 
+..., Trash2, 
+ArrowUpDown, Search, 
+[32mX[37m, 
+BookOpenText, Menu, 
+CheckCirc...
+         ÔòÁ          
+                      
+   [32m^[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'BookOpenText'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:103:
+[37m      21 Ôöé 
+..., ArrowUpDown, 
+Search, X, [32mBookOp
+enText[37m, Menu, 
+CheckCircle2, XCi...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Menu'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:117:
+[37m      21 Ôöé 
+...own, Search, X, 
+BookOpenText, 
+[32mMenu[37m, 
+CheckCircle2, 
+XCircle, Sun,...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'CheckCircle2'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:123:
+[37m      21 Ôöé 
+...h, X, 
+BookOpenText, Menu, [
+32mCheckCircle2[37m, 
+XCircle, Sun, Moon, 
+Set...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'XCircle'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:137:
+[37m      21 Ôöé 
+...enText, Menu, 
+CheckCircle2, 
+[32mXCircle[37m, 
+Sun, Moon, Settings, 
+Plus,...
+         ÔòÁ          
+                      
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Sun'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:146:
+[37m      21 Ôöé ... 
+Menu, CheckCircle2, 
+XCircle, 
+[32mSun[37m, Moon, 
+Settings, Plus, 
+ArrowL...
+         ÔòÁ          
+                      
+  [32m~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Moon'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:151:
+[37m      21 Ôöé 
+..., CheckCircle2, 
+XCircle, Sun, 
+[32mMoon[37m, 
+Settings, Plus, 
+ArrowLeft, ...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Settings'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:157:
+[37m      21 Ôöé 
+...ircle2, XCircle, 
+Sun, Moon, 
+[32mSettings[37m, 
+Plus, ArrowLeft, 
+MoreVert...
+         ÔòÁ          
+                      
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Plus'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:167:
+[37m      21 Ôöé 
+...XCircle, Sun, 
+Moon, Settings, 
+[32mPlus[37m, 
+ArrowLeft, 
+MoreVertical, St...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'ArrowLeft'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:173:
+[37m      21 Ôöé 
+...Sun, Moon, 
+Settings, Plus, 
+[32mArrowLeft[37m, 
+MoreVertical, Star, 
+Bold,...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'MoreVertical'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:184:
+[37m      21 Ôöé 
+...ettings, Plus, 
+ArrowLeft, [32mMoreVe
+rtical[37m, Star, 
+Bold, Italic, Str...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Star'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:198:
+[37m      21 Ôöé 
+...lus, ArrowLeft, 
+MoreVertical, 
+[32mStar[37m, Bold, 
+Italic, 
+Strikethrough...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Bold'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:204:
+[37m      21 Ôöé 
+...rrowLeft, 
+MoreVertical, Star, 
+[32mBold[37m, 
+Italic, 
+Strikethrough, Pilc...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Italic'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:210:
+[37m      21 Ôöé 
+...t, MoreVertical, 
+Star, Bold, 
+[32mItalic[37m, 
+Strikethrough, 
+Pilcrow, Li...
+         ÔòÁ          
+                      
+ [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'Strikethrough'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:218:
+[37m      21 Ôöé 
+...cal, Star, Bold, 
+Italic, [32mStrikethr
+ough[37m, Pilcrow, 
+List, ListOrde...
+         ÔòÁ          
+                   
+[32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Pilcrow'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:233:
+[37m      21 Ôöé 
+...old, Italic, 
+Strikethrough, 
+[32mPilcrow[37m, 
+List, ListOrdered, 
+Code, Q...
+         ÔòÁ          
+                      
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'List'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:242:
+[37m      21 Ôöé 
+...alic, 
+Strikethrough, 
+Pilcrow, 
+[32mList[37m, 
+ListOrdered, Code, 
+Quote, M...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'ListOrdered'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:248:
+[37m      21 Ôöé 
+...kethrough, 
+Pilcrow, List, [32mLi
+stOrdered[37m, Code, 
+Quote, Minus, Unde...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Code'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:261:
+[37m      21 Ôöé 
+..., Pilcrow, List, 
+ListOrdered, 
+[32mCode[37m, 
+Quote, Minus, 
+Underline, Al...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Quote'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:267:
+[37m      21 Ôöé 
+...ow, List, 
+ListOrdered, Code, 
+[32mQuote[37m, 
+Minus, Underline, 
+AlignLeft...
+         ÔòÁ          
+                      
+ [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Minus'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:274:
+[37m      21 Ôöé 
+...t, ListOrdered, 
+Code, Quote, 
+[32mMinus[37m, 
+Underline, AlignLeft, 
+Align...
+         ÔòÁ          
+                      
+ [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Underline'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:281:
+[37m      21 Ôöé 
+...dered, Code, 
+Quote, Minus, 
+[32mUnderline[37m, 
+AlignLeft, 
+AlignCenter, A...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'AlignLeft'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:292:
+[37m      21 Ôöé 
+..., Quote, Minus, 
+Underline, 
+[32mAlignLeft[37m, 
+AlignCenter, 
+AlignRight, ...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'AlignCenter'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:303:
+[37m      21 Ôöé 
+...us, Underline, 
+AlignLeft, [32mAlignC
+enter[37m, 
+AlignRight, 
+AlignJustify...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'AlignRight'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:316:
+[37m      21 Ôöé 
+...e, AlignLeft, 
+AlignCenter, 
+[32mAlignRight[37m, 
+AlignJustify, Link, 
+Yout...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'AlignJustify'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:328:
+[37m      21 Ôöé ... 
+AlignCenter, 
+AlignRight, [32mAlign
+Justify[37m, Link, 
+Youtube, Highligh...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Link'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:342:
+[37m      21 Ôöé 
+...er, AlignRight, 
+AlignJustify, 
+[32mLink[37m, 
+Youtube, Highlighter, 
+Pin, ...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Youtube'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:348:
+[37m      21 Ôöé 
+...nRight, 
+AlignJustify, Link, 
+[32mYoutube[37m, 
+Highlighter, Pin, 
+ChevronU...
+         ÔòÁ          
+                      
+[32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'Highlighter'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:357:
+[37m      21 Ôöé 
+...gnJustify, Link, 
+Youtube, [32mHighligh
+ter[37m, Pin, 
+ChevronUp, ChevronD...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Pin'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:370:
+[37m      21 Ôöé 
+..., Link, Youtube, 
+Highlighter, 
+[32mPin[37m, 
+ChevronUp, 
+ChevronDown, File...
+         ÔòÁ          
+                      
+  [32m~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'ChevronUp'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:375:
+[37m      21 Ôöé 
+...Youtube, 
+Highlighter, Pin, 
+[32mChevronUp[37m, 
+ChevronDown, 
+FileText, Bu...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'ChevronDown'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:386:
+[37m      21 Ôöé 
+...hlighter, Pin, 
+ChevronUp, [32mChevro
+nDown[37m, FileText, 
+Bug, Info, Ell...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'FileText'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:399:
+[37m      21 Ôöé 
+...in, ChevronUp, 
+ChevronDown, 
+[32mFileText[37m, 
+Bug, Info, Ellipsis, 
+Copy...
+         ÔòÁ          
+                      
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Bug'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:409:
+[37m      21 Ôöé 
+...ronUp, 
+ChevronDown, 
+FileText, 
+[32mBug[37m, Info, 
+Ellipsis, Copy, 
+LogOut...
+         ÔòÁ          
+                      
+  [32m~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Info'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:414:
+[37m      21 Ôöé 
+..., ChevronDown, 
+FileText, Bug, 
+[32mInfo[37m, 
+Ellipsis, Copy, 
+LogOut, Che...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Ellipsis'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:420:
+[37m      21 Ôöé 
+...nDown, FileText, 
+Bug, Info, 
+[32mEllipsis[37m, 
+Copy, LogOut, 
+ChevronRigh...
+         ÔòÁ          
+                      
+[32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Copy'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:430:
+[37m      21 Ôöé 
+...ileText, Bug, 
+Info, Ellipsis, 
+[32mCopy[37m, 
+LogOut, ChevronRight, 
+Chevr...
+         ÔòÁ          
+                      
+  [32m~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'LogOut'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:436:
+[37m      21 Ôöé 
+..., Bug, Info, 
+Ellipsis, Copy, 
+[32mLogOut[37m, 
+ChevronRight, 
+ChevronLeft,...
+         ÔòÁ          
+                      
+ [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'ChevronRight'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:444:
+[37m      21 Ôöé 
+..., Ellipsis, Copy, 
+LogOut, [32mChevronRi
+ght[37m, 
+ChevronLeft, History, 
+D...
+         ÔòÁ          
+                    
+[32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 
+'ChevronLeft'. Either 
+declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:458:
+[37m      21 Ôöé 
+...s, Copy, LogOut, 
+ChevronRight, [32mChe
+vronLeft[37m, 
+History, Download })),
+         ÔòÁ          
+                      
+   
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS18004: No value 
+exists in scope for 
+the shorthand 
+property 'Download'. 
+Either declare one or 
+provide an 
+initializer.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/app.config
+.ts:21:480:
+[37m      21 Ôöé 
+...s, Copy, LogOut, 
+ChevronRight, 
+ChevronLeft, History, 
+[32mDownload[37m 
+})),
+         ÔòÁ          
+                      
+                      
+   [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2339: Property 
+'exportNote' does not 
+exist on type 
+'NoteEditor'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/components
+/note-editor/note-edit
+or.html:70:30:
+[37m      70 Ôöé     
+              <a (clic
+k)="[32mexportNote[3
+7m()" class="flex 
+items-cent...
+         ÔòÁ          
+                     
+[32m~~~~~~~~~~[0m
+
+  Error occurs in the 
+template of component 
+NoteEditor.
+
+    src/app/components
+/note-editor/note-edit
+or.ts:28:15:
+[37m      28 Ôöé   
+templateUrl: [32m'./n
+ote-editor.html'[37m,
+         ÔòÁ          
+      [32m~~~~~~~~~~~
+~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS1434: 
+Unexpected keyword or 
+identifier.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/components
+/note-editor/note-edit
+or.ts:340:4:
+[37m      340 Ôöé    
+ [32masync[37m 
+exportNote() {
+          ÔòÁ     
+[32m~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 
+'async'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/components
+/note-editor/note-edit
+or.ts:340:4:
+[37m      340 Ôöé    
+ [32masync[37m 
+exportNote() {
+          ÔòÁ     
+[32m~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS2304: Cannot 
+find name 
+'exportNote'.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/components
+/note-editor/note-edit
+or.ts:340:10:
+[37m      340 Ôöé    
+ async [32mexportNote
+[37m() {
+          ÔòÁ         
+  [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;9
+7mERROR[41;31m][0m 
+[1mTS1005: ';' 
+expected.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/components
+/note-editor/note-edit
+or.ts:340:23:
+[37m      340 Ôöé    
+ async exportNote() 
+[32m{[37m
+          ÔòÁ         
+               
+[32m^[0m
+
+[39m[22m
