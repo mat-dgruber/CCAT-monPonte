@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ClipService } from '../../services/clip.service';
+import { StorageService } from '../../services/storage.service';
+import { DataService } from '../../services/data.service';
 import { ThemeService, Theme, FontFamily } from '../../services/theme';
 import { FormsModule } from '@angular/forms';
 import { User } from 'firebase/auth';
@@ -23,8 +25,10 @@ export class SettingsComponent implements OnInit {
   private router = inject(Router);
   private notificationService = inject(NotificationService);
   private tutorialService = inject(TutorialService);
+  private storageService = inject(StorageService);
   clipService = inject(ClipService);
   themeService = inject(ThemeService);
+  private dataService = inject(DataService);
 
   user: User | null = null;
   displayName = '';
@@ -100,6 +104,43 @@ export class SettingsComponent implements OnInit {
       this.notificationService.showError('Falha ao atualizar o nome.');
     } finally {
       this.isUpdating = false;
+    }
+  }
+
+  async onAvatarSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Simple validation, service also validates
+    if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Por favor, selecione uma imagem.');
+        return;
+    }
+
+    this.isUpdating = true;
+    try {
+        if (!this.user) throw new Error('User not authenticated');
+
+        // 1. Upload to Storage
+        const downloadUrl = await new Promise<string>((resolve, reject) => {
+            this.storageService.uploadProfileImage(file, this.user!.uid).subscribe({
+                next: (url) => resolve(url),
+                error: (err) => reject(err)
+            });
+        });
+
+        // 2. Update Firestore
+        await this.dataService.updateUserProfileImage(downloadUrl);
+
+        // 3. Update Auth User Profile (for immediate UI update)
+        await this.authService.updateProfile({ photoURL: downloadUrl });
+
+        this.notificationService.showSuccess('Foto de perfil atualizada!');
+    } catch (error) {
+        console.error('Error uploading avatar:', error);
+        this.notificationService.showError('Erro ao atualizar foto de perfil.');
+    } finally {
+        this.isUpdating = false;
     }
   }
 

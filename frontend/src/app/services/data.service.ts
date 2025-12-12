@@ -18,10 +18,22 @@ import {
 } from '@angular/fire/firestore';
 import { from, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth';
-import { Note } from './note.service';
+// import { Note } from './note.service'; // Removed circular import
 import { Timestamp } from '@angular/fire/firestore';
 
-export type { Note };
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  tags?: string[];
+  createdAt?: any;
+  notebookId?: string;
+  isPinned?: boolean;
+  isArchived?: boolean;
+  isTrashed?: boolean;
+  trashedAt?: any;
+}
+
 export interface NoteHistory {
   id?: string;
   content: string;
@@ -416,6 +428,14 @@ export class DataService {
         // Mas como não posso mudar o import agora, vou deixar assim e monitorar.
         console.error("Error updating tutorial status:", err);
         throw err;
+    });
+  }
+  updateUserProfileImage(url: string): Promise<void> {
+    if (!this.userId) throw new Error('Usuário não autenticado para atualizar imagem de perfil.');
+    const userDocRef = doc(this.firestore, `users/${this.userId}`);
+    return updateDoc(userDocRef, { profile_image_url: url }).catch(error => {
+        console.error("Erro ao atualizar imagem de perfil:", error);
+        throw error;
     });
   }
 }

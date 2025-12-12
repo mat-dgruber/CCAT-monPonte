@@ -1,23 +1,12 @@
 import { Injectable, inject, signal, WritableSignal, OnDestroy, effect, NgZone } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { DataService } from './data.service';
+import { DataService, Note } from './data.service';
 import { AuthService } from './auth';
 import { of, Subject, combineLatest, Subscription } from 'rxjs';
 import { switchMap, catchError, takeUntil, tap, filter, map } from 'rxjs/operators';
 
-export interface Note {
-  id: string;
-  title: string;
-  content: string;
-  tags?: string[];
-  createdAt?: any;
-  notebookId?: string;
-  isPinned?: boolean;
-  isArchived?: boolean;
-  isTrashed?: boolean;
-  trashedAt?: any;
-}
+
 
 
 @Injectable({
@@ -61,7 +50,7 @@ export class NoteService implements OnDestroy {
         if (user && notebookId) {
           this.isLoading.set(true);
           this.loadingError.set(false);
-          this.notes.set([]); 
+          this.notes.set([]);
 
           return this.dataService.getNotes(notebookId, false, showArchived, showTrashed).pipe(
             tap(notes => console.log(`NoteService: Received ${notes.length} notes`)),
@@ -103,7 +92,7 @@ export class NoteService implements OnDestroy {
     this.notesSubscription?.unsubscribe();
   }
 
-  // --- Métodos de Ação --- 
+  // --- Métodos de Ação ---
 
   createNote(title: string, content: string, tags: string[] = [], isPinned: boolean = false): Promise<string | null> {
     const notebookId = this.activeNotebookId();

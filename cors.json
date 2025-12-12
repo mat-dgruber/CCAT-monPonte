@@ -1,0 +1,7 @@
+[
+  {
+    "origin": ["http://localhost:4200", "https://monponte.web.app", "https://ccat-monponte.web.app"],
+    "method": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "maxAgeSeconds": 3600
+  }
+]

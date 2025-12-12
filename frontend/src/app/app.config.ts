@@ -15,7 +15,7 @@ import {
   ListOrdered, Code, Quote, Minus, Underline, AlignLeft, AlignCenter,
   AlignRight, AlignJustify, Link, Youtube, Highlighter, Pin, ChevronUp,
   ChevronDown, FileText, Bug, Info, Ellipsis, Copy, LogOut, ChevronRight,
-  ChevronLeft, History, Download
+  ChevronLeft, History, Download, User, Mail
 } from 'lucide-angular';
 
 import { environment } from '../environments/environment';
@@ -34,7 +34,7 @@ export const appConfig: ApplicationConfig = {
       experimentalForceLongPolling: true,
     })),
     provideMessaging(() => getMessaging()),
-    importProvidersFrom(LucideAngularModule.pick({ PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, List, ListOrdered, Code, Quote, Minus, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Link, Youtube, Highlighter, Pin, ChevronUp, ChevronDown, FileText, Bug, Info, Ellipsis, Copy, LogOut, ChevronRight, ChevronLeft, History, Download })),
+    importProvidersFrom(LucideAngularModule.pick({ PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, List, ListOrdered, Code, Quote, Minus, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Link, Youtube, Highlighter, Pin, ChevronUp, ChevronDown, FileText, Bug, Info, Ellipsis, Copy, LogOut, ChevronRight, ChevronLeft, History, Download, User, Mail })),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'

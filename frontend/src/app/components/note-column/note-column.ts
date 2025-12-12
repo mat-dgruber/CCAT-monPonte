@@ -7,7 +7,8 @@ import { Subscription, debounceTime, Subject, filter } from 'rxjs';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { NotebookService } from '../../services/notebook.service';
 import { NotificationService } from '../../services/notification.service';
-import { NoteService, Note } from '../../services/note.service';
+import { NoteService } from '../../services/note.service';
+import { Note } from '../../services/data.service';
 import { ResponsiveService } from '../../services/responsive';
 import { Notebook } from '../../services/data.service';
 import { ContextMenuModule } from 'primeng/contextmenu';
@@ -102,7 +103,7 @@ export class NoteColumn implements OnInit, OnDestroy {
     return sortedNotes.filter(note =>
       note.title.toLowerCase().includes(term) ||
       note.content.toLowerCase().includes(term) ||
-      (note.tags && note.tags.some(tag => tag.toLowerCase().includes(term)))
+      (note.tags && note.tags.some((tag: string) => tag.toLowerCase().includes(term)))
     );
   });
 
@@ -225,8 +226,8 @@ export class NoteColumn implements OnInit, OnDestroy {
       { label: 'Editar Nota', icon: 'pi pi-pencil', command: () => this.selectNote(note.id), visible: !this.showTrashed() },
       { label: 'Deletar Nota', icon: 'pi pi-trash', command: () => this.noteService.requestDeleteNote(note), visible: !this.showTrashed() },
       { label: 'Restaurar Nota', icon: 'pi pi-refresh', command: () => this.noteService.restoreNote(note), visible: !!this.showTrashed() },
-      { label: 'Excluir Permanentemente', icon: 'pi pi-times', command: () => { 
-           if(confirm('Tem certeza?')) this.noteService.deleteNotePermanently(note.id); 
+      { label: 'Excluir Permanentemente', icon: 'pi pi-times', command: () => {
+           if(confirm('Tem certeza?')) this.noteService.deleteNotePermanently(note.id);
         }, visible: !!this.showTrashed() },
       {
         label: note.isArchived ? 'Desarquivar Nota' : 'Arquivar Nota',
