@@ -55,7 +55,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Seção de Notificações -->
     <div class="bg-background dark:bg-dark-secondary p-6 rounded-lg shadow">
       <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-neutral dark:border-dark-border text-text dark:text-gray-300">Notificações</h3>
@@ -77,7 +77,25 @@
           </div>
         </div>
       </div>
-    </div>-->
+    <!-- Seção de Ajuda -->
+    <div class="bg-background dark:bg-dark-secondary p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4 border-b pb-2 border-neutral dark:border-dark-border text-text dark:text-gray-300">Ajuda</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-text dark:text-gray-300">Rever o tutorial de introdução</span>
+            <button (click)="restartTutorial()" class="px-4 py-2 bg-neutral dark:bg-dark-accent text-text dark:text-white rounded-md hover:bg-opacity-80 font-medium transition-colors duration-200">
+                Rever Tutorial
+            </button>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-text dark:text-gray-300">Encontrou um problema ou tem uma sugestão?</span>
+             <a href="mailto:contato@monclip.com" class="px-4 py-2 bg-neutral dark:bg-dark-accent text-text dark:text-white rounded-md hover:bg-opacity-80 font-medium transition-colors duration-200 flex items-center gap-2">
+                <lucide-icon name="mail" size="16"></lucide-icon>
+                <span>Entrar em Contato</span>
+            </a>
+        </div>
+      </div>
+    </div>
 
 
     <!-- Seção de Conta -->

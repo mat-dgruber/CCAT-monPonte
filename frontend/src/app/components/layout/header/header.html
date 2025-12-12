@@ -13,11 +13,13 @@
         <!-- Desktop Links -->
         <div class="hidden md:flex items-center gap-4 mx-5 titlebar-no-drag">
           <a routerLink="/clip"
+             id="nav-clip"
              routerLinkActive="active-link"
              [routerLinkActiveOptions]="{ exact: true }"
              aria-label="Ir para a página do Clip"
              class="nav-link">Clip</a>
           <a routerLink="/notebooks"
+             id="nav-notebooks"
              routerLinkActive="active-link"
              [routerLinkActiveOptions]="{ exact: false }"
              aria-label="Ir para a página de Cadernos"
@@ -64,10 +66,10 @@
         </button>
       </nav>
     }
-    
+
   </div>
   <!-- Mobile Menu -->
-  <div 
+  <div
     class="md:hidden bg-background dark:bg-dark-primary border-t border-neutral dark:border-dark-border overflow-hidden transition-all duration-300 ease-in-out"
     [class.max-h-0]="!isMobileMenuOpen()"
     [class.max-h-96]="isMobileMenuOpen()"

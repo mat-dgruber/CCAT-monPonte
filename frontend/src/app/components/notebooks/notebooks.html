@@ -12,7 +12,7 @@
       <!-- Header -->
       <div class="sidebar-header rounded-3xl flex items-center justify-between p-4 border-b border-neutral dark:border-dark-border transition-colors duration-300">
         <h2 class="text-lg font-semibold text-text dark:text-white">Cadernos</h2>
-        <button (click)="openCreateModal()" class="p-1 text-text dark:text-gray-400 rounded-full hover:bg-neutral dark:hover:bg-dark-accent hover:text-text dark:hover:text-white transition-colors duration-300" title="Criar novo caderno">
+        <button id="btn-create-notebook" (click)="openCreateModal()" class="p-1 text-text dark:text-gray-400 rounded-full hover:bg-neutral dark:hover:bg-dark-accent hover:text-text dark:hover:text-white transition-colors duration-300" title="Criar novo caderno">
           <lucide-icon name="plus-circle" size="18"></lucide-icon>
         </button>
       </div>
@@ -38,7 +38,7 @@
 
       <!-- Sort Dropdown -->
       <div class="px-2 pb-2">
-        <select 
+        <select
           class="w-full p-2 text-sm border border-neutral dark:border-dark-border rounded-lg focus:ring-2 focus:ring-accent dark:focus:ring-indigo-600 bg-background dark:bg-dark-primary text-text dark:text-white transition-colors duration-300"
           (change)="changeSortOrder($event)"
           [value]="sortOption().by + '-' + sortOption().direction">
@@ -188,7 +188,7 @@
     [title]="modalMode() === 'create' ? 'Criar Novo Caderno' : 'Renomear Caderno'"
     confirmText="Salvar"
     (onConfirm)="handleSaveNotebook()"
-    (onCancel)="closeCreateRenameModal()" 
+    (onCancel)="closeCreateRenameModal()"
   >
     <div class="space-y-4">
       <input #notebookNameInput type="text" [(ngModel)]="newNotebookName" class="w-full p-2 border border-neutral dark:border-dark-border rounded-lg bg-background dark:bg-dark-primary text-text dark:text-white" placeholder="Nome do caderno" (keydown.enter)="handleSaveNotebook()">

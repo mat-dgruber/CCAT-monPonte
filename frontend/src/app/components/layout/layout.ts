@@ -14,11 +14,12 @@ import { ClipService } from '../../services/clip.service';
 import { AuthService } from '../../services/auth';
 import { ThemeService } from '../../services/theme';
 import { ModalService } from '../../services/modal.service';
+import { TutorialOverlayComponent } from '../tutorial-overlay/tutorial-overlay';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, ToastNotificationComponent, FormsModule, CommonModule, Modal],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, ToastNotificationComponent, FormsModule, CommonModule, Modal, TutorialOverlayComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })

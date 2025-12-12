@@ -8,11 +8,13 @@ import { FormsModule } from '@angular/forms';
 import { User } from 'firebase/auth';
 import { NotificationService } from '../../services/notification.service';
 import { Modal } from '../modal/modal';
+import { TutorialService } from '../../services/tutorial.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, Modal],
+  imports: [CommonModule, FormsModule, Modal, LucideAngularModule],
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
 })
@@ -20,6 +22,7 @@ export class SettingsComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private notificationService = inject(NotificationService);
+  private tutorialService = inject(TutorialService);
   clipService = inject(ClipService);
   themeService = inject(ThemeService);
 
@@ -184,5 +187,10 @@ export class SettingsComponent implements OnInit {
       this.isDeleting = false;
       this.closeDeleteModal();
     }
+  }
+
+  restartTutorial() {
+    this.tutorialService.start();
+    this.router.navigate(['/']); // Go to dashboard to see the tutorial relative to main elements
   }
 }

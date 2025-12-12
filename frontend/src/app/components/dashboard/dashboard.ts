@@ -16,6 +16,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { NotificationService } from '../../services/notification.service';
 import { HtmlToTextPipe } from '../pipes/html-to-text.pipe';
 import { ListboxModule } from 'primeng/listbox';
+import { TutorialService } from '../../services/tutorial.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -45,6 +46,7 @@ export class DashboardComponent {
   private noteService = inject(NoteService);
   private subscriptions: Subscription = new Subscription();
   private htmlToTextPipe = inject(HtmlToTextPipe);
+  tutorialService = inject(TutorialService);
 
   currentUser: WritableSignal<User | null> = signal(null);
   allRecentNotes: WritableSignal<Note[]> = signal([]);
@@ -71,13 +73,24 @@ export class DashboardComponent {
     const user = this.currentUser();
     if (!user) return 'Seja bem-vindo(a)!';
 
+    // Se estivermos mostrando o tutorial (ou o usuário ainda não completou), mostramos "Seja bem-vindo(a)!"
+    // Como o status do tutorial é carregado assincronamente, podemos usar o signal 'showTutorial' se quisermos reatividade exata,
+    // mas o DataService retorna o status.
+    // Vamos simplificar: se é a primeira vez (tutorial não completo), mostra "Seja bem-vindo(a)!".
+    // Caso contrário, "Seja bem-vindo(a) de volta!".
+    // O ideal seria ter acesso ao signal do tutorialCompleted aqui, mas vamos usar a lógica existente de tempo como fallback
+    // ou integrá-la.
+
+    // Check local signal first (populated by data service check)
+    if (this.isFirstAccessUser()) {
+       return 'Seja bem-vindo(a)!';
+    }
+
     const metadata = user.metadata;
     if (metadata.creationTime && metadata.lastSignInTime) {
       const creationTime = new Date(metadata.creationTime).getTime();
       const lastSignInTime = new Date(metadata.lastSignInTime).getTime();
 
-      // Se a diferença entre a criação e o último login for pequena (ex: menos de 2 minutos),
-      // consideramos como o primeiro acesso (cadastro).
       if (Math.abs(lastSignInTime - creationTime) < 120000) {
         return 'Seja bem-vindo(a)!';
       }
@@ -86,11 +99,27 @@ export class DashboardComponent {
     return 'Seja bem-vindo(a) de volta!';
   });
 
+  isFirstAccessUser = signal(false); // Signal to track if tutorial incomplete
+
   constructor() {
+    // Inject TutorialService here (need to add import manually or let IDE handle it, but I must do it via replace)
+    // Actually, I can inject it using 'inject' in property declaration.
+
     const authSub = this.authService.authState$.subscribe(user => {
       this.currentUser.set(user);
       if (!user) {
         this.allRecentNotes.set([]);
+      } else {
+        // Check tutorial status
+        this.dataService.getTutorialStatus().pipe(take(1)).subscribe(completed => {
+            if (!completed) {
+                this.isFirstAccessUser.set(true);
+                // Trigger tutorial
+                this.tutorialService.start();
+            } else {
+                this.isFirstAccessUser.set(false);
+            }
+        });
       }
     });
     this.subscriptions.add(authSub);
