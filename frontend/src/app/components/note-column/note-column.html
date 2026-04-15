@@ -58,16 +58,24 @@
         [class.border-indigo-500]="note.id === activeNoteId()" [class.bg-indigo-50]="note.id === activeNoteId()"
         [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"
         [class.border-transparent]="note.id !== activeNoteId()" [class.hover:bg-gray-100]="note.id !== activeNoteId()"
-        [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()" (click)="selectNote(note.id)">
+        [class.dark:hover:bg-dark-accent]="note.id !== activeNoteId()" (click)="selectNote(note.id)"
+        class="group bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24 relative">
         <div class="flex justify-between items-start">
           <h3 class="font-semibold text-md line-clamp-1 text-gray-800 dark:text-white flex-1 min-w-0 truncate"
             [innerHTML]="note.title | highlight: searchTerm()"></h3>
-          <button (click)="togglePin(note); $event.stopPropagation()"
-            [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
-            class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
-            <lucide-icon name="pin" size="16"
-              [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
-          </button>
+            <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button (click)="togglePin(note); $event.stopPropagation()"
+                [attr.aria-label]="note.isPinned ? 'Desafixar nota' : 'Fixar nota'"
+                class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
+                <lucide-icon name="pin" size="16"
+                  [ngClass]="note.isPinned ? 'text-yellow-500 fill-current' : 'text-gray-400 dark:text-gray-500'"></lucide-icon>
+              </button>
+              <button (click)="openDeleteNoteModal(note); $event.stopPropagation()"
+                      aria-label="Deletar nota"
+                      class="p-1 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors flex-shrink-0">
+                <lucide-icon name="trash-2" size="16"></lucide-icon>
+              </button>
+            </div>
         </div>
         <p class="text-gray-600 dark:text-dark-text-secondary text-sm line-clamp-2 mt-1 flex-grow"
           [innerHTML]="note.content | highlight: searchTerm()"></p>
@@ -77,3 +85,15 @@
     }
   </div>
 </div>
+
+<!-- Modal de Confirmação de Deleção de Nota -->
+@if (showDeleteNoteModal()) {
+  <app-modal
+    [isOpen]="showDeleteNoteModal()"
+    title="Confirmar Deleção"
+    [message]="'Tem certeza que deseja deletar a nota &quot;' + (noteToDelete()?.title || 'sem título') + '&quot;? Esta ação não pode ser desfeita.'"
+    confirmText="Deletar"
+    (onConfirm)="confirmDeleteNote()"
+    (onCancel)="closeDeleteNoteModal()"
+  ></app-modal>
+}

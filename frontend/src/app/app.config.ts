@@ -15,10 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
-    provideFirestore(() => initializeFirestore(getApp(), {
-      localCache: persistentLocalCache(),
-      experimentalForceLongPolling: true,
-    })),
+    provideFirestore(() => getFirestore()),
     importProvidersFrom(LucideAngularModule.pick({ PlusCircle, Pencil, Trash2, ArrowUpDown, Search, X, BookOpenText, Menu, CheckCircle2, XCircle, Sun, Moon, Settings, Plus, ArrowLeft, MoreVertical, Star, Bold, Italic, Strikethrough, Pilcrow, List, ListOrdered, Code, Quote, Minus, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Link, Youtube, Highlighter, Pin, ChevronUp, ChevronDown, FileText, Bug, Info, Ellipsis, Copy, LogOut, })),
   ],
 };
