@@ -1,43 +1,38 @@
 import { Component, inject, OnInit, OnDestroy, signal, WritableSignal, computed, Signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate, keyframes, state } from '@angular/animations';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 import { AuthService } from '../../services/auth';
-import { Router, ActivatedRoute, NavigationEnd, RouterOutlet } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd, RouterOutlet, ActivatedRouteSnapshot } from '@angular/router';
 import { NoteColumn } from '../note-column/note-column';
 import { DataService, Notebook, SortBy, SortDirection } from '../../services/data.service';
 import { NoteService, Note } from '../../services/note.service';
 import { NotebookService } from '../../services/notebook.service';
-import { NotificationService } from '../../services/notification.service'; 
+import { NotificationService } from '../../services/notification.service';
 import { HighlightPipe } from '../pipes/highlight.pipe';
 import { Modal } from '../modal/modal';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, Subject } from 'rxjs';
 import { filter, debounceTime } from 'rxjs/operators';
 import { ResponsiveService } from '../../services/responsive';
-
+import { ContextMenuModule } from 'primeng/contextmenu';
+import { MenuItem } from 'primeng/api';
 
 const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
 
 @Component({
   selector: 'app-cadernos',
   standalone: true,
-  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet],
+  imports: [NoteColumn, HighlightPipe, FormsModule, Modal, LucideAngularModule, RouterOutlet, ContextMenuModule],
   templateUrl: './notebooks.html',
   animations: [
     trigger('itemAnimation', [
-      // Animação para quando um item entra na lista (é adicionado)
       transition(':enter', [
         animate('400ms ease-out', keyframes([
-          // 1. Começa invisível, um pouco menor e acima da posição final
           style({ opacity: 0, transform: 'scale(0.9) translateY(-20px)', offset: 0 }),
-          // 2. Aos 70% do tempo, fica visível e ultrapassa um pouco a posição/tamanho final
           style({ opacity: 1, transform: 'scale(1.05) translateY(5px)', offset: 0.7 }),
-          // 3. No final, assenta-se na posição e tamanho corretos
           style({ opacity: 1, transform: 'scale(1) translateY(0)', offset: 1.0 })
         ]))
       ]),
-      // Animação para quando um item sai da lista (é removido)
       transition(':leave', [
         style({ transform: 'translateY(0)', opacity: 1 }),
         animate('200ms ease-in', style({ transform: 'translateX(20px)', opacity: 0 }))
@@ -48,26 +43,10 @@ const SORT_PREFERENCE_KEY = 'notebooksSortPreference';
         style({ position: 'relative', opacity: 0, transform: 'translateY(10px)' }),
         animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
-    ]),
-    trigger('favoriteAnimation', [
-      // Animação para quando um item se torna favorito
-      transition('false => true', [
-        animate('400ms ease-in-out', keyframes([
-          style({ transform: 'scale(1)', offset: 0 }),
-          style({ transform: 'scale(1.1)', boxShadow: '0 0 10px #fbbf24', offset: 0.5 }), // Efeito de pulso e brilho amarelo
-          style({ transform: 'scale(1)', offset: 1.0 })
-        ]))
-      ]),
-      // Animação para quando um item DEIXA de ser favorito
-      transition('true => false', [
-        // A animação de "deslizar" será tratada pelo reordenamento da lista.
-        // Podemos manter um efeito sutil aqui ou remover. Por ora, vamos manter.
-        animate('200ms ease-out', style({ opacity: 0.7, transform: 'scale(0.95)' }))
-      ])
     ])
   ]
 })
-export class Notebooks implements OnInit {
+export class Notebooks implements OnInit, OnDestroy {
 
   private authService = inject(AuthService);
   private dataService = inject(DataService);
@@ -80,11 +59,15 @@ export class Notebooks implements OnInit {
   private subscriptions = new Subscription();
   private searchSubject = new Subject<string>();
 
-  
-  // Signals para o estado local do componente (UI)
+  // Context Menu
+  items: MenuItem[] = [];
+
+  // --- Signals de Estado ---
   selectedNotebookId: WritableSignal<string | null> = signal(null);
   currentNoteId: WritableSignal<string | null> = signal(null);
   selectedNoteId: WritableSignal<string | null> = signal(null);
+
+  // Signals de Modais e Ações
   deletingNotebookIds: WritableSignal<Set<string>> = signal(new Set());
   showDeleteModal: WritableSignal<boolean> = signal(false);
   notebookToDelete: WritableSignal<{ id: string; name: string } | null> = signal(null);
@@ -94,54 +77,51 @@ export class Notebooks implements OnInit {
   newNotebookName: WritableSignal<string> = signal('');
   newNotebookColor: WritableSignal<string> = signal('#FFFFFF');
 
-  // Signals for the Note modal
+  // Signals Note Modal
   isNoteModalVisible: WritableSignal<boolean> = signal(false);
   currentNote: WritableSignal<Partial<Note>> = signal({});
   isEditing: WritableSignal<boolean> = signal(false);
   modalTags: WritableSignal<string> = signal('');
   modalIsPinned: WritableSignal<boolean> = signal(false);
 
-  // Signals for the Note Delete Confirmation modal
+  // Signals Delete Note Modal
   showDeleteNoteModal: WritableSignal<boolean> = signal(false);
   noteToDelete: WritableSignal<Note | null> = signal(null);
+
   sortOption: WritableSignal<{ by: SortBy, direction: SortDirection }> = signal({ by: 'createdAt', direction: 'desc' });
   searchTerm: WritableSignal<string> = signal('');
-  isNoteOpen: WritableSignal<boolean> = signal(false);
-  isNavigating: WritableSignal<boolean> = signal(false); // Novo signal para o estado de navegação
-  routeAnimationState: WritableSignal<string> = signal(''); // New signal for route animation state
+
+  // Animations state
+  routeAnimationState: WritableSignal<string> = signal('');
+
+  // Context Menu
+  contextMenuItems: MenuItem[] = [];
 
   availableColors: string[] = [
     '#FFFFFF', '#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'
   ];
 
-  // Signal computado para filtrar os cadernos
+  // --- Computed Signals ---
   filteredNotebooks: Signal<Notebook[]> = computed(() => {
-    // 1. Pega os valores atuais dos signals de dependência
     const term = this.searchTerm().toLowerCase();
     const notebooks = this.notebookService.notebooks();
     const sort = this.sortOption();
 
-    // 2. Filtra os cadernos com base no termo de busca
     const filtered = term
       ? notebooks.filter(notebook => notebook.name.toLowerCase().includes(term))
-      : [...notebooks]; // Cria uma cópia para não modificar o array original
+      : [...notebooks];
 
-    // 3. Ordena a lista filtrada
     return filtered.sort((a, b) => {
       const valA = sort.by === 'name' ? a.name.toLowerCase() : a.createdAt?.toMillis() || 0;
       const valB = sort.by === 'name' ? b.name.toLowerCase() : b.createdAt?.toMillis() || 0;
 
-      if (valA < valB) {
-        return sort.direction === 'asc' ? -1 : 1;
-      }
-      if (valA > valB) {
-        return sort.direction === 'asc' ? 1 : -1;
-      }
+      if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
       return 0;
     });
   });
 
-  favoriteNotebooks: Signal<Notebook[]> = computed(() => 
+  favoriteNotebooks: Signal<Notebook[]> = computed(() =>
     this.filteredNotebooks().filter(n => n.isFavorite)
   );
 
@@ -149,13 +129,7 @@ export class Notebooks implements OnInit {
     this.filteredNotebooks().filter(n => !n.isFavorite)
   );
 
-  // NOVO: Signal computado para uma lista única, ordenada e agrupada
-  sortedAndGroupedNotebooks: Signal<Notebook[]> = computed(() => {
-    const notebooks = this.filteredNotebooks();
-    return [...notebooks].sort((a, b) => {
-      // 1. Prioridade máxima: Favoritos primeiro
-      if (a.isFavorite && !b.isFavorite) return -1;
-      if (!a.isFavorite && b.isFavorite) return 1;
+  constructor(private cdr: ChangeDetectorRef) { }
 
       // 2. Se ambos são favoritos ou ambos não são, aplica a ordenação do usuário
       const sort = this.sortOption();
@@ -183,15 +157,19 @@ export class Notebooks implements OnInit {
    }
 
   ngOnInit() {
-    // Subscription to handle delete requests from the note editor
+    // 1. Atualiza o estado baseado na rota ATUAL imediatamente (corrige o problema do Dashboard)
+    this.updateStateFromRoute();
+
+    // Sincroniza o estado da rota com os signals na inicialização
+    this.syncStateFromRoute();
+
+    // Subscription para requisições de deleção vindas do Editor
     const deleteRequestSub = this.noteService.deleteNoteRequest$.subscribe(note => {
       this.openDeleteNoteModal(note);
     });
     this.subscriptions.add(deleteRequestSub);
 
-    // Sincroniza o estado da rota com os signals na inicialização
-    this.syncStateFromRoute();
-
+    // Carregar preferências de ordenação
     const savedSort = localStorage.getItem(SORT_PREFERENCE_KEY);
     if (savedSort) {
       try {
@@ -200,18 +178,34 @@ export class Notebooks implements OnInit {
           this.sortOption.set(parsedSort);
         }
       } catch (e) {
-        console.error('Erro ao carregar preferência de ordenação do localStorage', e);
-        localStorage.removeItem(SORT_PREFERENCE_KEY);
+        console.error('Erro ao carregar preferência de ordenação', e);
       }
     }
 
-    // Assinatura para a busca com debounce
+    // Busca com debounce
     const searchSub = this.searchSubject.pipe(
-      debounceTime(300) // Espera 300ms após a última tecla digitada
+      debounceTime(300)
     ).subscribe(term => {
       this.searchTerm.set(term);
     });
     this.subscriptions.add(searchSub);
+
+    // Context Menu Items
+    this.contextMenuItems = [
+      { label: 'Criar Caderno', icon: 'pi pi-fw pi-plus', command: () => this.openCreateModal() },
+      {
+        label: 'Criar Nota',
+        icon: 'pi pi-fw pi-file',
+        command: () => {
+          if (this.selectedNotebookId()) {
+            this.openCreateNoteModal();
+          } else {
+            this.notificationService.showInfo('Selecione um caderno para criar a nota.');
+          }
+        },
+        visible: !!this.selectedNotebookId()
+      }
+    ];
   }
 
   // NOVO: Método para sincronizar o estado a partir da rota ATUAL
@@ -229,23 +223,49 @@ export class Notebooks implements OnInit {
     console.log('Tentando buscar cadernos novamente...');
   }
 
+  private updateStateFromRoute() {
+    const snapshot = this.route.snapshot;
+    const notebookId = this.findParamInTree(snapshot, 'notebookId');
+    const noteId = this.findParamInTree(snapshot, 'noteId');
+
+    // Atualiza os signals
+    this.currentNoteId.set(noteId);
+
+    if (notebookId) {
+      this.selectedNotebookId.set(notebookId);
+    } else {
+      // Se não tem notebookId na URL, não temos nenhum selecionado
+      this.selectedNotebookId.set(null);
+    }
+
+    // Atualiza estado da animação
+    this.routeAnimationState.set(this.router.url);
+  }
+
+  /**
+   * Helper recursivo para encontrar um parâmetro em qualquer nível da rota ativa
+   */
+  private findParamInTree(snapshot: ActivatedRouteSnapshot, paramName: string): string | null {
+    if (snapshot.paramMap.has(paramName)) {
+      return snapshot.paramMap.get(paramName);
+    }
+    if (snapshot.firstChild) {
+      return this.findParamInTree(snapshot.firstChild, paramName);
+    }
+    return null;
+  }
+
+  // --- Métodos Existentes (mantidos iguais) ---
+
+  retryFetchNotebooks() { console.log('Tentando buscar cadernos novamente...'); }
+
   changeSortOrder(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     const [by, direction] = selectElement.value.split('-') as [SortBy, SortDirection];
     const newSortOption = { by, direction };
     this.sortOption.set(newSortOption);
-
-    // Não é mais necessário chamar o fetchNotebooks aqui.
-    // A mudança no signal 'sortOption' fará com que o 'filteredNotebooks'
-    // seja recalculado automaticamente.
-
-    // Salva a nova preferência no localStorage
     localStorage.setItem(SORT_PREFERENCE_KEY, JSON.stringify(newSortOption));
   }
-
-
-
-
 
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
@@ -254,11 +274,10 @@ export class Notebooks implements OnInit {
 
   clearSearch(inputElement: HTMLInputElement) {
     this.searchTerm.set('');
-    inputElement.focus(); // Devolve o foco para o campo de busca
+    inputElement.focus();
   }
 
   openCreateModal() {
-    console.log('openCreateModal called');
     this.modalMode.set('create');
     this.newNotebookName.set('');
     this.newNotebookColor.set('#FFFFFF');
@@ -296,9 +315,8 @@ export class Notebooks implements OnInit {
       this.notificationService.showError('Você precisa estar logado para criar um caderno.');
       return;
     }
-
     try {
-      const newId = await this.dataService.createNotebook(name, color);
+      await this.dataService.createNotebook(name, color);
       this.notificationService.showSuccess(`Caderno "${name}" criado com sucesso.`);
     } catch (error) {
       console.error('Erro ao criar o caderno:', error);
@@ -307,67 +325,26 @@ export class Notebooks implements OnInit {
   }
 
   async updateNotebook(id: string, newName: string) {
-    if (!this.authService.getCurrentUserId()) {
-      this.notificationService.showError('Você precisa estar logado para atualizar um caderno.');
-      return;
-    }
-
     try {
       await this.dataService.updateNotebook(id, newName);
       this.notificationService.showSuccess(`Caderno renomeado para "${newName}".`);
     } catch (error) {
-      console.error('Erro ao atualizar o caderno:', error);
       this.notificationService.showError(`Erro ao renomear o caderno.`);
     }
   }
 
   async updateNotebookColor(id: string, color: string) {
-    if (!this.authService.getCurrentUserId()) {
-      this.notificationService.showError('Você precisa estar logado para atualizar um caderno.');
-      return;
-    }
-
     try {
       await this.dataService.updateNotebookColor(id, color);
       this.notificationService.showSuccess(`Cor do caderno atualizada.`);
-      // A lista será atualizada reativamente
     } catch (error) {
-      console.error('Erro ao atualizar a cor do caderno:', error);
       this.notificationService.showError(`Erro ao atualizar a cor do caderno.`);
     }
   }
 
   async deleteNotebook(id: string) {
-    if (!this.authService.getCurrentUserId()) {
-      this.notificationService.showError('Você precisa estar logado para deletar um caderno.');
-      return;
-    }
-
-    try {
-      await this.dataService.deleteNotebook(id);
-    } catch (error) {
-      console.error('Erro ao deletar o caderno:', error);
-    }
-  }
-
-  async renameNotebook(id: string, currentName: string) {
-    const newName = prompt(`Renomear caderno "${currentName}":`, currentName);
-    
-    if (newName === null) { // Usuário clicou em cancelar
-      console.log('Renomear caderno cancelado.');
-      return;
-    }
-
-    const trimmedNewName = newName.trim();
-    if (trimmedNewName === '') {
-      this.notificationService.showError('O nome do caderno não pode ser vazio.');
-      return;
-    }
-    if (trimmedNewName === currentName) {
-      console.log('O novo nome é o mesmo que o nome atual. Nenhuma alteração feita.');
-      return;
-    }
-    await this.updateNotebook(id, trimmedNewName);
+    try { await this.dataService.deleteNotebook(id); }
+    catch (error) { console.error('Erro ao deletar o caderno:', error); }
   }
 
   openDeleteModal(id: string, name: string) {
@@ -397,7 +374,6 @@ export class Notebooks implements OnInit {
       await this.dataService.deleteNotebook(notebook.id); // Chama o dataService diretamente
       this.notificationService.showSuccess(`Caderno "${notebook.name}" deletado com sucesso.`);
     } catch (error) {
-      console.error(`Erro ao deletar o caderno ${notebook.name}:`, error);
       this.notificationService.showError(`Ocorreu um erro ao deletar o caderno "${notebook.name}".`);
     } finally {
       this.deletingNotebookIds.update(ids => {
@@ -416,13 +392,6 @@ export class Notebooks implements OnInit {
   }
 
   async toggleFavorite(notebook: Notebook) {
-    if (!this.authService.getCurrentUserId()) {
-      this.notificationService.showError('Você precisa estar logado para favoritar um caderno.');
-      return;
-    }
-
-    const newFavoriteStatus = !notebook.isFavorite;
-
     try {
       await this.dataService.updateNotebookFavoriteStatus(notebook.id, newFavoriteStatus);
       const message = newFavoriteStatus
@@ -431,8 +400,7 @@ export class Notebooks implements OnInit {
       this.notificationService.showSuccess(message);
       // A UI será atualizada reativamente pelo onSnapshot do DataService
     } catch (error) {
-      console.error('Erro ao atualizar o status de favorito:', error);
-      this.notificationService.showError('Erro ao atualizar o status de favorito.');
+      this.notificationService.showError('Erro ao atualizar favorito.');
     }
   }
 
@@ -464,12 +432,10 @@ export class Notebooks implements OnInit {
       }
       this.closeNoteModal();
     } catch (error) {
-      console.error('Erro ao salvar nota:', error);
       this.notificationService.showError('Erro ao salvar a nota.');
     }
   }
 
-  // Methods for Note Delete Modal
   openDeleteNoteModal(note: Note) {
     this.noteToDelete.set(note);
     this.showDeleteNoteModal.set(true);
@@ -483,16 +449,13 @@ export class Notebooks implements OnInit {
   async confirmDeleteNote() {
     const note = this.noteToDelete();
     if (!note || !note.id) return;
-
     try {
       await this.noteService.deleteNote(note.id);
-      this.notificationService.showSuccess(`Nota "${note.title}" deletada com sucesso.`);
-      // Navigate away if the deleted note was the active one
+      this.notificationService.showSuccess(`Nota deletada.`);
       if (this.currentNoteId() === note.id) {
         this.router.navigate(['/notebooks', this.selectedNotebookId()]);
       }
     } catch (error) {
-      console.error('Erro ao deletar a nota:', error);
       this.notificationService.showError('Erro ao deletar a nota.');
     } finally {
       this.closeDeleteNoteModal();
@@ -503,13 +466,15 @@ export class Notebooks implements OnInit {
     this.subscriptions.unsubscribe();
   }
 
+  // Navegação Mobile (Botão Voltar)
   navigateBack() {
     if (this.currentNoteId() && this.responsiveService.isMobile()) {
-      this.router.navigateByUrl('/notebooks');
+      // Se estiver numa nota, volta para a lista de notas do caderno
+      this.router.navigate(['/notebooks', this.selectedNotebookId()]);
     } else if (this.selectedNotebookId() && this.responsiveService.isMobile()) {
+      // Se estiver na lista de notas, volta para a lista de cadernos
       this.selectedNotebookId.set(null);
-      this.router.navigateByUrl('/notebooks');
+      this.router.navigate(['/notebooks']);
     }
   }
-
 }

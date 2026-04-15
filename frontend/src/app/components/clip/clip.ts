@@ -6,6 +6,8 @@ import { ClipService } from '../../services/clip.service';
 import { ThemeService } from '../../services/theme';
 import { ModalService } from '../../services/modal.service';
 
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-clip',
   standalone: true,
@@ -19,6 +21,23 @@ export class Clip {
   themeService = inject(ThemeService);
   private notificationService = inject(NotificationService);
   private modalService = inject(ModalService);
+  private route = inject(ActivatedRoute);
+
+  constructor() {
+    this.route.queryParams.subscribe(params => {
+      const sharedContent = params['sharedContent'];
+      if (sharedContent) {
+        // Append or replace? Let's append if there is existing text, or just set it.
+        // Assuming user wants to save what they shared. 
+        // Let's just set it for now, or append with new line.
+        const currentText = this.clipService.copyText();
+        const newText = currentText ? `${currentText}\n\n${sharedContent}` : sharedContent;
+        this.clipService.onTextChange(newText);
+        this.clipService.saveClip(newText); // Auto save
+        this.notificationService.showSuccess('Conteúdo compartilhado recebido!');
+      }
+    });
+  }
 
   availableFonts = [
     { name: 'Padrão', family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif" },

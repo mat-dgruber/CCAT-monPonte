@@ -14,6 +14,8 @@ export const routes: Routes = [
      {path: 'terms-of-use', loadComponent: () => import('./components/terms-of-use/terms-of-use').then(m => m.TermsOfUseComponent)},
      {path: 'privacy-policy', loadComponent: () => import('./components/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent)},
      {path: 'bug-report', loadComponent: () => import('./components/bug-report/bug-report').then(m => m.BugReportComponent)},
+     {path: 'share-target', loadComponent: () => import('./components/share-target/share-target').then(m => m.ShareTargetComponent)},
+     {path: 'widget', loadComponent: () => import('./components/widget/widget').then(m => m.WidgetComponent)},
      {
           path: '',
           component: LayoutComponent,
@@ -27,7 +29,7 @@ export const routes: Routes = [
                  loadComponent: () => import('./components/notebooks/notebooks').then(m => m.Notebooks)
                ,
                  children: [
-                   { path: ':notebookId/notes/:noteId', loadComponent: () => import('./components/note-editor/note-editor').then(m => m.NoteEditor) }
+                   { path: ':notebookId/notes/:noteId', loadComponent: () => import('./components/note-editor/note-editor').then(m => m.NoteEditor), runGuardsAndResolvers: 'always' }
                  ]},
               {path: 'settings', loadComponent: () => import('./components/settings/settings').then(m => m.SettingsComponent)},
           ]

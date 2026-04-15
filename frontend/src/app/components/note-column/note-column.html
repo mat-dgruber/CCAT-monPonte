@@ -1,4 +1,6 @@
-<div class="flex flex-col h-full w-full rounded-3xl md:w-80 bg-white dark:bg-dark-panel-middle transition-colors duration-300">
+<div class="flex flex-col h-full w-full rounded-3xl md:w-80 bg-gray-50 dark:bg-dark-panel-middle transition-colors duration-300 font-sans" (contextmenu)="onContextMenu($event)">
+  <p-contextMenu #cm [model]="menuItems" appendTo="body"></p-contextMenu>
+  <p-menu #noteMenu [model]="noteMenuItems" [popup]="true" appendTo="body"></p-menu>
   <!-- Header -->
   <div class="flex-shrink-0 p-3 border-b rounded-3xl border-gray-200 dark:border-dark-border transition-colors duration-300">
     <!-- Mobile Header -->
@@ -10,6 +12,8 @@
       </button>
       <h2 class="text-lg font-semibold text-gray-800 dark:text-white truncate">
         {{ currentNotebook()?.name || 'Notas' }}
+        @if (showArchived()) { <span class="text-sm font-normal text-gray-500 ml-1">(Arquivadas)</span> }
+        @if (showTrashed()) { <span class="text-sm font-normal text-red-500 ml-1">(Lixeira)</span> }
       </h2>
       <button (click)="openCreateNoteModal()"
         class="p-2 -mr-2 text-gray-500 dark:text-dark-text-secondary rounded-full hover:bg-gray-200 dark:hover:bg-dark-accent">
@@ -26,9 +30,9 @@
         <input type="text" placeholder="Buscar notas..." [value]="searchTerm()" (input)="onSearch($event)"
           class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-dark-primary dark:border-dark-border dark:text-white dark:focus:ring-indigo-600 transition-colors duration-300" />
       </div>
-      @if (!responsiveService.isMobile()) {
+      @if (!responsiveService.isMobile() && !showTrashed()) {
       <button (click)="openCreateNoteModal()"
-        class="flex items-center flex-shrink p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">
+        class="flex items-center flex-shrink p-2 bg-accent text-white rounded-lg hover:bg-opacity-90 text-sm font-medium whitespace-nowrap">
         <lucide-icon name="plus" size="18"></lucide-icon>
         <span class="ml-1 inline">Nova Nota</span>
       </button>
@@ -38,13 +42,13 @@
 
   <!-- Notes List Area -->
   <div class="flex-grow overflow-y-auto p-2">
-    @if (notebookIdSignal() && notes().length === 0 && searchTerm() === '') {
+    @if (noteService.isLoading()) {
     <div class="space-y-2">
       @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
       <div class="h-20 bg-gray-200 rounded-lg dark:bg-dark-accent animate-pulse"></div>
       }
     </div>
-    } @else if (filteredNotes().length === 0) {
+    } @else if (!noteService.isLoading() && filteredNotes().length === 0) {
     <div class="text-center py-10 px-4">
       <lucide-icon name="file-text" size="48" class="mx-auto text-gray-400 dark:text-dark-text-secondary"></lucide-icon>
       <h3 class="mt-2 text-lg font-medium text-gray-800 dark:text-white">Nenhuma nota encontrada</h3>
@@ -54,7 +58,7 @@
     <div class="space-y-2" @listAnimation>
       @for (note of filteredNotes(); track note.id) {
       <div
-        class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24"
+        class="bg-white dark:bg-dark-primary/50 rounded-lg p-3 cursor-pointer transition-all duration-150 ease-in-out note-drag-item border-l-4 transition-colors duration-300 min-w-0 flex flex-col h-24 group shadow-sm hover:shadow-md"
         [class.border-indigo-500]="note.id === activeNoteId()" [class.bg-indigo-50]="note.id === activeNoteId()"
         [class.dark:bg-dark-accent/50]="note.id === activeNoteId()"
         [class.border-transparent]="note.id !== activeNoteId()" [class.hover:bg-gray-100]="note.id !== activeNoteId()"

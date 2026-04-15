@@ -21,22 +21,31 @@
 }
 
 .toast-success {
-  background-color: #f0fdf4; /* green-50 */
+  background-color: var(--success-color, #f0fdf4); /* Cor padrão */
+}
+.theme-aware .toast-success {
+  background-color: var(--color-success);
 }
 .dark .toast-success {
-  background-color: #166534; /* green-700 */
+  background-color: #16a34a; /* Mantém o estilo escuro original */
 }
 
 .toast-error {
-  background-color: #fef2f2; /* red-50 */
+  background-color: var(--error-color, #fef2f2);
+}
+.theme-aware .toast-error {
+  background-color: var(--color-error);
 }
 .dark .toast-error {
-  background-color: #b91c1c; /* red-700 */
+  background-color: #dc2626;
 }
 
 .toast-info {
-  background-color: #eff6ff; /* blue-50 */
+  background-color: var(--accent-color, #eff6ff);
+}
+.theme-aware .toast-info {
+  background-color: var(--color-accent);
 }
 .dark .toast-info {
-  background-color: #1e40af; /* blue-700 */
+  background-color: #2563eb;
 }

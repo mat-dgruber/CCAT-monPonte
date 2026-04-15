@@ -9,22 +9,24 @@ import { Subject, Subscription, debounceTime, switchMap, of, OperatorFunction, t
 import { LucideAngularModule } from 'lucide-angular';
 
 // Componentes e Serviços
-import { Modal } from '../modal/modal';
-
 import { StatsModalComponent } from './modals/stats-modal/stats-modal.component';
+import { HistoryModalComponent } from './modals/history-modal/history-modal.component';
 import { DataService, Note } from '../../services/data.service';
 import { NoteService } from '../../services/note.service';
 import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme';
 import { TiptapEditorComponent } from '../tiptap-editor/tiptap-editor.component';
 import { ResponsiveService } from '../../services/responsive';
+import { PwaService } from '../../services/pwa.service';
+
 
 
 @Component({
   selector: 'app-note-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, Modal, StatsModalComponent, TiptapEditorComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, StatsModalComponent, HistoryModalComponent, TiptapEditorComponent],
   templateUrl: './note-editor.html',
+
   styleUrls: ['./note-editor.css'],
   animations: [
     trigger('flyInOut', [
@@ -45,6 +47,7 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   private dataService = inject(DataService);
   private noteService = inject(NoteService);
   private notificationService = inject(NotificationService);
+  private pwaService = inject(PwaService);
   private location = inject(Location);
   themeService = inject(ThemeService);
   responsiveService = inject(ResponsiveService);
@@ -56,7 +59,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   tagInput: WritableSignal<string> = signal('');
   allTags: WritableSignal<string[]> = signal([]);
 
-  
+  // Wake Lock
+  isWakeLockActive: WritableSignal<boolean> = signal(false);
+
+
 
   showSearch: WritableSignal<boolean> = signal(false);
   searchTerm: WritableSignal<string> = signal('');
@@ -64,9 +70,12 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   currentMatchIndex: WritableSignal<number> = signal(0);
 
   showStatsModal: WritableSignal<boolean> = signal(false);
+  showHistoryModal: WritableSignal<boolean> = signal(false);
 
   private notebookId: string | null = null;
   private noteId: string | null = null;
+  private lastSavedContent: string | null = null;
+  private lastVersionSavedTime: number = 0; // Timestamp of last history save
 
   private contentChanges = new Subject<string>();
   private titleChanges = new Subject<string>();
@@ -107,8 +116,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       switchMap(params => {
         this.notebookId = params.get('notebookId');
         this.noteId = params.get('noteId');
+        console.log(`NoteEditor: Route Params changed - NB: ${this.notebookId}, Note: ${this.noteId}`);
         if (this.notebookId && this.noteId) {
           this.isLoading.set(true);
+          console.log(`NoteEditor: Fetching note...`);
           return this.dataService.getNote(this.notebookId, this.noteId);
         }
         return of(null);
@@ -118,12 +129,33 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscriptions.add(note$.subscribe(note => {
       this.isLoading.set(false);
-      this.searchTerm.set('');
-      this.showSearch.set(false);
+
+      // Only reset search on initial load, not every update (optional improvement, but sticking to content fix primarily)
+      // Actually, keeping original behavior for non-content logic to minimize side effects,
+      // but moving them inside "if not echo" check might be safer or just leaving them.
+      // The original code reset them every time. Let's keep it safe.
+
       if (note && note.id) {
-        this.note.set({ ...note, title: note.title ?? '', content: note.content ?? '' });
+        let contentToUse = note.content ?? '';
+
+        // FIX: Check if incoming content is just an echo of what we saved
+        if (this.lastSavedContent !== null && contentToUse === this.lastSavedContent) {
+           // It is an echo. Prefer current local content to preserve cursor/typing.
+           const currentLocal = this.note();
+           if (currentLocal) {
+             contentToUse = currentLocal.content;
+           }
+        } else {
+           // Content is different (new from remote, or we haven't saved yet).
+           // Update our baseline.
+           this.lastSavedContent = contentToUse;
+        }
+
+        this.note.set({ ...note, title: note.title ?? '', content: contentToUse });
       } else {
         this.note.set(null);
+        this.searchTerm.set('');
+        this.showSearch.set(false);
       }
     }));
 
@@ -131,6 +163,18 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(500),
       switchMap(content => {
         if (this.notebookId && this.noteId) {
+          this.lastSavedContent = content; // Store the content we are about to save
+
+          // --- History Saving Logic ---
+          // Save a version if more than 10 minutes have passed since last save
+          // OR if it's the first save of this session (handled by initial load snapshot maybe? No, let's do it here)
+          const now = Date.now();
+          if (now - this.lastVersionSavedTime > 2 * 60 * 1000) {
+              console.log('Auto-saving note version to history...');
+              this.noteService.saveVersion(this.noteId, content).catch(e => console.error('Error saving version', e));
+              this.lastVersionSavedTime = now;
+          }
+
           return this.dataService.updateNote(this.notebookId, this.noteId, { content });
         }
         return of(null);
@@ -164,10 +208,10 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {}
 
-  
+
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe(); 
+    this.subscriptions.unsubscribe();
     this.destroy$.next(); // <--- Add this
     this.destroy$.complete(); // <--- Add this
   }
@@ -251,6 +295,9 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
   closeStatsModal(): void { this.showStatsModal.set(false); }
   closeMoreOptions(): void { this.showMoreOptions.set(false); }
 
+  openHistoryModal(): void { this.showHistoryModal.set(true); this.closeMoreOptions(); }
+  closeHistoryModal(): void { this.showHistoryModal.set(false); }
+
   deleteNote(): void {
     const noteToDelete = this.note();
     if (noteToDelete) {
@@ -273,5 +320,64 @@ export class NoteEditor implements OnInit, AfterViewInit, OnDestroy {
 
   navigateBack(): void {
     this.router.navigate(['/notebooks']);
+  }
+
+  async toggleWakeLock() {
+    if (this.isWakeLockActive()) {
+      await this.pwaService.releaseWakeLock();
+      this.isWakeLockActive.set(false);
+      this.notificationService.showInfo('Modo Leitura desativado');
+    } else {
+      const success = await this.pwaService.requestWakeLock();
+      if (success) {
+        this.isWakeLockActive.set(true);
+        this.notificationService.showSuccess('Modo Leitura ativado (Tela não desligará)');
+      } else {
+        this.notificationService.showError('Seu navegador não suporta Wake Lock');
+      }
+    }
+    this.closeMoreOptions();
+  }
+
+  async exportNote() {
+    if (!this.note()) return;
+    const currentNote = this.note()!;
+    const title = (currentNote.title || 'Sem Titulo').replace(/[^a-z0-9]/gi, '_');
+    const content = currentNote.content || '';
+
+    // Modern API
+    if ('showSaveFilePicker' in window) {
+      try {
+        const handle = await (window as any).showSaveFilePicker({
+          suggestedName: `${title}.html`,
+          types: [{
+            description: 'HyperText Markup Language',
+            accept: { 'text/html': ['.html'] },
+          }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        this.notificationService.showSuccess('Arquivo exportado com sucesso!');
+        return;
+      } catch (err) {
+        if ((err as any).name !== 'AbortError') {
+          console.error(err);
+        } else {
+             return; // User cancelled
+        }
+      }
+    }
+
+    // Legacy Fallback
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.html`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    this.notificationService.showSuccess('Download iniciado!');
+    this.closeMoreOptions();
   }
 }

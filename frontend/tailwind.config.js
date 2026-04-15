@@ -25,5 +25,54 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwindcss-themer')({
+      defaultTheme: {
+        extend: {
+          colors: {
+            'primary': '#3B82F6', // Blue 500 - Standard Blue
+            'secondary': '#F4F4F5', // Zinc 100 - Light Grey for backgrounds
+            'accent': '#3B82F6',
+            'neutral': '#E4E4E7', // Zinc 200
+            'background': '#FFFFFF',
+            'text': '#374151', // Gray 700 - Softer than pure black
+            'success': '#22C55E',
+            'error': '#EF4444',
+            'warning': '#F97316',
+          }
+        }
+      },
+      themes: [
+        {
+          name: 'dark',
+          extend: {
+            colors: {
+              'primary': '#18181B',
+              'secondary': '#27272A',
+              'accent': '#3B82F6',
+              'neutral': '#3F3F46',
+              'background': '#18181B',
+              'text': '#F4F4F5',
+            }
+          }
+        },
+        {
+          name: 'capycro',
+          extend: {
+            colors: {
+              'primary': '#d8704c', // Reddish/Brown - Main theme color
+              'secondary': '#5f8a8c', // Teal/Blue - "Details" color requested by user
+              'accent': '#5f8a8c', // Teal/Blue - "Details" color requested by user
+              'neutral': '#b0b0b0',
+              'background': '#fbf9f6',
+              'text': '#3a3a3a',
+              'success': '#5a9261',
+              'error': '#d15c5c',
+              'warning': '#e6a700',
+            }
+          }
+        }
+      ]
+    })
+  ],
 }

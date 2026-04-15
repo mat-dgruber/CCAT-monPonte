@@ -1,84 +1,234 @@
-
-<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-dark-primary p-4">
-
-  <div class="max-w-md w-full bg-white dark:bg-dark-secondary p-10 rounded-3xl shadow-xl relative overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
-
+<div
+  class="min-h-screen flex items-center justify-center bg-background dark:bg-dark-primary p-4"
+>
+  <div
+    class="max-w-md w-full bg-background dark:bg-dark-secondary p-10 rounded-3xl shadow-xl relative overflow-hidden transform transition-all duration-300 hover:shadow-2xl"
+  >
     <div class="relative z-10">
-
       <div class="flex flex-col items-center justify-center mb-8">
+        <img
+          src="assets/logo-ccat.png"
+          alt="monClip Logo"
+          class="h-28 w-28 mb-3"
+        />
 
-        <img src="assets/logo-ccat.png" alt="monClip Logo" class="h-28 w-28 mb-3">
-
-        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">monClip</h1>
-
+        <h1
+          class="text-4xl font-extrabold text-text dark:text-white tracking-tight"
+        >
+          monClip
+        </h1>
       </div>
 
       @if (errorMessage) {
 
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+      <div
+        class="bg-error border border-red-400 text-white px-4 py-3 rounded relative mb-4"
+        role="alert"
+      >
+        <span class="block sm:inline">{{ errorMessage }}</span>
+      </div>
 
-          <span class="block sm:inline">{{ errorMessage }}</span>
-
+      } @if (isUnverified) {
+      <div class="text-center space-y-6">
+        <div
+          class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-200 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <strong class="font-bold">E-mail não verificado!</strong>
+          <span class="block sm:inline"
+            >Por favor, verifique seu e-mail para continuar.</span
+          >
         </div>
 
-      }
+        @if (resendSuccess) {
+        <div
+          class="bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <span class="block sm:inline"
+            >E-mail de verificação reenviado com sucesso!</span
+          >
+        </div>
+        }
 
-      <form [formGroup]="loginForm" class="space-y-7" (ngSubmit)="onLogin()" aria-labelledby="login-form-title">
+        <button
+          (click)="onResendEmail()"
+          [disabled]="isLoading || resendSuccess"
+          class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-accent hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+        >
+          @if (isLoading) {
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          }
+          <span>{{
+            isLoading ? "Enviando..." : "Reenviar E-mail de Verificação"
+          }}</span>
+        </button>
 
-        <h2 id="login-form-title" class="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-6">Bem-vindo de volta!</h2>
+        <button
+          (click)="backToLogin()"
+          class="w-full flex justify-center py-3 px-4 border border-neutral dark:border-dark-border rounded-xl shadow-sm text-text dark:text-white font-bold bg-background dark:bg-dark-primary hover:bg-gray-50 dark:hover:bg-dark-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300"
+        >
+          Voltar para Login
+        </button>
+      </div>
+      } @else {
+      <form
+        [formGroup]="loginForm"
+        class="space-y-7"
+        (ngSubmit)="onLogin()"
+        aria-labelledby="login-form-title"
+      >
+        <h2
+          id="login-form-title"
+          class="text-3xl font-extrabold text-text dark:text-white text-center mb-6"
+        >
+          Bem-vindo de volta!
+        </h2>
 
         <div role="form" aria-labelledby="emailLabel">
-
-          <label id="emailLabel" for="email" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Endereço de E-mail</label>
+          <label
+            id="emailLabel"
+            for="email"
+            class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1"
+            >Endereço de E-mail</label
+          >
 
           <input
             id="email"
             type="email"
             formControlName="email"
             autocomplete="email"
-            [class.border-red-500]="email?.invalid && (email?.dirty || email?.touched)"
-            class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200">
+            [class.border-red-500]="
+              email?.invalid && (email?.dirty || email?.touched)
+            "
+            class="mt-1 block w-full px-4 py-3 border border-neutral dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-background dark:bg-dark-primary text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-purple-600 focus:border-transparent transition-all duration-200"
+          />
 
           @if (email?.invalid && (email?.dirty || email?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
-              @if (email?.errors?.['required']) { O e-mail é obrigatório. }
-              @if (email?.errors?.['email']) { Por favor, insira um e-mail válido. }
-            </p>
+          <p class="mt-1 text-sm text-error">
+            @if (email?.errors?.['required']) { O e-mail é obrigatório. } @if
+            (email?.errors?.['email']) { Por favor, insira um e-mail válido. }
+          </p>
           }
         </div>
 
         <div role="form" aria-labelledby="passwordLabel">
-          <label id="passwordLabel" for="password" class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Senha</label>
+          <label
+            id="passwordLabel"
+            for="password"
+            class="block text-sm font-medium text-text dark:text-dark-text-secondary mb-1"
+            >Senha</label
+          >
           <div class="relative">
             <input
               id="password"
               [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               autocomplete="current-password"
-              [class.border-red-500]="password?.invalid && (password?.dirty || password?.touched)"
-              class="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-white dark:bg-dark-primary text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-200 pr-10">
-            <button type="button" (click)="toggleShowPassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-600 dark:text-dark-text-secondary focus:outline-none">
+              [class.border-red-500]="
+                password?.invalid && (password?.dirty || password?.touched)
+              "
+              class="mt-1 block w-full px-4 py-3 border border-neutral dark:border-dark-border rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-dark-text-secondary bg-background dark:bg-dark-primary text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-purple-600 focus:border-transparent transition-all duration-200 pr-10"
+            />
+            <button
+              type="button"
+              (click)="toggleShowPassword()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-text dark:text-dark-text-secondary focus:outline-none"
+            >
               @if (showPassword) {
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
               } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.981 12C5.411 10.03 8.032 7.5 12 7.5c3.979 0 6.601 2.53 8.031 4.5-.083.2-.166.4-.25.639-1.429 1.97-4.05 4.5-8.031 4.5-3.979 0-6.601-2.53-8.031-4.5C4.147 12.4 4.064 12.2 3.98 12Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75Z" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3.981 12C5.411 10.03 8.032 7.5 12 7.5c3.979 0 6.601 2.53 8.031 4.5-.083.2-.166.4-.25.639-1.429 1.97-4.05 4.5-8.031 4.5-3.979 0-6.601-2.53-8.031-4.5C4.147 12.4 4.064 12.2 3.98 12Z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 12.75c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75Z"
+                />
+              </svg>
               }
             </button>
           </div>
           @if (password?.invalid && (password?.dirty || password?.touched)) {
-            <p class="mt-1 text-sm text-red-600">
-              @if (password?.errors?.['required']) { A senha é obrigatória. }
-            </p>
+          <p class="mt-1 text-sm text-error">
+            @if (password?.errors?.['required']) { A senha é obrigatória. }
+          </p>
           }
         </div>
 
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <input id="remember-me" type="checkbox" formControlName="rememberMe" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-dark-border rounded">
-            <label for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-dark-text-secondary">Lembrar-me</label>
+            <input
+              id="remember-me"
+              type="checkbox"
+              formControlName="rememberMe"
+              class="h-4 w-4 text-accent dark:text-purple-600 focus:ring-accent dark:focus:ring-purple-500 border-neutral dark:border-dark-border rounded"
+            />
+            <label
+              for="remember-me"
+              class="ml-2 block text-sm text-text dark:text-dark-text-secondary"
+              >Lembrar-me</label
+            >
           </div>
           <div class="text-sm">
-            <a routerLink="/forgot-password" class="font-medium text-purple-600 hover:text-purple-500 dark:hover:text-dark-text">Esqueceu sua senha?</a>
+            <a
+              routerLink="/forgot-password"
+              class="font-medium text-accent dark:text-purple-600 hover:text-opacity-80 dark:hover:text-dark-text"
+              >Esqueceu sua senha?</a
+            >
           </div>
         </div>
 
@@ -86,22 +236,47 @@
           <button
             type="submit"
             [disabled]="loginForm.invalid || isLoading || isLocked"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300">
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-white font-bold bg-accent hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+          >
             @if (isLoading) {
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
             }
-            <span>{{ isLoading ? 'Processando...' : 'Login' }}</span>
+            <span>{{ isLoading ? "Processando..." : "Login" }}</span>
           </button>
         </div>
       </form>
+      }
 
-      <p class="mt-8 text-center text-sm text-gray-600 dark:text-dark-text-secondary">
+      <p
+        class="mt-8 text-center text-sm text-text dark:text-dark-text-secondary"
+      >
         Não tem uma conta?
-        <a routerLink="/signup" class="font-medium text-purple-600 hover:text-purple-500 dark:hover:text-dark-text transition-colors duration-200">
+        <a
+          routerLink="/signup"
+          class="font-medium text-accent dark:text-purple-600 hover:text-opacity-80 dark:hover:text-dark-text transition-colors duration-200"
+        >
           Registre-se
         </a>
       </p>
-
     </div>
   </div>
 </div>
