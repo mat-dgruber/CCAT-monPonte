@@ -41,6 +41,7 @@ export class DashboardComponent {
   notebookService = inject(NotebookService); // Public for template access
   clipService = inject(ClipService); // Public for template access
   private notificationService = inject(NotificationService);
+  private noteService = inject(NoteService); // Inject NoteService
   private subscriptions: Subscription = new Subscription();
   private htmlToTextPipe = inject(HtmlToTextPipe);
 
@@ -138,6 +139,7 @@ export class DashboardComponent {
       this.notificationService.showInfo('O clip está vazio.');
     }
   }
+
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();

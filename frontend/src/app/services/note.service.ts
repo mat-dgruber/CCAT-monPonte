@@ -47,6 +47,7 @@ export class NoteService implements OnDestroy {
     ]);
 
     this.notesSubscription = notebookChanges$.pipe(
+      tap(([user, notebookId]) => console.log(`NoteService: combineLatest - User: ${user ? user.uid : 'null'}, NotebookId: ${notebookId}`)),
       switchMap(([user, notebookId]) => {
         if (user && notebookId) {
           this.isLoading.set(true);
@@ -54,6 +55,7 @@ export class NoteService implements OnDestroy {
           this.notes.set([]); // Limpa as notas imediatamente
 
           return this.dataService.getNotes(notebookId).pipe(
+            tap(notes => console.log(`NoteService: Received ${notes.length} notes from DataService for notebookId: ${notebookId}`)),
             catchError(error => {
               console.error('Erro ao buscar notas:', error);
               this.loadingError.set(true);
@@ -61,6 +63,7 @@ export class NoteService implements OnDestroy {
             })
           );
         } else {
+          console.log('NoteService: No user or notebookId, returning empty array.');
           return of([]); // Se não houver usuário ou caderno, emite um array vazio
         }
       }),
