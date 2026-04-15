@@ -14,7 +14,8 @@ import {
   getDoc,
   query,
   orderBy,
-  where
+  where,
+  limit
 } from '@angular/fire/firestore';
 import { from, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth';
@@ -239,88 +240,35 @@ export class DataService {
     return deleteDoc(docRef);
   }
 
-  restoreNote(notebookId: string, noteId: string): Promise<void> {
-    if (!this.userId) throw new Error('Usuário não autenticado para restaurar nota.');
-    const docRef = doc(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}`);
-    return updateDoc(docRef, { isTrashed: false, trashedAt: null });
-  }
-
-  async cleanupTrash(): Promise<void> {
-    if (!this.userId) return;
-
-    // Calcula a data de 7 dias atrás
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const timestamp = Timestamp.fromDate(sevenDaysAgo);
-
-    console.log('Iniciando limpeza da lixeira...');
-
-    // Usa collectionGroup para buscar notas deletadas em todos os cadernos
-    // Nota: Isso requer um índice composto no Firestore se 'isTrashed' e 'trashedAt' forem usados juntos em queries complexas,
-    // mas aqui estamos filtrando em memória se necessário ou confiando na query simples.
-    // Para simplificar e evitar problemas de índice complexo agora, vamos tentar buscar por users/{userId}/...
-    // Mas collectionGroup é global. Vamos filtrar por userId no cliente se necessário, ou assumir regras de segurança.
-    // MELHOR ABORDAGEM: Iterar pelos cadernos e buscar notas trashed. É mais seguro e não exige índice global.
-
-    // Abordagem iterativa (pode ser lenta se tiver muitos cadernos, mas é segura)
-    const notebooks = await this.getNotebooksOnce();
-    const batch = writeBatch(this.firestore);
-    let operationCount = 0;
-
-    for (const notebook of notebooks) {
-      const notesRef = collection(this.firestore, `users/${this.userId}/notebooks/${notebook.id}/notes`);
-      const q = query(notesRef, where('isTrashed', '==', true));
-      const snapshot = await getDocs(q);
-
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data['trashedAt']) {
-           const trashedAt = data['trashedAt'] instanceof Timestamp ? data['trashedAt'].toDate() : new Date(data['trashedAt']); // Fallback
-           if (trashedAt < sevenDaysAgo) {
-             batch.delete(docSnap.ref);
-             operationCount++;
-           }
-        }
-      });
-    }
-
-    if (operationCount > 0) {
-      await batch.commit();
-      console.log(`Limpeza concluída. ${operationCount} notas removidas permanentemente.`);
-    } else {
-      console.log('Nenhuma nota antiga encontrada para limpeza.');
-    }
-  }
-
-  // Helper para cleanupTrash
-  private async getNotebooksOnce(): Promise<Notebook[]> {
-     if (!this.userId) return [];
-     const notebooksCollectionRef = collection(this.firestore, `users/${this.userId}/notebooks`);
-     const snapshot = await getDocs(notebooksCollectionRef);
-     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notebook));
-  }
-
-  // --- Métodos para Histórico (History) ---
-
-  async saveNoteVersion(notebookId: string, noteId: string, content: string): Promise<void> {
-    if (!this.userId) return;
-    const historyCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}/history`);
-    await addDoc(historyCollection, {
-      content,
-      savedAt: serverTimestamp()
-    });
-  }
-
-  getNoteHistory(notebookId: string, noteId: string): Observable<NoteHistory[]> {
+  // NOVO: Método otimizado para buscar as notas mais recentes de todos os cadernos
+  getAllRecentNotes(count: number): Observable<Note[]> {
     if (!this.userId) return of([]);
-    const historyCollection = collection(this.firestore, `users/${this.userId}/notebooks/${notebookId}/notes/${noteId}/history`);
-    const q = query(historyCollection, orderBy('savedAt', 'desc'));
 
-    return new Observable<NoteHistory[]>(subscriber => {
+    const notesGroup = collectionGroup(this.firestore, 'notes');
+    const q = query(
+      notesGroup,
+      where('__name__', '>=', `users/${this.userId}/`),
+      where('__name__', '<', `users/${this.userId}0`),
+      orderBy('createdAt', 'desc'),
+      limit(count)
+    );
+
+    return new Observable<Note[]>(subscriber => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NoteHistory));
-        this.zone.run(() => subscriber.next(history));
+        const notes = snapshot.docs.map(doc => {
+          const data = doc.data();
+          const pathParts = doc.ref.path.split('/');
+          const notebookId = pathParts[pathParts.length - 3];
+          return { id: doc.id, notebookId, ...data } as Note;
+        });
+        this.zone.run(() => {
+          subscriber.next(notes);
+        });
+      }, (error) => {
+        console.error("Error fetching recent notes:", error);
+        subscriber.error(error);
       });
+
       return () => unsubscribe();
     });
   }
